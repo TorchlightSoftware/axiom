@@ -1,0 +1,29 @@
+{
+  "name":"axiom",
+  "description":"Environment setup/runtime for single page applications.",
+  "version":"0.0.1",
+  "homepage":"http://github.com/TorchlightSoftware/axiom",
+  "repository":"git://github.com/TorchlightSoftware/axiom.git",
+  "author":"Torchlight Software <info@torchlightsoftware.com> (http://torchlightsoftware.com)",
+  "main":"./index.js",
+
+  "dependencies":{
+    "coffee-script":"*"
+  },
+  "devDependencies":{
+    "mocha":"*",
+    "should":"*"
+  },
+  "engines":{
+    "node":">= 0.8.4"
+  },
+  "licenses":[
+    {
+      "type":"MIT",
+      "url":"http://github.com/torchlightsoftware/axiom/raw/master/LICENSE"
+    }
+  ],
+  "scripts": {
+    "test":"mocha"
+  }
+}
