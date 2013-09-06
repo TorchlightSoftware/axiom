@@ -1,5 +1,70 @@
 # Axiom
 
+Axiom is a very flexible/lightweight framework with plugins comprising most functionality.  It was designed to offer a productive workflow, while remaining flexible enough to support alternate ways of doing things.  It includes:
+
+* One line skeleton project creation
+* Install axioms, which can include:
+  * Build
+  * Test
+  * Runtime
+  * Feature Scaffolding
+
+# Usage
+
+```bash
+axiom create [project]
+# Creates a new app (creates the directory as well).
+# This is the only command designed to be run outside the project directory.
+# If you already have a directory that you would like to start with, running any
+# install (or install with no args) should check all required baseline artifacts
+# and install them if they don't exist.
+
+axiom run
+# Runs your app.
+
+axiom install [axiom]
+# Automatically does the following:
+#   1) add to package.json
+#   2) npm install [axiom]
+#   3) run 'install'
+
+axiom uninstall [name]
+# Automatically does the following:
+#   1) require [axiom-name], run 'uninstall' if it exists
+#   2) remove from package.json
+#   3) npm uninstall [axiom-name]
+
+axiom client build
+# If you have installed an axiom named "client" and it has a task called "build", this
+# will run that task.
+
+axiom client test
+axiom server test
+# Again, these assume axioms/tasks that exist with those names.
+```
+
+# Building Axioms
+
+Simply publish on npm a module with the name format 'axiom-yourname'.  This will then be discovered by `axiom install`, and once installed will be automatically referanceable from the Axiom CLI.
+
+Your module should export an object containing the keys:
+
+* install - A function to install the axiom.  Include any generation code here.
+* uninstall - A function to uninstall the axiom.  Remove all the generated code and directories/files that would have resulted from the installation.
+* [anything_else] - A function to generate some files, deploy something, start a server, or run a task.
+
+# Axiom Runtime
+
+*UNSTABLE - IN DISCUSSION*
+
+Axiom maintains event buses which act as the main communication between subsystems.  When a task is run it will be bound to an event bus through which it can listen to relevant events and emit its own.  The event bus will contain the following keys:
+
+* on/off - listen to messages
+* emit - send a message
+* config - the config for the corresponding axiom
+
+The axiom must specify any namespaces it wishes to listen to.  Aliases are possible as well - one or more source namespaces can be merged into a target namespace which the axiom will listen to.  When 'emit' is called the message will automatically be aliased under the axiom name.
+
 ## LICENSE
 
 (MIT License)
