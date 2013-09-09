@@ -1,13 +1,33 @@
 # Axiom
 
-Axiom is a very flexible/lightweight framework with plugins comprising most functionality.  It was designed to offer a productive workflow, while remaining flexible enough to support alternate ways of doing things.  It includes:
+Axiom is the anti-framework.  If you prefer libraries over frameworks, but are looking for a place to put your integration, setup, and configuration options, this is for you.
 
-* One line skeleton project creation
-* Install axioms, which can include:
+Axiom can be used to create productive workflows, while retaining the flexibility and maintainability that comes from utilizing decoupled components.
+
+At its core, Axiom is:
+
+* A message bus for sub-system communication
+* A standard for sub-system definition
+
+Sub-systems are called axioms, and may include:
+
+* A configuration
+* Processes for:
+  * Install/Uninstall
   * Build
   * Test
   * Runtime
   * Feature Scaffolding
+
+# Alternatives
+
+Yeoman fulfills a similar role in that it provides a place to store the 'recipes' that are commonly used by your organization.  So why not just use a build tool?
+
+Have you ever found yourself wanting to initialize parts of your application within a script?  Maybe you want to have access to the models so you can run a batch script.  Maybe you want to initialize a subsegment of the application for testing.
+
+Have you ever installed a new module in your application, and found yourself handling the integration at multiple points?
+
+Axiom was designed to solve these problems.  By defining standard roles that components fulfill, and a standard interface by which they communicate, we can build upon a foundation that makes simple things easy, but won't back us into a corner when things get complex.
 
 # Usage
 
