@@ -1,0 +1,15 @@
+#!/usr/bin/env coffee
+logger = require 'torch'
+core = require '..'
+
+logger.red process.argv
+[moduleName, serviceName] = process.argv.slice 2 # use nopt
+
+core.init()
+core.request "#{moduleName}.#{serviceName}", args, (err, results) ->
+  if err
+    console.err err.red
+
+  else
+    console.log 'SUCCESS'
+    console.log results.cyan

@@ -1,8 +1,8 @@
 # Axiom
 
-Axiom is the anti-framework.  If you prefer libraries over frameworks, but are looking for a place to put your integration, setup, and configuration options, this is for you.
+Axiom is a system for defining lifecycles in a declarative way, and attaching processes to each stage.
 
-Axiom can be used to create productive workflows, while retaining the flexibility and maintainability that comes from utilizing decoupled components.
+Axiom can be used to create productive workflows, and define the runtime of your application in a decoupled, extensible way.
 
 At its core, Axiom is:
 

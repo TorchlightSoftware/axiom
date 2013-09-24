@@ -6,12 +6,20 @@
   "repository":"git://github.com/TorchlightSoftware/axiom.git",
   "author":"Torchlight Software <info@torchlightsoftware.com> (http://torchlightsoftware.com)",
   "main":"./index.js",
+  "bin":{"axiom": "./bin/axiom"},
 
   "dependencies":{
-    "coffee-script":"*"
+    "coffee-script":"*",
+    "npm":"*",
+    "lodash":"*",
+    "machina":"*",
+    "postal":"*",
+    "torch":"*",
+    "law":"*"
   },
   "devDependencies":{
     "mocha":"*",
+    "connect":"*",
     "should":"*"
   },
   "engines":{
