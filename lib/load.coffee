@@ -1,10 +1,13 @@
 logger = require 'torch'
-applicationBus = require "./applicationBus"
+bus = require './bus'
 
 module.exports =
   (module, done) ->
     {config, services} = module
     moduleName = module.name
+
+    for namespace, options of config
+      logger.red 'NOT IMPLEMENTED'
 
     for serviceName, serviceDef of services
       # determine the topic to listen on
@@ -15,12 +18,12 @@ module.exports =
       readyService = (args, env) ->
         serviceDef args, (err, result) ->
           if err?
-            applicationBus.publish "error", err
-            applicationBus.publish "#{serviceChannel}.error", err
+            bus.publish "error", err
+            bus.publish "#{serviceChannel}.error", err
           else
-            applicationBus.publish "#{serviceChannel}.success", result
+            bus.publish "#{serviceChannel}.success", result
 
       # attach service to base topic
-      applicationBus.subscribe serviceChannel, readyService
+      bus.subscribe serviceChannel, readyService
 
     done()

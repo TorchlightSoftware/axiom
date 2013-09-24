@@ -3,7 +3,7 @@ logger = require 'torch'
 
 load = require '../lib/load'
 postal = require('postal')()
-bus = postal.channel 'axiom'
+bus = require '../lib/bus'
 
 describe 'load', ->
   afterEach ->

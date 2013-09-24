@@ -1,5 +1,4 @@
-postal = require('postal')()
-bus = postal.channel 'axiom'
+bus = require './bus'
 
 module.exports =
   init: ->
