@@ -1,4 +1,16 @@
+uuid = require 'uuid'
+
 bus = require './bus'
+
+getTopicId = (topic) -> topic.split('.').pop()
+makeRequestTopic = (topic) ->
+  topicId = getTopicId topic
+  return "request.#{topicId}"
+
+makeResponseTopic = (topic) ->
+  topicId = getTopicId topic
+  return "response.#{topicId}"
+
 
 module.exports =
   init: ->
@@ -10,6 +22,30 @@ module.exports =
     # publish a message, with a response address in the envelope
     # time out based on axiom config
 
+    # default callback is of signature (message, envelope).
+    # wrap so we can pass a conventional (err, result)-style callback.
+    callback = (message, envelope) ->
+      done null, message
+
+    topicId = uuid.v1()
+
+    replyTo =
+      channel: channel
+      topic: "response.#{topicId}"
+
+    bus.subscribe {
+      channel: replyTo.channel
+      topic: replyTo.topic
+      callback: callback
+    }
+
+    bus.publish {
+      channel: channel
+      topic: "request.#{topicId}"
+      data: data
+      replyTo: replyTo
+    }
+
   delegate: (channel, data, done) ->
     # same as request, but for multiple recipients
     # ask each recipient to acknowledge receipt
@@ -19,6 +55,19 @@ module.exports =
   respond: (channel, handler) ->
     # can respond to request or delegate (or should we split this out?)
     # sends acknowledgement, error, completion to replyTo channels
+    callback = (message, envelope) ->
+      handler message, (err, result) ->
+        bus.publish {
+          channel: envelope.replyTo.channel
+          topic: envelope.replyTo.topic
+          data: result
+        }
+
+    bus.subscribe {
+      channel: channel
+      topic: 'request.#'
+      callback: callback
+    }
 
   send: (channel, data) ->
     # just send the message

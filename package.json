@@ -15,7 +15,8 @@
     "machina":"*",
     "postal":"*",
     "torch":"*",
-    "law":"*"
+    "law":"*",
+    "uuid":"*"
   },
   "devDependencies":{
     "mocha":"*",
