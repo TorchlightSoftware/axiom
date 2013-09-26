@@ -31,20 +31,30 @@ module.exports =
 
     replyTo =
       channel: channel
-      topic: "response.#{topicId}"
+      # topic: "response.#{topicId}"
+      topic:
+        ack: "ack.#{topicId}"
+        err: "err.#{topicId}"
+        info: "info.#{topicId}"
+        success: "success.#{topicId}"
 
-    bus.subscribe {
+    # subscribe to the 'success' response for topicId
+    bus.subscribe
       channel: replyTo.channel
-      topic: replyTo.topic
+      topic: replyTo.topic.success
       callback: callback
-    }
 
-    bus.publish {
+    # subscribe to the 'err' response for topicId
+    bus.subscribe
+      channel: replyTo.channel
+      topic: replyTo.topic.err
+      callback: callback
+
+    bus.publish
       channel: channel
       topic: "request.#{topicId}"
       data: data
       replyTo: replyTo
-    }
 
   delegate: (channel, data, done) ->
     # same as request, but for multiple recipients
@@ -64,17 +74,15 @@ module.exports =
           topic = envelope.replyTo.topic.success
           data = result
 
-        bus.publish {
+        bus.publish
           channel: envelope.replyTo.channel
           topic: topic
           data: data
-        }
 
-    bus.subscribe {
+    bus.subscribe
       channel: channel
       topic: 'request.#'
       callback: callback
-    }
 
   send: (channel, data) ->
     # just send the message

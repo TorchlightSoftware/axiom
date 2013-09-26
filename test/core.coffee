@@ -15,16 +15,14 @@ describe 'core.request', ->
     done()
 
   it 'should receive exactly one valid response', (done) ->
-    bus.subscribe {
+    bus.subscribe
       channel: @channel
       topic: 'request.*'
       callback: (message, envelope) =>
-        bus.publish {
+        bus.publish
           channel: envelope.replyTo.channel
-          topic: envelope.replyTo.topic
+          topic: envelope.replyTo.topic.success
           data: message
-        }
-    }
 
     core.request @channel, @data, (err, message) =>
       should.not.exist err
@@ -48,10 +46,11 @@ describe 'core.response', ->
 
     bus.subscribe
       channel: @channel
-      topic: "response.123"
+      topic: "success.123"
       callback: (message) =>
         should.exist message
         message.should.eql @data
+        done()
 
     bus.publish
       channel: @channel
@@ -62,4 +61,4 @@ describe 'core.response', ->
         topic:
           success: "success.123"
 
-    done()
+#    done()
