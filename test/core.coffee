@@ -15,9 +15,6 @@ describe 'core.request', ->
     done()
 
   it 'should receive exactly one valid response', (done) ->
-    # echo = (message, next) -> next null, message
-    # core.respond @channel, echo
-
     bus.subscribe {
       channel: @channel
       topic: 'request.*'
@@ -49,10 +46,19 @@ describe 'core.response', ->
     echo = (message, next) -> next null, message
     core.respond @channel, echo
 
-    core.request @channel, @data, (err, message) =>
-      should.not.exist err
+    bus.subscribe
+      channel: @channel
+      topic: "response.123"
+      callback: (message) =>
+        should.exist message
+        message.should.eql @data
 
-      should.exist message
-      message.should.eql @data
+    bus.publish
+      channel: @channel
+      topic: "request.123"
+      data: @data
+      replyTo:
+        channel: @channel
+        topic: "response.123"
 
-      done()
+    done()

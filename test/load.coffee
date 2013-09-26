@@ -2,12 +2,11 @@ should = require 'should'
 logger = require 'torch'
 
 load = require '../lib/load'
-postal = require('postal')()
 bus = require '../lib/bus'
 
 describe 'load', ->
   afterEach ->
-    postal.utils.reset()
+    bus.utils.reset()
 
   tests = [
       description: 'a default base'
@@ -35,9 +34,13 @@ describe 'load', ->
       {description, module, input, output} = test
       it description, (done) ->
         load module, (err, result) ->
-          bus.subscribe output[0], (result) ->
-            should.exist result
-            result.should.eql output[1]
-            done()
+          bus.subscribe
+            channel: output[0]
+            callback: (result) ->
+              should.exist result
+              result.should.eql output[1]
+              done()
 
-          bus.publish input...
+          bus.publish
+            channel: input[0]
+            data: input[1]
