@@ -3,7 +3,6 @@ should = require 'should'
 bus = require '../lib/bus'
 core = require '../lib/core'
 
-
 describe 'core.request', ->
   afterEach ->
     bus.utils.reset()
