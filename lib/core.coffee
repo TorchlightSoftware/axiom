@@ -58,10 +58,10 @@ module.exports =
     callback = (message, envelope) ->
       handler message, (err, result) ->
         if err?
-          topic = envelope.replyTo.errTopic
+          topic = envelope.replyTo.topic.err
           data = err
         else
-          topic = envelope.replyTo.successTopic
+          topic = envelope.replyTo.topic.success
           data = result
 
         bus.publish {
