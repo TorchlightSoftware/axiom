@@ -57,10 +57,17 @@ module.exports =
     # sends acknowledgement, error, completion to replyTo channels
     callback = (message, envelope) ->
       handler message, (err, result) ->
+        if err?
+          topic = envelope.replyTo.errTopic
+          data = err
+        else
+          topic = envelope.replyTo.successTopic
+          data = result
+
         bus.publish {
           channel: envelope.replyTo.channel
-          topic: envelope.replyTo.topic
-          data: result
+          topic: topic
+          data: data
         }
 
     bus.subscribe {

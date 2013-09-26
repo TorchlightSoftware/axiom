@@ -59,6 +59,6 @@ describe 'core.response', ->
       data: @data
       replyTo:
         channel: @channel
-        topic: "response.123"
+        successTopic: "success.123"
 
     done()
