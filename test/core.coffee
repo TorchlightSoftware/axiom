@@ -60,5 +60,3 @@ describe 'core.response', ->
         channel: @channel
         topic:
           success: "success.123"
-
-#    done()

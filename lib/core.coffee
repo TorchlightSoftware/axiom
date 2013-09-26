@@ -25,13 +25,23 @@ module.exports =
     # default callback is of signature (message, envelope).
     # wrap so we can pass a conventional (err, result)-style callback.
     callback = (message, envelope) ->
-      done null, message
+      {topic} = envelope
+      [condition, _..., topicId] = topic.split('.')
+      switch condition
+        when 'err'
+          err = message
+          done err
+        when 'success'
+          done null, message
+        else # non-exhaustive without this
+          err = new Error "Invalid condition '#{condition}'for response with topicId '#{topicId}'"
+          done err
+
 
     topicId = uuid.v1()
 
     replyTo =
       channel: channel
-      # topic: "response.#{topicId}"
       topic:
         ack: "ack.#{topicId}"
         err: "err.#{topicId}"
