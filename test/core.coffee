@@ -32,6 +32,25 @@ describe 'core.request', ->
 
       done()
 
+  it 'should pass an error to the callback the response returns one', (done) ->
+    testError = new Error 'testError'
+    bus.subscribe
+      channel: @channel
+      topic: 'request.#'
+      callback: (message, envelope) =>
+        bus.publish
+          channel: envelope.replyTo.channel
+          topic: envelope.replyTo.topic.err
+          data: testError
+
+    core.request @channel, @data, (err, message) =>
+      should.exist err
+      should.not.exist message
+
+      err.should.eql testError
+
+      done()
+
 describe 'core.response', ->
   beforeEach (done) ->
     @channel = 'testChannel'

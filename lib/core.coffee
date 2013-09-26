@@ -33,10 +33,12 @@ module.exports =
           done err
         when 'success'
           done null, message
-        else # non-exhaustive without this
+        else
+          # This should never be reached, as this callback should only
+          # be invoked by a subscription to a topic of the form
+          # 'err.<uuid>' or 'success.<uuid>'.
           err = new Error "Invalid condition '#{condition}'for response with topicId '#{topicId}'"
           done err
-
 
     topicId = uuid.v1()
 
