@@ -1,6 +1,7 @@
 uuid = require 'uuid'
 
 bus = require './bus'
+postal = bus
 
 getTopicId = (topic) -> topic.split('.').pop()
 makeRequestTopic = (topic) ->
@@ -50,17 +51,22 @@ module.exports =
         info: "info.#{topicId}"
         success: "success.#{topicId}"
 
-    # subscribe to the 'success' response for topicId
-    bus.subscribe
-      channel: replyTo.channel
-      topic: replyTo.topic.success
-      callback: callback
-
     # subscribe to the 'err' response for topicId
-    bus.subscribe
-      channel: replyTo.channel
-      topic: replyTo.topic.err
-      callback: callback
+    errSub = new bus.SubscriptionDefinition(
+      replyTo.channel,
+      replyTo.topic.err,
+    )
+    errSub.subscribe callback
+
+    # subscribe to the 'success' response for topicId
+    successSub = new bus.SubscriptionDefinition(
+      replyTo.channel,
+      replyTo.topic.success
+    )
+    successSub.subscribe (message, envelope) ->
+      errSub.unsubscribe()
+      callback message, envelope
+    successSub.once()
 
     bus.publish
       channel: channel
