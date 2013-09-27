@@ -46,7 +46,6 @@ module.exports =
     replyTo =
       channel: channel
       topic:
-        ack: "ack.#{topicId}"
         err: "err.#{topicId}"
         info: "info.#{topicId}"
         success: "success.#{topicId}"
