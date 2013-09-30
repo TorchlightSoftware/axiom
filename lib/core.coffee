@@ -28,12 +28,9 @@ module.exports = core =
     # (either error or success) in the configured time.
     timeout = core.config.timeout
     onTimeout = ->
-      result =
-        message: 'Request timed out'
-        timeout: timeout or defaultTimeout
-        channel: channel
-        data: data
-      done null, result
+      msg = "Request timed out on channel '#{channel}'"
+      err = new Error msg
+      done err
     timeoutId = timers.setTimeout onTimeout, timeout
 
     # Default callback is of signature (message, envelope).

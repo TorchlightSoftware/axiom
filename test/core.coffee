@@ -81,19 +81,15 @@ describe 'core.request', ->
     noop = ->
     core.request @channel, @data, noop
 
-  it 'should return a timeout result when it times out', (done) ->
+  it 'should return a timeout error when it times out', (done) ->
     @timeout 3000
 
     core.request @channel, @data, (err, result) =>
-      should.not.exist err
+      should.exist err
+      expectedMsg = "Request timed out on channel '#{@channel}'"
+      err.message.should.eql expectedMsg
 
-      should.exist result
-      expected =
-        message: 'Request timed out'
-        timeout: 2000
-        channel: @channel
-        data: @data
-      result.should.eql expected
+      should.not.exist result
 
       done()
 
@@ -178,7 +174,7 @@ describe 'core.delegate', ->
 
       done()
 
-  it 'should receive a timeout result when an implied request out', (done) ->
+  it 'should return a timeout err when an implied request times out', (done) ->
     @timeout 3000
 
     channels = ['wontTimeOut', 'willTimeOut']
@@ -189,7 +185,8 @@ describe 'core.delegate', ->
       next null, wontTimeOutMsg
 
     core.delegate channels, {}, (err, result) ->
-      should.not.exist err
+      should.exist err
+      err.message.should.eql "Request timed out on channel 'willTimeOut'"
 
       should.exist result
       result.length.should.eql 2
@@ -197,12 +194,6 @@ describe 'core.delegate', ->
       should.exist result[0]
       result[0].should.eql wontTimeOutMsg
 
-      should.exist result[1]
-      result[1].should.eql {
-        message: 'Request timed out'
-        timeout: 2000
-        channel: 'willTimeOut'
-        data: {}
-      }
+      should.not.exist result[1]
 
       done()
