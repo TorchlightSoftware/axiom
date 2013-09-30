@@ -16,7 +16,8 @@
     "postal":"*",
     "torch":"*",
     "law":"*",
-    "uuid":"*"
+    "uuid":"*",
+    "async":"*"
   },
   "devDependencies":{
     "mocha":"*",

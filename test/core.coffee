@@ -1,4 +1,5 @@
 should = require 'should'
+async = require 'async'
 
 bus = require '../lib/bus'
 core = require '../lib/core'
@@ -18,7 +19,7 @@ describe 'core.request', ->
     bus.subscribe
       channel: @channel
       topic: 'request.#'
-      callback: (message, envelope) =>
+      callback: (message, envelope) ->
         bus.publish
           channel: envelope.replyTo.channel
           topic: envelope.replyTo.topic.success
@@ -37,7 +38,7 @@ describe 'core.request', ->
     bus.subscribe
       channel: @channel
       topic: 'request.#'
-      callback: (message, envelope) =>
+      callback: (message, envelope) ->
         bus.publish
           channel: envelope.replyTo.channel
           topic: envelope.replyTo.topic.err
@@ -79,6 +80,22 @@ describe 'core.request', ->
     noop = ->
     core.request @channel, @data, noop
 
+  it 'should return a timeout result when it times out', (done) ->
+    @timeout 3000
+
+    core.request @channel, @data, (err, result) =>
+      should.not.exist err
+
+      should.exist result
+      expected =
+        message: 'Request timed out'
+        timeout: 2000
+        channel: @channel
+        data: @data
+      result.should.eql expected
+
+      done()
+
 
 describe 'core.response', ->
   beforeEach (done) ->
@@ -108,3 +125,81 @@ describe 'core.response', ->
         channel: @channel
         topic:
           success: "success.123"
+
+describe 'core.delegate', ->
+  beforeEach (done) ->
+    done()
+
+  it 'should return results when everything works', (done) ->
+    channels = ['channelA', 'channelB', 'channelC']
+
+    expected = [
+      { helloFrom: 'channelA' },
+      { helloFrom: 'channelB' },
+      { helloFrom: 'channelC' }
+    ]
+
+    channels.map (ch) ->
+      core.respond ch, (message, next) ->
+        next null, {helloFrom: ch}
+
+    core.delegate channels, {}, (err, result) ->
+      should.not.exist err
+      should.exist result
+      result.should.eql expected
+      done()
+
+  it 'should return an err when a responder returns one', (done) ->
+    channels = ['willWork', 'wontWork']
+
+    testResponse = {message: 'this works'}
+    core.respond 'willWork', (message, next) ->
+      next null, testResponse
+
+    testError = new Error 'Expect this error'
+    core.respond 'wontWork', (message, next) ->
+      next testError, {}
+
+    core.delegate channels, {}, (err, result) ->
+      should.exist err
+      err.should.eql testError
+
+      should.exist result
+      should.exist result.length
+      result.length.should.eql 2
+
+      should.exist result[0]
+      result[0].should.eql testResponse
+
+      should.not.exist result[1]
+
+      done()
+
+  it 'should receive a timeout result when an implied request out', (done) ->
+    @timeout 3000
+
+    channels = ['wontTimeOut', 'willTimeOut']
+    core.init()
+
+    wontTimeOutMsg = {message: "I won't time out"}
+    core.respond 'wontTimeOut', (message, next) ->
+      next null, wontTimeOutMsg
+
+    core.delegate channels, {}, (err, result) ->
+      should.not.exist err
+
+      should.exist result
+      result.length.should.eql 2
+
+      should.exist result[0]
+      result[0].should.eql wontTimeOutMsg
+
+      should.exist result[1]
+      result[1].should.eql {
+        message: 'Request timed out'
+        timeout: 2000
+        channel: 'willTimeOut'
+        data: {}
+      }
+
+      done()

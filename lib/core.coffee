@@ -1,31 +1,46 @@
+timers = require 'timers'
+
 uuid = require 'uuid'
+async = require 'async'
 
 bus = require './bus'
-postal = bus
+
 
 getTopicId = (topic) -> topic.split('.').pop()
-makeRequestTopic = (topic) ->
-  topicId = getTopicId topic
-  return "request.#{topicId}"
 
-makeResponseTopic = (topic) ->
-  topicId = getTopicId topic
-  return "response.#{topicId}"
+defaultTimeout = 2000
 
-
-module.exports =
+module.exports = core =
   init: ->
-    # require each axiom module
-    # pass to load
+    # Require each axiom module.
+    # Pass to load.
+    core.config = {}
+    core.config.timeout = defaultTimeout
 
   request: (channel, data, done) ->
-    # subscribe to a response address
-    # publish a message, with a response address in the envelope
-    # time out based on axiom config
+    # Subscribe to a response address.p
+    # Publish a message, with a response address in the envelope.
+    # Time out based on axiom config.
 
-    # default callback is of signature (message, envelope).
-    # wrap so we can pass a conventional (err, result)-style callback.
+    # Define an 'onTimeout' callback for when we don't get a response
+    # (either error or success) in the configured time.
+    timeout = core.config?.timeout or defaultTimeout
+    onTimeout = ->
+      result =
+        message: 'Request timed out'
+        timeout: timeout or defaultTimeout
+        channel: channel
+        data: data
+      done null, result
+    timeoutId = timers.setTimeout onTimeout, timeout
+
+    # Default callback is of signature (message, envelope).
+    # Wrap so we can pass a conventional (err, result)-style callback.
     callback = (message, envelope) ->
+      # Either an error or a success response has been
+      # received, so cancel our timeout callback.
+      timers.clearTimeout timeoutId
+
       {topic} = envelope
       [condition, _..., topicId] = topic.split('.')
       switch condition
@@ -50,21 +65,30 @@ module.exports =
         info: "info.#{topicId}"
         success: "success.#{topicId}"
 
-    # subscribe to the 'err' response for topicId
-    errSub = new bus.SubscriptionDefinition(
-      replyTo.channel,
-      replyTo.topic.err,
-    )
+    # Subscribe to the 'err' response for topicId
+    # We don't pass a callback immediately so that we can
+    # refer to the subscription itself in the callback.
+    errSub = bus.subscribe {
+      channel: replyTo.channel,
+      topic: replyTo.topic.err,
+    }
     errSub.subscribe callback
 
-    # subscribe to the 'success' response for topicId
-    successSub = new bus.SubscriptionDefinition(
-      replyTo.channel,
-      replyTo.topic.success
-    )
+    # Subscribe to the 'success' response for topicId
+    # As above, we don't pass a callback immediately so that
+    # we can refer to the subscription itself in the callback.
+    successSub = bus.subscribe {
+      channel: replyTo.channel
+      topic: replyTo.topic.success
+    }
     successSub.subscribe (message, envelope) ->
+      # Stop listening for errors by detaching the error callback
       errSub.unsubscribe()
+
+      # Actually call the callback
       callback message, envelope
+
+    # The success callback should only fire once, if at all
     successSub.once()
 
     bus.publish
@@ -73,11 +97,20 @@ module.exports =
       data: data
       replyTo: replyTo
 
-  delegate: (channel, data, done) ->
-    # same as request, but for multiple recipients
+
+
+  delegate: (channels, data, done) ->
+    # Same as request, but for multiple recipients
     # ask each recipient to acknowledge receipt
     # wait until we receive a response from each recipient
     # time out based on axiom config - report timeouts for each recipient
+
+    # Wrap 'core.request' in a signature compatible with 'async.map'
+    request = (ch, next) ->
+      core.request ch, data, (err, result) ->
+        next err, result
+    # Make 'core.request's on each channel, in parallel
+    async.map channels, request, done
 
   respond: (channel, handler) ->
     # can respond to request or delegate (or should we split this out?)
