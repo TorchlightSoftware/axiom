@@ -2,20 +2,22 @@ timers = require 'timers'
 
 uuid = require 'uuid'
 async = require 'async'
+_ = require 'lodash'
 
 bus = require './bus'
 
 
 getTopicId = (topic) -> topic.split('.').pop()
 
-defaultTimeout = 2000
+defaultConfig =
+  timeout: 2000
 
 module.exports = core =
-  init: ->
+  init: (config) ->
     # Require each axiom module.
     # Pass to load.
-    core.config = {}
-    core.config.timeout = defaultTimeout
+    core.config = _.merge {}, defaultConfig
+    core.config = _.merge core.config, config
 
   request: (channel, data, done) ->
     # Subscribe to a response address.p
@@ -24,7 +26,7 @@ module.exports = core =
 
     # Define an 'onTimeout' callback for when we don't get a response
     # (either error or success) in the configured time.
-    timeout = core.config?.timeout or defaultTimeout
+    timeout = core.config.timeout
     onTimeout = ->
       result =
         message: 'Request timed out'
@@ -42,7 +44,7 @@ module.exports = core =
       timers.clearTimeout timeoutId
 
       {topic} = envelope
-      [condition, _..., topicId] = topic.split('.')
+      [condition, middle..., topicId] = topic.split('.')
       switch condition
         when 'err'
           err = message

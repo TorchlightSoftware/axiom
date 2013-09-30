@@ -9,6 +9,7 @@ describe 'core.request', ->
     bus.utils.reset()
 
   beforeEach (done) ->
+    core.init()
     @channel = 'testChannel'
     @data =
       x: 2
@@ -99,6 +100,7 @@ describe 'core.request', ->
 
 describe 'core.response', ->
   beforeEach (done) ->
+    core.init()
     @channel = 'testChannel'
     @data =
       x: 2
@@ -128,6 +130,7 @@ describe 'core.response', ->
 
 describe 'core.delegate', ->
   beforeEach (done) ->
+    core.init()
     done()
 
   it 'should return results when everything works', (done) ->
