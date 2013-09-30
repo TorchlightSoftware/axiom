@@ -20,17 +20,32 @@ module.exports = core =
     core.config = _.merge core.config, config
 
   request: (channel, data, done) ->
-    # Subscribe to a response address.p
+    # Subscribe to a response address.
     # Publish a message, with a response address in the envelope.
     # Time out based on axiom config.
+
+    # Define a unique identifier for the message cycle
+    topicId = uuid.v1()
+
+    # Define metadata to put inside the envelope
+    replyTo =
+      channel: channel
+      topic:
+        err: "err.#{topicId}"
+        info: "info.#{topicId}"
+        success: "success.#{topicId}"
 
     # Define an 'onTimeout' callback for when we don't get a response
     # (either error or success) in the configured time.
     timeout = core.config.timeout
     onTimeout = ->
-      msg = "Request timed out on channel '#{channel}'"
-      err = new Error msg
-      done err
+      err = new Error "Request timed out on channel '#{channel}'"
+
+      bus.publish
+        channel: replyTo.channel
+        topic: replyTo.topic.err
+        data: err
+
     timeoutId = timers.setTimeout onTimeout, timeout
 
     # Default callback is of signature (message, envelope).
@@ -55,14 +70,7 @@ module.exports = core =
           err = new Error "Invalid condition '#{condition}'for response with topicId '#{topicId}'"
           done err
 
-    topicId = uuid.v1()
 
-    replyTo =
-      channel: channel
-      topic:
-        err: "err.#{topicId}"
-        info: "info.#{topicId}"
-        success: "success.#{topicId}"
 
     # Subscribe to the 'err' response for topicId
     # We don't pass a callback immediately so that we can
