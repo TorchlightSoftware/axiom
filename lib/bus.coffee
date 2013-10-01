@@ -1,3 +1,7 @@
 # instantiate our instance of postal, passing it its lodash dependency
 _ = require 'lodash'
-module.exports = require('postal')(_)
+uuid = require 'uuid'
+
+bus = require('postal')(_)
+
+module.exports = bus

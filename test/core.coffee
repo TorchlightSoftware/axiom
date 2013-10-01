@@ -1,5 +1,6 @@
 should = require 'should'
 async = require 'async'
+_ = require 'lodash'
 
 bus = require '../lib/bus'
 core = require '../lib/core'
@@ -95,6 +96,9 @@ describe 'core.request', ->
 
 
 describe 'core.response', ->
+  afterEach ->
+    bus.utils.reset()
+
   beforeEach (done) ->
     core.init()
     @channel = 'testChannel'
@@ -124,76 +128,112 @@ describe 'core.response', ->
         topic:
           success: "success.123"
 
+
 describe 'core.delegate', ->
+  afterEach ->
+    bus.utils.reset()
+
   beforeEach (done) ->
     core.init()
     done()
 
   it 'should return results when everything works', (done) ->
-    channels = ['channelA', 'channelB', 'channelC']
+    channel = 'testChannel'
+
+    core.respond channel, (message, next) ->
+      name = 'responderA'
+      next null, {helloFrom: name}
+
+    core.respond channel, (message, next) ->
+      name = 'responderB'
+      next null, {helloFrom: name}
 
     expected = [
-      { helloFrom: 'channelA' },
-      { helloFrom: 'channelB' },
-      { helloFrom: 'channelC' }
+      { helloFrom: 'responderA' },
+      { helloFrom: 'responderB' },
     ]
 
-    channels.map (ch) ->
-      core.respond ch, (message, next) ->
-        next null, {helloFrom: ch}
-
-    core.delegate channels, {}, (err, result) ->
+    core.delegate channel, {}, (err, results) ->
       should.not.exist err
-      should.exist result
-      result.should.eql expected
+
+      should.exist results
+
+      values = _.values results
+      should.exist values
+
+      data = _.pluck values, 'data'
+      should.exist data
+
+      data.should.eql expected
+
       done()
 
   it 'should return an err when a responder returns one', (done) ->
-    channels = ['willWork', 'wontWork']
+    channel = 'testChannel'
 
     testResponse = {message: 'this works'}
-    core.respond 'willWork', (message, next) ->
+    core.respond channel, (message, next) ->
       next null, testResponse
 
     testError = new Error 'Expect this error'
-    core.respond 'wontWork', (message, next) ->
+    core.respond channel, (message, next) ->
       next testError, {}
 
-    core.delegate channels, {}, (err, result) ->
+    core.delegate channel, {}, (err, results) ->
       should.exist err
-      err.should.eql testError
+      expectedMsg = "Errors returned by responders on channel '#{channel}'"
+      err.message.should.eql expectedMsg
 
+      should.exist err.errors
+      subErrors = (e.err for e in _.values err.errors)
+      should.exist subErrors
+      [subErr] = subErrors
+      should.exist subErr
+      subErr.should.eql testError
+
+      should.exist results
+      values = _.values results
+      should.exist values
+      [result] = values
       should.exist result
-      should.exist result.length
-      result.length.should.eql 2
-
-      should.exist result[0]
-      result[0].should.eql testResponse
-
-      should.not.exist result[1]
+      result.data.should.eql testResponse
 
       done()
 
   it 'should return a timeout err when an implied request times out', (done) ->
-    @timeout 3000
+    @timeout 2500
 
-    channels = ['wontTimeOut', 'willTimeOut']
-    core.init()
+    channel = 'testChannel'
 
     wontTimeOutMsg = {message: "I won't time out"}
-    core.respond 'wontTimeOut', (message, next) ->
+    core.respond channel, (message, next) ->
       next null, wontTimeOutMsg
 
-    core.delegate channels, {}, (err, result) ->
+    # This WILL time out
+    core.respond channel, (message, next) ->
+      # This will never get called.
+      # next()
+
+    core.delegate channel, {}, (err, results) ->
       should.exist err
-      err.message.should.eql "Request timed out on channel 'willTimeOut'"
+      expectedMsg = "Errors returned by responders on channel '#{channel}'"
+      err.message.should.eql expectedMsg
 
+      should.exist err.errors
+
+      responderId = Object.keys(err.errors)[0]
+      should.exist responderId
+
+      subErr = err.errors[responderId]?.err
+      should.exist subErr
+
+      errMsg = "Responder with id #{responderId} timed out on channel '#{channel}'"
+      subErr.message.should.eql errMsg
+
+      should.exist results
+      [result] = _.values results
       should.exist result
-      result.length.should.eql 2
-
-      should.exist result[0]
-      result[0].should.eql wontTimeOutMsg
-
-      should.not.exist result[1]
+      should.exist result.data
+      result.data.should.eql wontTimeOutMsg
 
       done()
