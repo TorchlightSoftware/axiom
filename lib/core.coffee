@@ -243,13 +243,19 @@ module.exports = core =
 
   send: (channel, data) ->
     # just send the message
+    topicId = uuid.v1()
+    topic = topicId
+    pub = bus.publish
+      channel: channel
+      data: data
+      topic: topic
 
   listen: (channel, handler) ->
     # just listen
-    sub = bus.subscribe {
+    sub = bus.subscribe
       channel: channel
+      # topic: '#'
       callback: handler
-    }
 
   signal: (channel, data) ->
     # for sending interrupts
