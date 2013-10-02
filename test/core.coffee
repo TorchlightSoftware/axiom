@@ -10,7 +10,7 @@ describe 'core.request', ->
     bus.utils.reset()
 
   beforeEach (done) ->
-    core.init()
+    core.init {timeout: 20}
     @channel = 'testChannel'
     @data =
       x: 2
@@ -134,7 +134,7 @@ describe 'core.delegate', ->
     bus.utils.reset()
 
   beforeEach (done) ->
-    core.init()
+    core.init {timeout: 20}
     done()
 
   it 'should return results when everything works', (done) ->
