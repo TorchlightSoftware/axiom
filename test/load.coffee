@@ -3,10 +3,15 @@ logger = require 'torch'
 
 load = require '../lib/load'
 bus = require '../lib/bus'
+core = require '../lib/core'
+
 
 describe 'load', ->
   afterEach ->
     bus.utils.reset()
+
+  before ->
+    core.init()
 
   tests = [
       description: 'a default base'
@@ -14,10 +19,15 @@ describe 'load', ->
         name: 'server'
         services:
           run: (args, done) ->
-            #logger.blue 'inside run service', arguments
             done null, {status: "success"}
-      input: ['server.run', {foo: 1, bar: 2}]
-      output: ['server.run.success', {status: "success"}]
+      input:
+        channel: 'server.run'
+        topic: 'runServer'
+        data: {foo: 1, bar: 2}
+      output:
+        channel: 'server.run.success'
+        topic: 'runServer'
+        data: {status: "success"}
     ,
       description: 'a referenced base'
       module:
@@ -25,8 +35,14 @@ describe 'load', ->
         config:
           run:
             base: 'lifecycle'
-      input: ['server.run', {foo: 1, bar: 2}]
-      output: ['base.run', {foo: 1, bar: 2}]
+      input:
+        channel: 'server.run'
+        topic: 'whatever'
+        data: {foo: 1, bar: 2}
+      output:
+        channel: 'base.run'
+        topic: 'request.#'
+        data: {foo: 1, bar: 2}
   ]
 
   for test in tests
@@ -34,13 +50,22 @@ describe 'load', ->
       {description, module, input, output} = test
       it description, (done) ->
         load module, (err, result) ->
+
+          replyTo =
+            channel: output.channel
+            topic:
+              success: output.topic
+
           bus.subscribe
-            channel: output[0]
+            channel: output.channel
+            topic: output.topic
             callback: (result) ->
               should.exist result
-              result.should.eql output[1]
+              result.should.eql output.data
               done()
 
           bus.publish
-            channel: input[0]
-            data: input[1]
+            channel: input.channel
+            data: input.data
+            topic: "request.#{input.topic}"
+            replyTo: replyTo
