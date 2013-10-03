@@ -1,4 +1,5 @@
 timers = require 'timers'
+logger = require 'torch'
 
 uuid = require 'uuid'
 async = require 'async'
@@ -40,7 +41,7 @@ module.exports = core =
       {base} = options
       rest = _.omit options, 'base'
 
-      baseChannel = "base.#{serviceName}"
+      baseChannel = "base.#{base}"
       core.respond serviceChannel, (args, done) ->
         core.request baseChannel, args, done
 

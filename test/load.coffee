@@ -38,7 +38,7 @@ describe 'load', ->
         topic: 'whatever'
         data: {foo: 1, bar: 2}
       output:
-        channel: 'base.run'
+        channel: 'base.lifecycle'
         topic: 'request.#'
         data: {foo: 1, bar: 2}
   ]
