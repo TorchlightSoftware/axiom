@@ -13,17 +13,20 @@ defaultConfig =
 module.exports = core =
   config:
     timeout: 2000
+
+  # a place to record what responders we have attached
   responders: {}
 
   init: (config) ->
     _.merge core.config, config
+    core.reset()
 
     # Require each axiom module.
     # Pass to load.
 
-    # Initialize mapping of 'responderIds's to responder metadata
+  reset: ->
     core.responders = {}
-
+    bus.utils.reset()
 
   load: (moduleName, module) ->
     {config, services} = module
