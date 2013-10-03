@@ -1,15 +1,13 @@
 # Axiom
 
-Axiom is a system for defining lifecycles in a declarative way, and attaching processes to each stage.
-
-Axiom can be used to create productive workflows, and define the runtime of your application in a decoupled, extensible way.
+Axiom is a system for formalizing productive workflows, and defining the runtime of your application in a decoupled, extensible way.
 
 At its core, Axiom is:
 
-* A message bus for sub-system communication
+* A protocol for sub-system communication
 * A standard for sub-system definition
 
-Sub-systems are called axioms, and may include:
+Sub-systems are stored as NPM modules, and may include:
 
 * A configuration
 * Processes for:
@@ -19,41 +17,43 @@ Sub-systems are called axioms, and may include:
   * Runtime
   * Feature Scaffolding
 
+These processes can extend existing life-cycles or define their own.
+
 # Alternatives
 
-Yeoman fulfills a similar role in that it provides a place to store the 'recipes' that are commonly used by your organization.  So why not just use a build tool?
+Yeoman - Used for formalizing workflows, workflows are not extensible, there is no standard for organizing/extending the application runtime.
+FireShell - Ditto.
+Anvil.js - Very similar design goals to Axiom, and in fact we use the same underlying message bus (Postal.js).  Whereas Anvil.js decided to back in the lifecycles, we wanted these to be extensible and therefore we have a more lightweight core than Anvil ships with.  We also wanted to extend the decoupled approach of tasks to building out the application runtime.
 
-Have you ever found yourself wanting to initialize parts of your application within a script?  Maybe you want to have access to the models so you can run a batch script.  Maybe you want to initialize a subsegment of the application for testing.
+# Installation
 
-Have you ever installed a new module in your application, and found yourself handling the integration at multiple points?
-
-Axiom was designed to solve these problems.  By defining standard roles that components fulfill, and a standard interface by which they communicate, we can build upon a foundation that makes simple things easy, but won't back us into a corner when things get complex.
+```bash
+npm install -g axiom
+```
 
 # Usage
 
 ```bash
-axiom create [project]
+axiom core create
 # Creates a new app (creates the directory as well).
 # This is the only command designed to be run outside the project directory.
 # If you already have a directory that you would like to start with, running any
 # install (or install with no args) should check all required baseline artifacts
 # and install them if they don't exist.
 
-axiom run
-# Runs your app.
-
-axiom install [axiom]
+axiom [module] install
 # Automatically does the following:
-#   1) add to package.json
-#   2) npm install [axiom]
-#   3) run 'install'
+#   1) npm install axiom-[module] --save
+#   2) require axiom-[module]
+#   3) run 'install' if it exists
 
-axiom uninstall [name]
+axiom [module] uninstall
 # Automatically does the following:
-#   1) require [axiom-name], run 'uninstall' if it exists
-#   2) remove from package.json
-#   3) npm uninstall [axiom-name]
+#   1) require axiom-[module]
+#   2) run 'uninstall' if it exists
+#   3) npm uninstall axiom-[module] --save
 
+axiom [module] [task]
 axiom client build
 # If you have installed an axiom named "client" and it has a task called "build", this
 # will run that task.
@@ -69,21 +69,49 @@ Simply publish on npm a module with the name format 'axiom-yourname'.  This will
 
 Your module should export an object containing the keys:
 
+* config - A javascript object describing how to wire up the services in this module.
+* services - Functions of a standard signature which implement your intended functionality.
+
+Services should contain:
+
 * install - A function to install the axiom.  Include any generation code here.
 * uninstall - A function to uninstall the axiom.  Remove all the generated code and directories/files that would have resulted from the installation.
 * [anything_else] - A function to generate some files, deploy something, start a server, or run a task.
 
-# Axiom Runtime
+Services are in the format of:
 
-*UNSTABLE - IN DISCUSSION*
+```coffee-script
+(args, done) ->
+  {foo, bar} = args
+  done null, {message: 'hello'}
+```
 
-Axiom maintains event buses which act as the main communication between subsystems.  When a task is run it will be bound to an event bus through which it can listen to relevant events and emit its own.  The event bus will contain the following keys:
+These conform to the specification for Law services, so if you want some middleware to help you out (argument validations, access controls, filters for common functionality), check out the Law documentation:
 
-* on/off - listen to messages
-* emit - send a message
-* config - the config for the corresponding axiom
+https://github.com/torchlightsoftware/law
 
-The axiom must specify any namespaces it wishes to listen to.  Aliases are possible as well - one or more source namespaces can be merged into a target namespace which the axiom will listen to.  When 'emit' is called the message will automatically be aliased under the axiom name.
+Here's an example module definition using Law:
+
+```coffee-script
+law = require 'law'
+serviceDefs = law.load './services'
+
+module.exports =
+  config:
+    test:
+      base: 'task'
+      stages: ['prepare', 'test', 'cleanup']
+
+  services: law.create {
+      services: serviceDefs
+      policy: require './policy'
+    }
+
+```
+
+## DISCLAIMER
+
+Modules in the Axiom ecosystem are the property of their respective authors.  We make no guarantee for the quality, usefulness, or intent of any module.
 
 ## LICENSE
 
