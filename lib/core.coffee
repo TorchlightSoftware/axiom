@@ -6,7 +6,6 @@ _ = require 'lodash'
 
 bus = require './bus'
 
-
 getTopicId = (topic) -> topic.split('.').pop()
 
 defaultConfig =
@@ -21,6 +20,27 @@ module.exports = core =
 
     # Initialize mapping of 'responderIds's to responder metadata
     core.responders = {}
+
+
+  load: (module, done) ->
+    {config, services} = module
+    moduleName = module.name
+
+    for serviceName, options of config
+      serviceChannel = "#{moduleName}.#{serviceName}"
+      {base} = options
+      rest = _.omit options, 'base'
+
+      baseChannel = "base.#{serviceName}"
+      core.respond serviceChannel, (args, done) ->
+        core.request baseChannel, args, done
+
+    for serviceName, serviceDef of services
+      serviceChannel = "#{moduleName}.#{serviceName}"
+      core.respond serviceChannel, serviceDef
+
+    done()
+
 
   request: (channel, data, done) ->
     # Subscribe to a response address.
@@ -72,8 +92,6 @@ module.exports = core =
           # 'err.<uuid>' or 'success.<uuid>'.
           err = new Error "Invalid condition '#{condition}'for response with topicId '#{topicId}'"
           done err
-
-
 
     # Subscribe to the 'err' response for topicId
     # We don't pass a callback immediately so that we can
@@ -241,6 +259,7 @@ module.exports = core =
       topic: 'request.#'
       callback: callback
 
+
   send: (channel, data) ->
     # just send the message
     topicId = uuid.v1()
@@ -250,12 +269,14 @@ module.exports = core =
       data: data
       topic: topic
 
+
   listen: (channel, handler) ->
     # just listen
     sub = bus.subscribe
       channel: channel
-      # topic: '#'
+      topic: '#'
       callback: handler
+
 
   signal: (channel, data) ->
     # for sending interrupts

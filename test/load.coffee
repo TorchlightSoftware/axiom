@@ -1,10 +1,9 @@
 should = require 'should'
 logger = require 'torch'
 
-load = require '../lib/load'
 bus = require '../lib/bus'
 core = require '../lib/core'
-
+{load} = core
 
 describe 'load', ->
   afterEach ->
