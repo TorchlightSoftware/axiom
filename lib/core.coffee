@@ -9,14 +9,17 @@ bus = require './bus'
 getTopicId = (topic) -> topic.split('.').pop()
 
 defaultConfig =
-  timeout: 2000
 
 module.exports = core =
+  config:
+    timeout: 2000
+  responders: {}
+
   init: (config) ->
+    _.merge core.config, config
+
     # Require each axiom module.
     # Pass to load.
-    core.config = _.merge {}, defaultConfig
-    core.config = _.merge core.config, config
 
     # Initialize mapping of 'responderIds's to responder metadata
     core.responders = {}
