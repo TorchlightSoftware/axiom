@@ -11,6 +11,10 @@ getTopicId = (topic) -> topic.split('.').pop()
 defaultConfig =
 
 module.exports = core =
+
+  # for troubleshooting/wiretapping
+  bus: bus
+
   config:
     timeout: 2000
 
@@ -30,7 +34,6 @@ module.exports = core =
 
   load: (moduleName, module) ->
     {config, services} = module
-    moduleName = module.name
 
     for serviceName, options of config
       serviceChannel = "#{moduleName}.#{serviceName}"
@@ -226,10 +229,8 @@ module.exports = core =
 
     timers.setImmediate finish
 
-
+  # sends acknowledgement, error, completion to replyTo channels
   respond: (channel, handler) ->
-    # can respond to request or delegate (or should we split this out?)
-    # sends acknowledgement, error, completion to replyTo channels
     responderId = uuid.v1()
 
     callback = (message, envelope) ->
@@ -262,9 +263,8 @@ module.exports = core =
       topic: 'request.#'
       callback: callback
 
-
+  # just send the message
   send: (channel, data) ->
-    # just send the message
     topicId = uuid.v1()
     topic = topicId
     pub = bus.publish
@@ -272,14 +272,12 @@ module.exports = core =
       data: data
       topic: topic
 
-
+  # just listen
   listen: (channel, handler) ->
-    # just listen
     sub = bus.subscribe
       channel: channel
       topic: '#'
       callback: handler
 
-
+  # for sending interrupts
   signal: (channel, data) ->
-    # for sending interrupts
