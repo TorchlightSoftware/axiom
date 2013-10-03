@@ -3,7 +3,6 @@ logger = require 'torch'
 
 bus = require '../lib/bus'
 core = require '../lib/core'
-{load} = core
 
 describe 'load', ->
   afterEach ->
@@ -48,23 +47,23 @@ describe 'load', ->
     do (test) ->
       {description, module, input, output} = test
       it description, (done) ->
-        load module, (err, result) ->
+        core.load module.name, module
 
-          replyTo =
-            channel: output.channel
-            topic:
-              success: output.topic
+        replyTo =
+          channel: output.channel
+          topic:
+            success: output.topic
 
-          bus.subscribe
-            channel: output.channel
-            topic: output.topic
-            callback: (result) ->
-              should.exist result
-              result.should.eql output.data
-              done()
+        bus.subscribe
+          channel: output.channel
+          topic: output.topic
+          callback: (result) ->
+            should.exist result
+            result.should.eql output.data
+            done()
 
-          bus.publish
-            channel: input.channel
-            data: input.data
-            topic: "request.#{input.topic}"
-            replyTo: replyTo
+        bus.publish
+          channel: input.channel
+          data: input.data
+          topic: "request.#{input.topic}"
+          replyTo: replyTo

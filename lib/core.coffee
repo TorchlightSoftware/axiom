@@ -22,7 +22,7 @@ module.exports = core =
     core.responders = {}
 
 
-  load: (module, done) ->
+  load: (moduleName, module) ->
     {config, services} = module
     moduleName = module.name
 
@@ -38,9 +38,6 @@ module.exports = core =
     for serviceName, serviceDef of services
       serviceChannel = "#{moduleName}.#{serviceName}"
       core.respond serviceChannel, serviceDef
-
-    done()
-
 
   request: (channel, data, done) ->
     # Subscribe to a response address.
