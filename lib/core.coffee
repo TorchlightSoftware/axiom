@@ -39,11 +39,12 @@ module.exports = core =
     for serviceName, options of config
       serviceChannel = "#{moduleName}.#{serviceName}"
       {base} = options
-      rest = _.omit options, 'base'
+      if base
+        rest = _.omit options, 'base'
 
-      baseChannel = "base.#{base}"
-      core.respond serviceChannel, (args, done) ->
-        core.request baseChannel, args, done
+        baseChannel = "base.#{base}"
+        core.respond serviceChannel, (args, done) ->
+          core.request baseChannel, args, done
 
     for serviceName, serviceDef of services
       serviceChannel = "#{moduleName}.#{serviceName}"
