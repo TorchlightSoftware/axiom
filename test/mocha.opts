@@ -2,3 +2,4 @@
 -r should
 -R spec
 --ui bdd
+--timeout 200

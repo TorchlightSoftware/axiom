@@ -48,8 +48,18 @@ module.exports = core =
             core.request baseChannel, {moduleName, serviceName, args, config: options, axiom: core}, done
 
     for serviceName, serviceDef of services
-      serviceChannel = "#{moduleName}.#{serviceName}"
-      core.respond serviceChannel, serviceDef
+
+      # attach a responder for each service definition
+      core.respond "#{moduleName}.#{serviceName}", serviceDef
+
+      # check the root namespace for this service, and see if we have an alias for it
+      [namespace] = serviceName.split '/'
+      alias = config?[namespace]?.extends
+      if alias
+
+        # attach an aliased responder
+        core.respond "#{alias}.#{serviceName}", serviceDef
+
 
   request: (channel, data, done) ->
     # Subscribe to a response address.

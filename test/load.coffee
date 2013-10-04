@@ -1,5 +1,6 @@
 should = require 'should'
 logger = require 'torch'
+uuid = require 'uuid'
 
 bus = require '../lib/bus'
 core = require '../lib/core'
@@ -20,11 +21,9 @@ describe 'load', ->
             done null, {status: "success"}
       input:
         channel: 'server.run'
-        topic: 'runServer'
-        data: {foo: 1, bar: 2}
       output:
-        channel: 'server.run.success'
-        topic: 'runServer'
+        channel: 'server.run'
+        topic: 'success.#'
         data: {status: "success"}
     ,
       description: 'a referenced base'
@@ -37,7 +36,6 @@ describe 'load', ->
             bar: 2
       input:
         channel: 'server.run'
-        topic: 'whatever'
         data: {baz: 45}
       output:
         channel: 'base.lifecycle'
@@ -59,12 +57,28 @@ describe 'load', ->
               done null, {status: "success"}
       input:
         channel: 'server.run'
-        topic: 'runServer'
         data: {foo: 1, bar: 2}
       output:
-        channel: 'server.run.success'
-        topic: 'runServer'
+        channel: 'server.run'
+        topic: 'success.#'
         data: {status: "success"}
+    ,
+      description: 'an aliased namespace'
+      module:
+        name: 'implementation'
+        config:
+          run:
+            extends: 'server'
+        services:
+          "run/prepare": (args, done) ->
+            done null, {status: "prepared"}
+      input:
+        channel: 'server.run/prepare'
+        data: {}
+      output:
+        channel: 'server.run/prepare'
+        topic: 'success.#'
+        data: {status: "prepared"}
   ]
 
   for test in tests
@@ -73,10 +87,13 @@ describe 'load', ->
       it description, (done) ->
         core.load module.name, module
 
+        id = uuid.v1()
+
         replyTo =
-          channel: output.channel
+          channel: input.channel
           topic:
-            success: output.topic
+            success: "success.#{id}"
+            error: "error.#{id}"
 
         bus.subscribe
           channel: output.channel
@@ -88,6 +105,6 @@ describe 'load', ->
 
         bus.publish
           channel: input.channel
+          topic: "request.#{id}"
           data: input.data
-          topic: "request.#{input.topic}"
           replyTo: replyTo
