@@ -61,25 +61,17 @@ module.exports = core =
         core.respond "#{alias}.#{serviceName}", serviceDef
 
 
+  # Subscribe to a response address.
+  # Publish a message, with a response address in the envelope.
+  # Time out based on axiom config.
   request: (channel, data, done) ->
-    # Subscribe to a response address.
-    # Publish a message, with a response address in the envelope.
-    # Time out based on axiom config.
 
-    # Define a unique identifier for the message cycle
-    topicId = uuid.v1()
+    # Send the message
+    replyTo = core.send channel, data
 
-    # Define metadata to put inside the envelope
-    replyTo =
-      channel: channel
-      topic:
-        err: "err.#{topicId}"
-        info: "info.#{topicId}"
-        success: "success.#{topicId}"
 
     # Define an 'onTimeout' callback for when we don't get a response
     # (either error or success) in the configured time.
-    timeout = core.config.timeout
     onTimeout = ->
       err = new Error "Request timed out on channel '#{channel}'"
 
@@ -88,38 +80,41 @@ module.exports = core =
         topic: replyTo.topic.err
         data: err
 
-    timeoutId = timers.setTimeout onTimeout, timeout
+    timeoutId = timers.setTimeout onTimeout, core.config.timeout
 
     # Default callback is of signature (message, envelope).
     # Wrap so we can pass a conventional (err, result)-style callback.
     callback = (message, envelope) ->
-      # Either an error or a success response has been
-      # received, so cancel our timeout callback.
+
+      # We're done, so cancel timeouts and subscriptions.
       timers.clearTimeout timeoutId
+      errSub.unsubscribe()
+      successSub.unsubscribe()
 
       {topic} = envelope
       [condition, middle..., topicId] = topic.split('.')
+
       switch condition
         when 'err'
-          err = message
-          done err
+          done message
         when 'success'
           done null, message
+
         else
           # This should never be reached, as this callback should only
           # be invoked by a subscription to a topic of the form
           # 'err.<uuid>' or 'success.<uuid>'.
-          err = new Error "Invalid condition '#{condition}'for response with topicId '#{topicId}'"
+          err = new Error "Invalid condition '#{condition}' for response with topicId '#{topicId}'"
           done err
 
     # Subscribe to the 'err' response for topicId
     # We don't pass a callback immediately so that we can
     # refer to the subscription itself in the callback.
     errSub = bus.subscribe {
-      channel: replyTo.channel,
-      topic: replyTo.topic.err,
+      channel: channel
+      topic: replyTo.topic.err
+      callback: callback
     }
-    errSub.subscribe callback
 
     # Subscribe to the 'success' response for topicId
     # As above, we don't pass a callback immediately so that
@@ -127,22 +122,8 @@ module.exports = core =
     successSub = bus.subscribe {
       channel: replyTo.channel
       topic: replyTo.topic.success
+      callback: callback
     }
-    successSub.subscribe (message, envelope) ->
-      # Stop listening for errors by detaching the error callback
-      errSub.unsubscribe()
-
-      # Actually call the callback
-      callback message, envelope
-
-    # The success callback should only fire once, if at all
-    successSub.once()
-
-    bus.publish
-      channel: channel
-      topic: "request.#{topicId}"
-      data: data
-      replyTo: replyTo
 
 
   delegate: (channel, data, done) ->
@@ -244,11 +225,11 @@ module.exports = core =
     timers.setImmediate finish
 
   # sends acknowledgement, error, completion to replyTo channels
-  respond: (channel, handler) ->
+  respond: (channel, service) ->
     responderId = uuid.v1()
 
     callback = (message, envelope) ->
-      handler message, (err, result) ->
+      service message, (err, result) ->
         if err?
           topic = envelope.replyTo.topic.err
           data = err
@@ -267,7 +248,7 @@ module.exports = core =
 
     # Map this 'responderId' to the responder and its metadata
     core.responders[channel] or= {}
-    core.responders[channel][callback.responderId] =
+    core.responders[channel][responderId] =
       callback: callback
 
     # Actually subscribe as a responder
@@ -279,18 +260,30 @@ module.exports = core =
   # just send the message
   send: (channel, data) ->
     topicId = uuid.v1()
-    topic = topicId
-    pub = bus.publish
+    replyTo =
       channel: channel
-      data: data
-      topic: topic
+      topicId: topicId
+      topic:
+        err: "err.#{topicId}"
+        info: "info.#{topicId}"
+        success: "success.#{topicId}"
+
+    timers.setImmediate ->
+      topic = "request.#{topicId}"
+      bus.publish
+        channel: channel
+        topic: topic
+        data: data
+        replyTo: replyTo
+
+    return replyTo
 
   # just listen
-  listen: (channel, handler) ->
+  listen: (channel, callback) ->
     sub = bus.subscribe
       channel: channel
       topic: '#'
-      callback: handler
+      callback: callback
 
   # for sending interrupts
   signal: (channel, data) ->
