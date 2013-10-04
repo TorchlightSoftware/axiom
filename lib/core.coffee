@@ -91,8 +91,7 @@ module.exports = core =
       errSub.unsubscribe()
       successSub.unsubscribe()
 
-      {topic} = envelope
-      [condition, middle..., topicId] = topic.split('.')
+      [condition, middle..., topicId] = envelope.topic.split('.')
 
       switch condition
         when 'err'
@@ -136,21 +135,17 @@ module.exports = core =
     responders = core.responders[channel] or {}
     waitingOn = _.keys responders
 
+    # return immediately if we have nothing to do
+    if _.isEmpty waitingOn
+      return done()
+
     # We will accumulate results in these objects, which map
     # responderId's to errors and results.
     errors = {}
     results = {}
 
-    # Define a unique identifier for the message cycle
-    topicId = uuid.v1()
-
-    # Define metadata to put inside the envelope
-    replyTo =
-      channel: channel
-      topic:
-        err: "err.#{topicId}"
-        info: "info.#{topicId}"
-        success: "success.#{topicId}"
+    # Send the message
+    replyTo = core.send channel, data
 
     # Define an 'onTimeout' callback for when we don't get a response
     # (either error or success) in the configured time.
@@ -168,9 +163,32 @@ module.exports = core =
 
     timeoutId = timers.setTimeout onTimeout, timeout
 
-    # Helper to pop a specific 'responderId' from the waitingOn array
-    stopWaitingOn = (responderId) ->
-      _.remove waitingOn, (el) -> el is responderId
+    callback = (message, envelope) ->
+      {responderId} = envelope
+      _.pull waitingOn, responderId
+
+      [condition, middle..., topicId] = envelope.topic.split('.')
+
+      switch condition
+        when 'err'
+          errors[responderId] =
+            err: message
+            envelope: envelope
+        when 'success'
+          results[responderId] =
+            data: message
+            envelope: envelope
+
+      if waitingOn.length is 0
+        errSub.unsubscribe()
+        successSub.unsubscribe()
+        timers.clearTimeout timeoutId
+
+        unless _.isEmpty errors
+          err = new Error "Errors returned by responders on channel '#{channel}'"
+          err.errors = errors
+
+        done err, results
 
     # Subscribe to the 'err' response for topicId
     # We don't pass a callback immediately so that we can
@@ -178,14 +196,8 @@ module.exports = core =
     errSub = bus.subscribe {
       channel: replyTo.channel
       topic: replyTo.topic.err
+      callback: callback
     }
-    errSub.subscribe (err, envelope) ->
-      {responderId} = envelope
-      stopWaitingOn responderId
-
-      errors[responderId] =
-        err: err
-        envelope: envelope
 
     # Subscribe to the 'success' response for topicId
     # As above, we don't pass a callback immediately so that
@@ -193,36 +205,8 @@ module.exports = core =
     successSub = bus.subscribe {
       channel: replyTo.channel
       topic: replyTo.topic.success
+      callback: callback
     }
-    successSub.subscribe (data, envelope) ->
-      {responderId} = envelope
-      stopWaitingOn responderId
-
-      results[responderId] =
-        data: data
-        envelope: envelope
-
-    bus.publish
-      channel: channel
-      topic: "request.#{topicId}"
-      data: data
-      replyTo: replyTo
-
-    finish = ->
-      return timers.setImmediate finish if waitingOn.length > 0
-
-      err = null
-      unless _.isEmpty errors
-        msg = "Errors returned by responders on channel '#{channel}'"
-        err = new Error msg
-        err.errors = errors
-
-      errSub.unsubscribe()
-      successSub.unsubscribe()
-
-      done err, results
-
-    timers.setImmediate finish
 
   # sends acknowledgement, error, completion to replyTo channels
   respond: (channel, service) ->
