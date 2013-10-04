@@ -33,14 +33,38 @@ describe 'load', ->
         config:
           run:
             base: 'lifecycle'
+            foo: 1
+            bar: 2
       input:
         channel: 'server.run'
         topic: 'whatever'
-        data: {foo: 1, bar: 2}
+        data: {baz: 45}
       output:
         channel: 'base.lifecycle'
         topic: 'request.#'
+        data:
+          args:
+            {baz: 45}
+          config:
+            base: 'lifecycle'
+            foo: 1
+            bar: 2
+    ,
+      description: 'a law service'
+      module:
+        name: 'server'
+        services:
+          run:
+            service: (args, done) ->
+              done null, {status: "success"}
+      input:
+        channel: 'server.run'
+        topic: 'runServer'
         data: {foo: 1, bar: 2}
+      output:
+        channel: 'server.run.success'
+        topic: 'runServer'
+        data: {status: "success"}
   ]
 
   for test in tests
@@ -59,7 +83,7 @@ describe 'load', ->
           topic: output.topic
           callback: (result) ->
             should.exist result
-            result.should.eql output.data
+            result.should.include output.data
             done()
 
         bus.publish

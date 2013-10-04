@@ -1,6 +1,7 @@
 should = require 'should'
 async = require 'async'
 _ = require 'lodash'
+logger = require 'torch'
 
 bus = require '../lib/bus'
 core = require '../lib/core'
@@ -137,25 +138,34 @@ describe 'core.delegate', ->
     core.init {timeout: 20}
     done()
 
-  it 'should return results when everything works', (done) ->
+  it 'should should return if there are no responders', (done) ->
     channel = 'testChannel'
-
-    core.respond channel, (message, next) ->
-      name = 'responderA'
-      next null, {helloFrom: name}
-
-    core.respond channel, (message, next) ->
-      name = 'responderB'
-      next null, {helloFrom: name}
-
-    expected = [
-      { helloFrom: 'responderA' },
-      { helloFrom: 'responderB' },
-    ]
 
     core.delegate channel, {}, (err, results) ->
       should.not.exist err
+      done()
 
+  it 'responders on another channel should not interfere', (done) ->
+    channel = 'testChannel'
+
+    core.respond 'fooChannel', (message, next) ->
+      next null, {helloFrom: 'fooChannel'}
+
+    core.delegate channel, {}, (err, results) ->
+      should.not.exist err
+      done()
+
+  it 'should should receive multiple responses', (done) ->
+    channel = 'testChannel'
+
+    core.respond channel, (message, next) ->
+      next null, {helloFrom: 'responderA'}
+
+    core.respond channel, (message, next) ->
+      next null, {helloFrom: 'responderB'}
+
+    core.delegate channel, {}, (err, results) ->
+      should.not.exist err
       should.exist results
 
       values = _.values results
@@ -164,7 +174,10 @@ describe 'core.delegate', ->
       data = _.pluck values, 'data'
       should.exist data
 
-      data.should.eql expected
+      data.should.eql [
+        { helloFrom: 'responderA' }
+        { helloFrom: 'responderB' }
+      ]
 
       done()
 
@@ -201,8 +214,6 @@ describe 'core.delegate', ->
       done()
 
   it 'should return a timeout err when an implied request times out', (done) ->
-    @timeout 2500
-
     channel = 'testChannel'
 
     wontTimeOutMsg = {message: "I won't time out"}
@@ -211,8 +222,7 @@ describe 'core.delegate', ->
 
     # This WILL time out
     core.respond channel, (message, next) ->
-      # This will never get called.
-      # next()
+      # next() will never get called.
 
     core.delegate channel, {}, (err, results) ->
       should.exist err
@@ -221,7 +231,7 @@ describe 'core.delegate', ->
 
       should.exist err.errors
 
-      responderId = Object.keys(err.errors)[0]
+      [responderId] = _.keys err.errors
       should.exist responderId
 
       subErr = err.errors[responderId]?.err

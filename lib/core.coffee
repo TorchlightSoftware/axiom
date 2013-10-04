@@ -1,6 +1,7 @@
 timers = require 'timers'
 logger = require 'torch'
 
+law = require 'law'
 uuid = require 'uuid'
 async = require 'async'
 _ = require 'lodash'
@@ -34,17 +35,17 @@ module.exports = core =
     bus.utils.reset()
 
   load: (moduleName, module) ->
-    {config, services} = module
+    {config} = module
+    services = law.create module
 
     for serviceName, options of config
-      serviceChannel = "#{moduleName}.#{serviceName}"
-      {base} = options
-      if base
-        rest = _.omit options, 'base'
+      do (serviceName, options) ->
+        serviceChannel = "#{moduleName}.#{serviceName}"
 
-        baseChannel = "base.#{base}"
-        core.respond serviceChannel, (args, done) ->
-          core.request baseChannel, args, done
+        if options.base
+          baseChannel = "base.#{options.base}"
+          core.respond serviceChannel, (args, done) ->
+            core.request baseChannel, {moduleName, serviceName, args, config: options, axiom: core}, done
 
     for serviceName, serviceDef of services
       serviceChannel = "#{moduleName}.#{serviceName}"
@@ -141,7 +142,8 @@ module.exports = core =
 
     # Get an array of responderId's of listeners from whom we expect
     # some kind of response on this channel.
-    waitingOn = Object.keys core.responders
+    responders = core.responders[channel] or {}
+    waitingOn = _.keys responders
 
     # We will accumulate results in these objects, which map
     # responderId's to errors and results.
@@ -216,7 +218,7 @@ module.exports = core =
       replyTo: replyTo
 
     finish = ->
-      return timers.setImmediate finish if waitingOn.length
+      return timers.setImmediate finish if waitingOn.length > 0
 
       err = null
       unless _.isEmpty errors
@@ -254,9 +256,8 @@ module.exports = core =
     callback.responderId = responderId
 
     # Map this 'responderId' to the responder and its metadata
-    core.responders[callback.responderId] =
-      channel: channel
-      topic: 'request.#'
+    core.responders[channel] or= {}
+    core.responders[channel][callback.responderId] =
       callback: callback
 
     # Actually subscribe as a responder
