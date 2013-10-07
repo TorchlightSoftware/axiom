@@ -1,15 +1,45 @@
 #!/usr/bin/env coffee
 logger = require 'torch'
+optimist = require 'optimist'
+
 core = require '..'
 
-logger.red process.argv
-[moduleName, serviceName] = process.argv.slice 2 # use nopt
 
-core.init()
-core.request "#{moduleName}.#{serviceName}", args, (err, results) ->
-  if err
-    console.err err.red
+options =
+  # Should correspond to an installed NPM module named 'axiom-<moduleName>'
+  'moduleName':
+    alias: ['module', 'm']
+    demand: true
+  'serviceName':
+    alias: ['service', 's']
+    demand: true
+  # The contents of 'data' are really the 'args' we expect to passs
+  'data':
+    default: {}
 
-  else
-    console.log 'SUCCESS'
-    console.log results.cyan
+
+main = ->
+  # Extract the arguments we expect, and remaining args for the service.
+  parsed = optimist.options options
+  {moduleName, serviceName, data} = parsed.argv
+
+  # Initialize Axiom, load the module.
+  config = process.env['AXIOM.config'] or {}
+  config.modules or= []
+  config.modules.push moduleName
+
+  core.init config
+
+  channel = [moduleName, serviceName].join('.')
+  core.request channel, data, (err, results) ->
+    if err
+      logger '[failure]'.red, {err}
+    else
+      logger '[success]'.green, {results}
+
+
+if module is require.main
+  main()
+
+
+module.exports = main

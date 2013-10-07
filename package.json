@@ -15,14 +15,16 @@
     "machina":"*",
     "postal":"*",
     "torch":"*",
-    "law":"*",
+    "law":"",
     "uuid":"*",
-    "async":"*"
+    "async":"*",
+    "optimist":"*"
   },
   "devDependencies":{
     "mocha":"*",
     "connect":"*",
-    "should":"*"
+    "should":"*",
+    "mockery":"*"
   },
   "engines":{
     "node":">= 0.8.4"
