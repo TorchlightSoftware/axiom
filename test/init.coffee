@@ -6,7 +6,7 @@ sample = require '../sample/sample'
 
 describe 'core.init', ->
   after ->
-    core.config.modules = []
+    core.reset()
 
   afterEach ->
     core.reset()
@@ -20,10 +20,10 @@ describe 'core.init', ->
     done()
 
   it 'should dynamically load a module based on name', (done) ->
+    config = {}
     moduleName = 'sample'
-    config =
-      modules: [moduleName]
-    core.init config
+    modules = [moduleName]
+    core.init config, modules
 
     channelName = 'sample.echo'
     data =
@@ -32,4 +32,23 @@ describe 'core.init', ->
       should.not.exist err
       should.exist result
       result.should.eql data
+      done()
+
+  it 'should not init a module that is blacklisted', (done) ->
+    @timeout 3000
+    moduleName = 'sample'
+    modules = [moduleName]
+    config =
+      blacklist: [moduleName]
+    core.init config, modules
+
+    channelName = 'sample.echo'
+    data =
+      greeting: 'hello!'
+    core.request channelName, data, (err, result) ->
+      should.exist err
+      err.message.should.eql "Request timed out on channel 'sample.echo'"
+
+      should.not.exist result
+
       done()

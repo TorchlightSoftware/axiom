@@ -1,3 +1,5 @@
+path = require 'path'
+
 timers = require 'timers'
 logger = require 'torch'
 
@@ -10,31 +12,47 @@ bus = require './bus'
 
 getTopicId = (topic) -> topic.split('.').pop()
 
+getAxiomModules = (config) ->
+  config or= {}
+  {blacklist} = config
+
+  packageJson = require path.join(__dirname, '..', 'package.json')
+  dependencies = Object.keys packageJson.dependencies
+  dependencies = _.difference dependencies, blacklist
+  axiomModules = dependencies.filter (dep) -> /^axiom-\S\S*/.test dep
+
 
 module.exports = core =
 
   # for troubleshooting/wiretapping
   bus: bus
 
+  modules: getAxiomModules()
+
   config:
-    modules: []
+    blacklist: []
     timeout: 2000
 
   # a place to record what responders we have attached
   responders: {}
 
-  init: (config) ->
-    _.merge core.config, config
+  init: (config, modules) ->
     core.reset()
+    modules or= []
+    _.merge core.config, config
+    core.modules = _.union core.modules, modules
 
     # Require each axiom module.
     # Pass to load.
-    for moduleName in core.config.modules
+    for moduleName in core.modules
+      continue if moduleName in core.config.blacklist
+
       module = require "axiom-#{moduleName}"
       core.load moduleName, module
 
   reset: ->
     core.responders = {}
+    core.modules = getAxiomModules()
     bus.utils.reset()
 
   load: (moduleName, module) ->
@@ -49,7 +67,13 @@ module.exports = core =
         if options.base
           baseChannel = "base.#{options.base}"
           core.respond serviceChannel, (args, done) ->
-            core.request baseChannel, {moduleName, serviceName, args, config: options, axiom: core}, done
+            core.request baseChannel, {
+              moduleName
+              serviceName
+              args
+              config: options
+              axiom: core
+            }, done
 
     for serviceName, serviceDef of services
       # attach a responder for each service definition
