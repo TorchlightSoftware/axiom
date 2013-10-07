@@ -10,7 +10,6 @@ bus = require './bus'
 
 getTopicId = (topic) -> topic.split('.').pop()
 
-defaultConfig =
 
 module.exports = core =
 
@@ -18,6 +17,7 @@ module.exports = core =
   bus: bus
 
   config:
+    modules: []
     timeout: 2000
 
   # a place to record what responders we have attached
@@ -29,6 +29,9 @@ module.exports = core =
 
     # Require each axiom module.
     # Pass to load.
+    for moduleName in core.config.modules
+      module = require "axiom-#{moduleName}"
+      core.load moduleName, module
 
   reset: ->
     core.responders = {}
@@ -36,6 +39,7 @@ module.exports = core =
 
   load: (moduleName, module) ->
     {config} = module
+    config or= []
     services = law.create module
 
     for serviceName, options of config
@@ -48,7 +52,6 @@ module.exports = core =
             core.request baseChannel, {moduleName, serviceName, args, config: options, axiom: core}, done
 
     for serviceName, serviceDef of services
-
       # attach a responder for each service definition
       core.respond "#{moduleName}.#{serviceName}", serviceDef
 
