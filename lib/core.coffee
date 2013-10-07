@@ -10,7 +10,6 @@ _ = require 'lodash'
 
 bus = require './bus'
 
-getTopicId = (topic) -> topic.split('.').pop()
 
 getAxiomModules = (config) ->
   config or= {}
