@@ -36,6 +36,7 @@ describe 'core.init', ->
 
   it 'should not init a module that is blacklisted', (done) ->
     @timeout 3000
+
     moduleName = 'sample'
     modules = [moduleName]
     config =

@@ -15,11 +15,23 @@ getAxiomModules = (config) ->
   config or= {}
   {blacklist} = config
 
+  # Grab 'package.json' as an object
   packageJson = require path.join(__dirname, '..', 'package.json')
+
+  # Extract the NPM module names of the 'dependencies'
   dependencies = Object.keys packageJson.dependencies
-  dependencies = _.difference dependencies, blacklist
+
+  # Filter out non-axiom NPM modules
   axiomNpmModules = dependencies.filter (dep) -> /^axiom-\S\S*/.test dep
+
+  # Remove the 'axiom-' prefix
   axiomModules = axiomNpmModules.map (m) -> m.slice('axiom-'.length)
+
+  # We only want the axiom modules not blacklisted, so take the
+  # set difference of 'axiomModules' \ 'blacklist'.
+  axiomModules = _.difference axiomModules, blacklist
+
+  return axiomModules
 
 
 module.exports = core =
@@ -45,6 +57,7 @@ module.exports = core =
     # Require each axiom module.
     # Pass to load.
     for moduleName in core.modules
+      # In case we have passed in a blacklisted module
       continue if moduleName in core.config.blacklist
 
       module = require "axiom-#{moduleName}"
