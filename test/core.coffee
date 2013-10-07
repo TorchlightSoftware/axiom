@@ -3,19 +3,25 @@ async = require 'async'
 _ = require 'lodash'
 logger = require 'torch'
 
+mockery = require './mockery'
 bus = require '../lib/bus'
 core = require '../lib/core'
 
+
 describe 'core.request', ->
   afterEach ->
-    bus.utils.reset()
+    core.reset()
+    mockery.disable()
 
   beforeEach (done) ->
+    mockery.enable()
+
     core.init {timeout: 20}
     @channel = 'testChannel'
     @data =
       x: 2
       y: 'hello'
+
     done()
 
   it 'should receive exactly one valid response', (done) ->
@@ -98,9 +104,11 @@ describe 'core.request', ->
 
 describe 'core.response', ->
   afterEach ->
-    bus.utils.reset()
+    core.reset()
 
   beforeEach (done) ->
+    mockery.enable()
+
     core.init()
     @channel = 'testChannel'
     @data =
@@ -132,9 +140,10 @@ describe 'core.response', ->
 
 describe 'core.delegate', ->
   afterEach ->
-    bus.utils.reset()
+    core.reset()
 
   beforeEach (done) ->
+    mockery.enable()
     core.init {timeout: 20}
     done()
 

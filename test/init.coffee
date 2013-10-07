@@ -16,8 +16,26 @@ describe 'core.init', ->
     mockery.enable
       warnOnReplace: false,
       warnOnUnregistered: false
+
+    mockery.registerMock 'axiom-base',
+      services:
+        runtime: (args, next) ->
+          next null, {message: 'axiom-base'}
     mockery.registerMock 'axiom-sample', sample
     done()
+
+  it 'should load axiom-base', (done) ->
+    config = {}
+    modules = []
+    core.init config, modules
+
+    channelName = 'base.runtime'
+    data = {}
+    core.request channelName, data, (err, result) ->
+      should.not.exist err
+      should.exist result
+      result.should.eql {message: 'axiom-base'}
+      done()
 
   it 'should dynamically load a module based on name', (done) ->
     config = {}

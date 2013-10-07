@@ -54,6 +54,10 @@ module.exports = core =
     _.merge core.config, config
     core.modules = _.union core.modules, modules
 
+    # Require and load axiom-base
+    base = require 'axiom-base'
+    core.load 'base', base
+
     # Require each axiom module.
     # Pass to load.
     for moduleName in core.modules

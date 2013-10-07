@@ -2,15 +2,18 @@ should = require 'should'
 logger = require 'torch'
 uuid = require 'uuid'
 
+mockery = require './mockery'
 bus = require '../lib/bus'
 core = require '../lib/core'
 
 
 describe 'load', ->
   afterEach ->
+    mockery.disable()
     core.reset()
 
-  before ->
+  beforeEach ->
+    mockery.enable()
     core.init()
 
   tests = [
