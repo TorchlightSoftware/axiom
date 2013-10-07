@@ -18,7 +18,8 @@ getAxiomModules = (config) ->
   packageJson = require path.join(__dirname, '..', 'package.json')
   dependencies = Object.keys packageJson.dependencies
   dependencies = _.difference dependencies, blacklist
-  axiomModules = dependencies.filter (dep) -> /^axiom-\S\S*/.test dep
+  axiomNpmModules = dependencies.filter (dep) -> /^axiom-\S\S*/.test dep
+  axiomModules = axiomNpmModules.map (m) -> m.slice('axiom-'.length)
 
 
 module.exports = core =
