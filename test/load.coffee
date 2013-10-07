@@ -5,9 +5,10 @@ uuid = require 'uuid'
 bus = require '../lib/bus'
 core = require '../lib/core'
 
+
 describe 'load', ->
   afterEach ->
-    bus.utils.reset()
+    core.reset()
 
   before ->
     core.init()
