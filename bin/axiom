@@ -1,6 +1,7 @@
 #!/usr/bin/env coffee
 logger = require 'torch'
 optimist = require 'optimist'
+_ = require 'lodash'
 
 core = require '..'
 
@@ -13,9 +14,7 @@ options =
   's':
     alias: ['axiom.serviceName']
     demand: true
-  # The contents of 'data' are really the 'args' we expect to passs
-  'data':
-    default: {}
+  # Any remaining named args will be pushed through as service arguments
 
 
 main = ->
@@ -23,20 +22,27 @@ main = ->
   parsed = optimist.options options
   {axiom, data} = parsed.argv
   {moduleName, serviceName} = axiom
+  toOmit = [
+    # Special optimist properties
+    '_', '$0'
+    # Axiom config arguments and shorthands
+    'axiom', 'm', 's'
+  ]
+  args = _.omit parsed.argv, toOmit
 
   # Initialize Axiom, load the module.
-  config = process.env['AXIOM.config'] or {}
+  config = process.env['axiom.config'] or {}
   modules = []
   modules.push moduleName
 
   core.init config, modules
 
   channel = [moduleName, serviceName].join('.')
-  core.request channel, data, (err, results) ->
+  core.request channel, args, (err, results) ->
     if err
       logger.red err.stack
     else
-      logger.green {results}
+      logger.green results
 
 
 if module is require.main
