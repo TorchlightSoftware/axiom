@@ -7,11 +7,11 @@ core = require '..'
 
 options =
   # Should correspond to an installed NPM module named 'axiom-<moduleName>'
-  'moduleName':
-    alias: ['module', 'm']
+  'm':
+    alias: ['axiom.moduleName']
     demand: true
-  'serviceName':
-    alias: ['service', 's']
+  's':
+    alias: ['axiom.serviceName']
     demand: true
   # The contents of 'data' are really the 'args' we expect to passs
   'data':
@@ -21,24 +21,36 @@ options =
 main = ->
   # Extract the arguments we expect, and remaining args for the service.
   parsed = optimist.options options
-  {moduleName, serviceName, data} = parsed.argv
+  {axiom, data} = parsed.argv
+  {moduleName, serviceName} = axiom
 
   # Initialize Axiom, load the module.
   config = process.env['AXIOM.config'] or {}
-  config.modules or= []
-  config.modules.push moduleName
+  modules = []
+  modules.push moduleName
 
-  core.init config
+  core.init config, modules
 
   channel = [moduleName, serviceName].join('.')
   core.request channel, data, (err, results) ->
     if err
-      logger '[failure]'.red, {err}
+      logger.red err.stack
     else
-      logger '[success]'.green, {results}
+      logger.green {results}
 
 
 if module is require.main
+  if process.env['axiom.env'] is 'testing'
+    mockery = require 'mockery'
+    mockery.enable
+      warnOnReplace: false,
+      warnOnUnregistered: false
+
+    mockery.registerMock 'axiom-base',
+      services:
+        echo: (args, next) ->
+          next null, args
+
   main()
 
 
