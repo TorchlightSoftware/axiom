@@ -12,16 +12,16 @@ command = path.join binDir, 'axiom'
 
 
 tests = [
-  {
-    description: 'should fail when no module is specified'
-    args: []
-    expected:
-      code: 1
-      stderr: [
-        'Options:\n  --moduleName, --module, -m    [required]\n  --serviceName, --service, -s  [required]\n  --data                        [default: {}]\n\n'
-        'Missing required arguments: moduleName, serviceName\n'
-      ]
-  }
+  # {
+  #   description: 'should fail when no module is specified'
+  #   args: []
+  #   expected:
+  #     code: 1
+  #     stderr: [
+  #       'Options:\n  --moduleName, --module, -m    [required]\n  --serviceName, --service, -s  [required]\n  --data                        [default: {}]\n\n'
+  #       'Missing required arguments: moduleName, serviceName\n'
+  #     ]
+  # }
   # # This will be a valid test once in the actual execution environment.
   # # We can't use mockery to intercept the 'require' call because we are
   # # spawning a subprocess.
