@@ -317,6 +317,7 @@ core =
   # for sending interrupts
   signal: (channel, data) ->
 
+
 # Expose 'bus' access for internal methods, wiretaps.
 # Non-enumerable, non-configurable, non-assignable.
 Object.defineProperty core, 'bus', {value: bus}
