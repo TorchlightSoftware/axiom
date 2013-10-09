@@ -46,13 +46,14 @@ main = ->
 
   core.init config, modules
 
-  # Ad hoc info listener. Replace this.
   channel = [moduleName, serviceName].join('.')
-  core.bus.subscribe
-    channel: channel
+  # Listen to any channel for info messages
+  core.listen
+    channel: '#'
     topic: 'info.#'
-    callback: (data, envelope) ->
-      logger.yellow data
+    callback: (err, envelope) ->
+      {timestamp, data} = envelope
+      logger.yellow "[#{timetamp}] #{data}"
 
   core.request channel, args, (err, results) ->
     if err
