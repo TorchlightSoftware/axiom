@@ -1,4 +1,5 @@
 #!/usr/bin/env coffee
+fs = require 'fs'
 logger = require 'torch'
 optimist = require 'optimist'
 _ = require 'lodash'
@@ -31,13 +32,25 @@ main = ->
   args = _.omit parsed.argv, toOmit
 
   # Initialize Axiom, load the module.
-  config = process.env['axiom.config'] or {}
+  # Default to empty config, but if a config file path is defined
+  # in the unix environment, try to load it.
+  config = {}
+  configFile = process.env['axiom.config']
+  if fs.existsSync configFile
+    config = JSON.parse fs.readFileSync(configFile, {encoding: 'utf8'})
   modules = []
   modules.push moduleName
 
   core.init config, modules
 
+  # Ad hoc info listener. Replace this.
   channel = [moduleName, serviceName].join('.')
+  core.bus.subscribe
+    channel: channel
+    topic: 'info.#'
+    callback: (data, envelope) ->
+      logger.yellow data
+
   core.request channel, args, (err, results) ->
     if err
       logger.red err.stack
@@ -46,6 +59,7 @@ main = ->
 
 
 if module is require.main
+  # Mock out pre-existing module
   if process.env['axiom.env'] is 'testing'
     mockery = require 'mockery'
     mockery.enable
