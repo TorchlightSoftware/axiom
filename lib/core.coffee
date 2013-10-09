@@ -307,11 +307,13 @@ module.exports = core =
     return replyTo
 
   # just listen
-  listen: (channel, callback) ->
+  listen: (channel, topic, callback) ->
     sub = bus.subscribe
       channel: channel
-      topic: '#'
-      callback: callback
+      topic: topic
+      callback: (data, envelope) ->
+        err = null
+        callback err, envelope
 
   # for sending interrupts
   signal: (channel, data) ->

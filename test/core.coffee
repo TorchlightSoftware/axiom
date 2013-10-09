@@ -2,6 +2,7 @@ should = require 'should'
 async = require 'async'
 _ = require 'lodash'
 logger = require 'torch'
+{focus} = require 'qi'
 
 mockery = require './mockery'
 bus = require '../lib/bus'
@@ -256,3 +257,123 @@ describe 'core.delegate', ->
       result.data.should.eql wontTimeOutMsg
 
       done()
+
+describe 'core.listen', ->
+  afterEach ->
+    core.reset()
+    mockery.disable()
+
+  beforeEach (done) ->
+    mockery.enable()
+
+    core.init {timeout: 20}
+    @channelA = 'testChannelA'
+    @channelB = 'testChannelB'
+    @dataA =
+      x: 2
+      y: 'hello'
+    @dataB =
+      x: 111
+      y: 'goodbye'
+    @topicA = 'info.A'
+    @topicB = 'info.B'
+
+    done()
+
+  it 'should listen with a standard-signature callback', (done) ->
+    core.listen @channelA, @topicA, (err, result) =>
+      should.not.exist err
+      should.exist result
+      {data} = result
+      should.exist data
+      data.should.eql @dataA
+      done()
+
+    bus.publish
+      channel: @channelA
+      data: @dataA
+      topic: @topicA
+
+  it 'should listen to two topics on one channel', (done) ->
+    cb = focus (err, results) =>
+      should.not.exist err
+
+      should.exist results
+
+      [resultA, resultB] = results
+      should.exist resultA
+      should.exist resultB
+
+      dataA = resultA.data
+      should.exist dataA
+      dataA.should.eql @dataA
+
+      dataB = resultB.data
+      should.exist dataB
+      dataB.should.eql @dataB
+
+      done()
+
+    core.listen @channelA, @topicA, cb()
+
+    core.listen @channelA, @topicB, cb()
+
+    bus.publish
+      channel: @channelA
+      data: @dataA
+      topic: @topicA
+
+    bus.publish
+      channel: @channelA
+      data: @dataB
+      topic: @topicB
+
+  it 'should listen to two topics on two channels', (done) ->
+    cb = focus (err, results) =>
+      should.not.exist err
+
+      should.exist results
+
+      [resultA, resultB] = results
+      should.exist resultA
+      should.exist resultB
+
+      dataA = resultA.data
+      should.exist dataA
+      dataA.should.eql @dataA
+
+      dataB = resultB.data
+      should.exist dataB
+      dataB.should.eql @dataB
+
+      done()
+
+    core.listen @channelA, @topicA, cb()
+
+    core.listen @channelB, @topicB, cb()
+
+    bus.publish
+      channel: @channelA
+      data: @dataA
+      topic: @topicA
+
+    bus.publish
+      channel: @channelB
+      data: @dataB
+      topic: @topicB
+
+  it 'should listen to any topic on one channel', (done) ->
+    core.listen @channelA, '#', (err, result) =>
+      should.not.exist err
+      should.exist result
+
+      {data} = result
+      should.exist data
+      data.should.eql @dataA
+
+      done()
+
+    bus.publish
+      channel: @channelA
+      data: @dataA
+      topic: @topicA
