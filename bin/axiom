@@ -7,27 +7,30 @@ _ = require 'lodash'
 core = require '..'
 
 
-options =
-  # Should correspond to an installed NPM module named 'axiom-<moduleName>'
-  'm':
-    alias: ['axiom.moduleName']
-    demand: true
-  's':
-    alias: ['axiom.serviceName']
-    demand: true
-  # Any remaining named args will be pushed through as service arguments
-
+options = {}
 
 main = ->
-  # Extract the arguments we expect, and remaining args for the service.
   parsed = optimist.options options
-  {axiom, data} = parsed.argv
-  {moduleName, serviceName} = axiom
+
+  # Extract the positional arguments we demand
+  positional = parsed.argv._
+  # Should correspond to an installed NPM module
+  # named 'axiom-<moduleName>' exposing service 'serviceName'
+  [moduleName, serviceName] = positional
+
+  # TODO: Change this to instead alert specific error and print usage information
+  throw new Error 'Missing required positional argument: moduleName' unless moduleName
+  throw new Error 'Missing required positional argument: serviceName' unless serviceName
+
+  # Extract the 'axiom' config object, which holds named args of the form 'axiom.<key>'
+  {axiom} = parsed.argv
+
+  # Extract the remaining args for the service
   toOmit = [
     # Special optimist properties
     '_', '$0'
-    # Axiom config arguments and shorthands
-    'axiom', 'm', 's'
+    # Axiom config arguments
+    'axiom'
   ]
   args = _.omit parsed.argv, toOmit
 
