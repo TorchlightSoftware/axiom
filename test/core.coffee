@@ -18,7 +18,9 @@ describe 'core.request', ->
     mockery.enable()
 
     core.init {timeout: 20}
-    @channel = 'testChannel'
+    @moduleName = 'server'
+    @serviceName = 'start'
+    @channel = "#{@moduleName}.#{@serviceName}"
     @data =
       x: 2
       y: 'hello'
@@ -26,14 +28,8 @@ describe 'core.request', ->
     done()
 
   it 'should receive exactly one valid response', (done) ->
-    bus.subscribe
-      channel: @channel
-      topic: 'request.#'
-      callback: (message, envelope) ->
-        bus.publish
-          channel: envelope.replyTo.channel
-          topic: envelope.replyTo.topic.success
-          data: message
+    core.respond @channel, (message, done) ->
+      done null, message
 
     core.request @channel, @data, (err, message) =>
       should.not.exist err
@@ -63,39 +59,30 @@ describe 'core.request', ->
       done()
 
   it 'should invoke the success callback exactly once, then discard all', (done) ->
-    unsubbedErr = unsubbedSuccess = false
-    callback = (message, envelope) =>
-      {replyTo} = envelope
-      tap = bus.addWireTap (d, e) ->
-        {err, success} = replyTo.topic
-        {topic} = e.data
-        if e.topic is 'subscription.removed'
-          unsubbedErr ||= topic is err
-          unsubbedSuccess ||= topic is success
+    core.respond @channel, (message, finished) =>
+      finished()
 
-        if unsubbedErr and unsubbedSuccess
-          tap()
-          done()
-
+    test = (err, data) ->
       bus.publish
-        channel: replyTo.channel
-        topic: replyTo.topic.success
-        data: {}
+        channel: @channel
+        topic: replyTo.topic.err
+        data: new Error 'should not see'
+      done()
 
-    sub = bus.subscribe
-      channel: @channel
-      topic: 'request.#'
-      callback: callback
-
-    noop = ->
-    core.request @channel, @data, noop
+    replyTo = core.request @channel, @data, test
 
   it 'should return a timeout error when it times out', (done) ->
-    @timeout 3000
-
+    core.respond @channel, -> # I can't hear you
     core.request @channel, @data, (err, result) =>
       should.exist err
-      expectedMsg = "Request timed out on channel '#{@channel}'"
+      err.message.should.eql "Request timed out on channel '#{@channel}'"
+      should.not.exist result
+      done()
+
+  it 'should return immediately if there are no listeners', (done) ->
+    core.request @channel, @data, (err, result) =>
+      should.exist err
+      expectedMsg = "No responders for request: '#{@channel}'"
       err.message.should.eql expectedMsg
 
       should.not.exist result

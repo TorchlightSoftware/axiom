@@ -60,7 +60,7 @@ core =
       # In case we have passed in a blacklisted module
       continue if moduleName in core.config.blacklist
 
-      module = require "axiom-#{moduleName}"
+      module = require "#{process.cwd()}/node_modules/axiom-#{moduleName}"
       core.load moduleName, module
 
   reset: ->
@@ -106,9 +106,20 @@ core =
   # Time out based on axiom config.
   request: (channel, data, done) ->
 
-    # Send the message
-    replyTo = core.send channel, data
+    # how many responders do we have
+    responders = core.responders[channel] or {}
+    responderCount = _.keys(responders).length
 
+    switch responderCount
+      when 0
+        return done new Error "No responders for request: '#{channel}'"
+
+      when 1
+        # Send the message
+        replyTo = core.send channel, data
+
+      else
+        return done new Error "Ambiguous: #{responderCount} responders for request: '#{channel}'"
 
     # Define an 'onTimeout' callback for when we don't get a response
     # (either error or success) in the configured time.
@@ -163,6 +174,8 @@ core =
       topic: replyTo.topic.success
       callback: callback
     }
+
+    return replyTo
 
 
   delegate: (channel, data, done) ->
