@@ -10,6 +10,8 @@ core = require '..'
 options = {}
 
 main = ->
+  usage = 'Usage: axiom <moduleName> <serviceName> [<--arg> <value> ...]'
+  optimist.usage usage
   parsed = optimist.options options
 
   # Extract the positional arguments we demand
@@ -19,8 +21,14 @@ main = ->
   [moduleName, serviceName] = positional
 
   # TODO: Change this to instead alert specific error and print usage information
-  throw new Error 'Missing required positional argument: moduleName' unless moduleName
-  throw new Error 'Missing required positional argument: serviceName' unless serviceName
+  unless moduleName
+    logger.red 'Missing required positional argument: moduleName'
+    logger.yellow parsed.help()
+    return
+  unless serviceName
+    logger.yellow parsed.help()
+    logger.red 'Missing required positional argument: serviceName'
+    return
 
   # Extract the 'axiom' config object, which holds named args of the form 'axiom.<key>'
   {axiom} = parsed.argv
