@@ -35,9 +35,6 @@ getAxiomModules = (config) ->
 
 
 core =
-  # for troubleshooting/wiretapping
-  # bus: bus
-
   modules: getAxiomModules()
 
   config:
@@ -69,7 +66,7 @@ core =
   reset: ->
     core.responders = {}
     core.modules = getAxiomModules()
-    core.bus.utils.reset()
+    bus.utils.reset()
 
   load: (moduleName, module) ->
     {config} = module
@@ -118,7 +115,7 @@ core =
     onTimeout = ->
       err = new Error "Request timed out on channel '#{channel}'"
 
-      core.bus.publish
+      bus.publish
         channel: replyTo.channel
         topic: replyTo.topic.err
         data: err
@@ -152,7 +149,7 @@ core =
     # Subscribe to the 'err' response for topicId
     # We don't pass a callback immediately so that we can
     # refer to the subscription itself in the callback.
-    errSub = core.bus.subscribe {
+    errSub = bus.subscribe {
       channel: channel
       topic: replyTo.topic.err
       callback: callback
@@ -161,7 +158,7 @@ core =
     # Subscribe to the 'success' response for topicId
     # As above, we don't pass a callback immediately so that
     # we can refer to the subscription itself in the callback.
-    successSub = core.bus.subscribe {
+    successSub = bus.subscribe {
       channel: replyTo.channel
       topic: replyTo.topic.success
       callback: callback
@@ -198,7 +195,7 @@ core =
         msg = "Responder with id #{responderId} timed out on channel '#{channel}'"
         err = new Error msg
 
-        core.bus.publish
+        bus.publish
           channel: replyTo.channel
           topic: replyTo.topic.err
           data: err
@@ -236,7 +233,7 @@ core =
     # Subscribe to the 'err' response for topicId
     # We don't pass a callback immediately so that we can
     # refer to the subscription itself in the callback.
-    errSub = core.bus.subscribe {
+    errSub = bus.subscribe {
       channel: replyTo.channel
       topic: replyTo.topic.err
       callback: callback
@@ -245,7 +242,7 @@ core =
     # Subscribe to the 'success' response for topicId
     # As above, we don't pass a callback immediately so that
     # we can refer to the subscription itself in the callback.
-    successSub = core.bus.subscribe {
+    successSub = bus.subscribe {
       channel: replyTo.channel
       topic: replyTo.topic.success
       callback: callback
@@ -264,7 +261,7 @@ core =
           topic = envelope.replyTo.topic.success
           data = result
 
-        core.bus.publish
+        bus.publish
           channel: envelope.replyTo.channel
           topic: topic
           data: data
@@ -279,7 +276,7 @@ core =
       callback: callback
 
     # Actually subscribe as a responder
-    core.bus.subscribe
+    bus.subscribe
       channel: channel
       topic: 'request.#'
       callback: callback
@@ -297,7 +294,7 @@ core =
 
     timers.setImmediate ->
       topic = "request.#{topicId}"
-      core.bus.publish
+      bus.publish
         channel: channel
         topic: topic
         data: data
@@ -307,7 +304,7 @@ core =
 
   # just listen
   listen: (channel, topic, callback) ->
-    sub = core.bus.subscribe
+    sub = bus.subscribe
       channel: channel
       topic: topic
       callback: (data, envelope) ->
@@ -316,11 +313,6 @@ core =
 
   # for sending interrupts
   signal: (channel, data) ->
-
-
-# Expose 'bus' access for internal methods, wiretaps.
-# Non-enumerable, non-configurable, non-assignable.
-Object.defineProperty core, 'bus', {value: bus}
 
 
 module.exports = core
