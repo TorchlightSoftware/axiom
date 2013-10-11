@@ -45,13 +45,17 @@ core =
   responders: {}
 
   init: (config, modules) ->
+
+    requireModule = (moduleName) ->
+      require "#{process.cwd()}/node_modules/axiom-#{moduleName}"
+
     core.reset()
     modules or= []
     _.merge core.config, config
     core.modules = _.union core.modules, modules
 
     # Require and load axiom-base
-    base = require 'axiom-base'
+    base = requireModule 'base'
     core.load 'base', base
 
     # Require each axiom module.
@@ -61,8 +65,7 @@ core =
       # In case we have passed in a blacklisted module
       continue if moduleName in core.config.blacklist
 
-      module = require "#{process.cwd()}/node_modules/axiom-#{moduleName}"
-      core.load moduleName, module
+      core.load moduleName, requireModule moduleName
 
   reset: ->
     core.responders = {}
@@ -279,7 +282,7 @@ core =
 
   # sends acknowledgement, error, completion to replyTo channels
   respond: (channel, service) ->
-    #logger.blue "attaching responder at:", channel
+    logger.blue "attaching responder at:", channel
     responderId = uuid.v1()
 
     callback = (message, envelope) ->
