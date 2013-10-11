@@ -1,117 +1,84 @@
 should = require 'should'
 logger = require 'torch'
-uuid = require 'uuid'
 
-mockery = require './mockery'
-bus = require '../lib/bus'
-core = require '../lib/core'
+core = require '..'
 
 
-describe 'load', ->
+describe 'core.load', ->
   afterEach ->
-    #mockery.disable()
     core.reset()
 
-  beforeEach ->
-    #mockery.enable()
-    #core.init()
 
-#   tests = [
-#       description: 'a default base'
-#       module:
-#         name: 'server'
-#         services:
-#           run: (args, done) ->
-#             done null, {status: "success"}
-#       input:
-#         channel: 'server.run'
-#       output:
-#         channel: 'server.run'
-#         topic: 'success.#'
-#         data: {status: "success"}
-#     ,
-#       description: 'a referenced base'
-#       module:
-#         name: 'server'
-#         config:
-#           run:
-#             base: 'lifecycle'
-#             foo: 1
-#             bar: 2
-#       input:
-#         channel: 'server.run'
-#         data: {baz: 45}
-#       output:
-#         channel: 'base.lifecycle'
-#         topic: 'request.#'
-#         data:
-#           args:
-#             {baz: 45}
-#           config:
-#             base: 'lifecycle'
-#             foo: 1
-#             bar: 2
-#     ,
-#       description: 'a law service'
-#       module:
-#         name: 'server'
-#         services:
-#           run:
-#             service: (args, done) ->
-#               done null, {status: "success"}
-#       input:
-#         channel: 'server.run'
-#         data: {foo: 1, bar: 2}
-#       output:
-#         channel: 'server.run'
-#         topic: 'success.#'
-#         data: {status: "success"}
-#     ,
-#       description: 'an aliased namespace'
-#       module:
-#         name: 'implementation'
-#         config:
-#           run:
-#             extends: 'server'
-#         services:
-#           "run/prepare": (args, done) ->
-#             done null, {status: "prepared"}
-#       input:
-#         channel: 'server.run/prepare'
-#         data: {}
-#       output:
-#         channel: 'server.run/prepare'
-#         topic: 'success.#'
-#         data: {status: "prepared"}
-#   ]
+  it 'should load a default base', (done) ->
+    module =
+      services:
+        run: (args, done) ->
+          done null, {status: 'success'}
 
-#   for test in tests
-#     do (test) ->
-#       {description, module, input, output} = test
-#       it description, (done) ->
-#         core.load module.name, module
+    core.load 'server', module
+    core.request 'server.run', {}, (err, data) ->
+      should.not.exist err
+      should.exist data
+      data.should.eql {status: 'success'}
 
-#         id = uuid.v1()
+      done()
 
-#         replyTo =
-#           channel: input.channel
-#           topic:
-#             success: "success.#{id}"
-#             error: "error.#{id}"
 
-#         bus.subscribe
-#           channel: output.channel
-#           topic: output.topic
-#           callback: (result) ->
-#             should.exist result
-#             result.should.include output.data
-#             done()
+  it 'should load a referenced base', (done) ->
+    core.load 'base', {
+      services:
+        lifecycle: (args, done) ->
+          done null, args.args
+    }
 
-#         bus.publish
-#           channel: input.channel
-#           topic: "request.#{id}"
-#           data: input.data
-#           replyTo: replyTo
+    core.load 'server', {
+      config:
+        run:
+          base: 'lifecycle'
+    }
+
+    data = {x: 111}
+    core.request 'server.run', data, (err, result) ->
+      should.not.exist err
+      should.exist result
+      result.should.eql data
+
+      done()
+
+
+  it 'should load a law service', (done) ->
+    module =
+      services:
+        run:
+          service: (args, done) ->
+            done null, {status: 'success'}
+
+    core.load 'server', module
+    core.request 'server.run', {}, (err, data) ->
+      should.not.exist err
+      should.exist data
+      data.should.eql {status: 'success'}
+
+      done()
+
+
+  it 'should load an aliased namespace', (done) ->
+    module =
+      config:
+        run:
+          extends: 'server'
+      services:
+        'run/prepare': (args, done) ->
+          done null, {status: 'prepared'}
+
+    core.load 'extension', module
+    core.request 'server.run/prepare', {}, (err, data) ->
+      should.not.exist err
+      should.exist data
+      data.should.eql {status: 'prepared'}
+
+      done()
+
 
   it 'should receive config in context', (done) ->
     robot =
