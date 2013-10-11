@@ -74,11 +74,18 @@ core =
     config or= {}
     services = law.create module
 
+    contexts = {}
+
     # Give each service a binding context containing the config.
     # The context is shared between all services in a namespace.
     for name, def of services
-      context = {config}
-      services[name] = def.bind context
+      [namespace] = name.split '/'
+      unless contexts[namespace]
+        contexts[namespace] = {
+          config: config[namespace]
+        }
+
+      services[name] = def.bind contexts[namespace]
 
     for serviceName, options of config
       do (serviceName, options) ->

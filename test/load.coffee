@@ -8,13 +8,13 @@ core = require '../lib/core'
 
 
 describe 'load', ->
-#   afterEach ->
-#     mockery.disable()
-#     core.reset()
+  afterEach ->
+    #mockery.disable()
+    core.reset()
 
-#   beforeEach ->
-#     mockery.enable()
-# #    core.init()
+  beforeEach ->
+    #mockery.enable()
+    #core.init()
 
 #   tests = [
 #       description: 'a default base'
@@ -122,10 +122,56 @@ describe 'load', ->
         crushLikeBug: (args, fin) ->
           should.exist @config
           @config.should.eql {
-            crushLikeBug:
-              strength: 5
+            strength: 5
           }
           fin()
 
     core.load "robot", robot
     core.request "robot.crushLikeBug", {}, done
+
+  it 'should share context between services in a namespace', (done) ->
+    server =
+      config:
+        run:
+          port: 4000
+
+      services:
+        "run/prepare": (args, fin) ->
+          @foo = 7
+          fin()
+
+        "run/boot": (args, fin) ->
+          should.exist @foo, 'expected foo in context'
+          @foo.should.eql 7
+          fin()
+
+    core.load "server", server
+    core.request "server.run/prepare", {}, (err, result) ->
+      should.not.exist err
+      core.request "server.run/boot", {}, done
+
+  it 'should not share context between services in different namespaces', (done) ->
+    server =
+      config:
+        run:
+          port: 4000
+        test:
+          timeout: 200
+
+      services:
+        "run/prepare": (args, fin) ->
+          should.exist @config?.port, 'expected port in context'
+          @config.port.should.eql 4000
+          @foo = 7
+          fin()
+
+        "test/prepare": (args, fin) ->
+          should.exist @config?.timeout, 'expected timeout in context'
+          @config.timeout.should.eql 200
+          should.not.exist @foo
+          fin()
+
+    core.load "server", server
+    core.request "server.run/prepare", {}, (err, result) ->
+      should.not.exist err
+      core.request "server.test/prepare", {}, done
