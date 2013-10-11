@@ -83,6 +83,7 @@ core =
       unless contexts[namespace]
         contexts[namespace] = {
           config: config[namespace]
+          axiom: core
         }
 
       services[name] = def.bind contexts[namespace]

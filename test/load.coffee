@@ -80,14 +80,15 @@ describe 'core.load', ->
       done()
 
 
-  it 'should receive config in context', (done) ->
+  it 'should receive axiom/config in context', (done) ->
     robot =
       config:
         crushLikeBug:
           strength: 5
       services:
         crushLikeBug: (args, fin) ->
-          should.exist @config
+          should.exist @axiom, 'expected axiom in context'
+          should.exist @config, 'expected config in context'
           @config.should.eql {
             strength: 5
           }
