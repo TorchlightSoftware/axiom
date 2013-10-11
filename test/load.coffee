@@ -120,8 +120,11 @@ describe 'load', ->
           strength: 5
       services:
         crushLikeBug: (args, fin) ->
-          # logger @
           should.exist @config
+          @config.should.eql {
+            crushLikeBug:
+              strength: 5
+          }
           fin()
 
     core.load "robot", robot

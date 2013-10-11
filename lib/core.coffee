@@ -73,18 +73,12 @@ core =
     {config} = module
     config or= {}
     services = law.create module
-    logger.cyan services
-    # Give each service a meaningful 'this' context, which includes
-    # the config as a property accessible within the service body.
-    context = {config}
+
+    # Give each service a binding context containing the config.
+    # The context is shared between all services in a namespace.
     for name, def of services
-      # context = {config}
-      logger {name, def, context}
+      context = {config}
       services[name] = def.bind context
-
-
-    services.crushLikeBug {x: 2, y: 3}, (err, data) ->
-
 
     for serviceName, options of config
       do (serviceName, options) ->

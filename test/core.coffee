@@ -10,10 +10,6 @@ core = require '../lib/core'
 
 
 describe 'core.request', ->
-  afterEach ->
-    core.reset()
-    mockery.disable()
-
   beforeEach (done) ->
     mockery.enable()
 
@@ -26,6 +22,10 @@ describe 'core.request', ->
       y: 'hello'
 
     done()
+
+  afterEach ->
+    core.reset()
+    mockery.disable()
 
   it 'should receive exactly one valid response', (done) ->
     core.respond @channel, (message, done) ->
