@@ -112,3 +112,16 @@ describe 'load', ->
           topic: "request.#{id}"
           data: input.data
           replyTo: replyTo
+
+  it 'should receive config in context', (done) ->
+    robot =
+      config:
+        crushLikeBug:
+          strength: 5
+      services:
+        crushLikeBug: (args, fin) ->
+          should.exist @config
+          fin()
+
+    core.load "robot", robot
+    core.request "robot.crushLikeBug", {}, done

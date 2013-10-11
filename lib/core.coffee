@@ -56,6 +56,7 @@ core =
 
     # Require each axiom module.
     # Pass to load.
+    #logger.magenta 'loading modules:', core.modules
     for moduleName in core.modules
       # In case we have passed in a blacklisted module
       continue if moduleName in core.config.blacklist
@@ -88,6 +89,7 @@ core =
               axiom: core
             }, done
 
+    #logger.blue "load '#{moduleName}' found services:", services
     for serviceName, serviceDef of services
       # attach a responder for each service definition
       core.respond "#{moduleName}.#{serviceName}", serviceDef
@@ -263,6 +265,7 @@ core =
 
   # sends acknowledgement, error, completion to replyTo channels
   respond: (channel, service) ->
+    #logger.blue "attaching responder at:", channel
     responderId = uuid.v1()
 
     callback = (message, envelope) ->

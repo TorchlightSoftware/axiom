@@ -5,7 +5,6 @@ module.exports =
       type: 'extension'
       target: 'server.run'
 
-    '*':
       port: 4000
       ssl: false
 
