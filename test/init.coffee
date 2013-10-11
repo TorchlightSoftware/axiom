@@ -11,10 +11,11 @@ describe 'core.init', ->
       warnOnReplace: false,
       warnOnUnregistered: false
 
-    mockery.registerMock 'axiom-base',
+    mockery.registerMock 'axiom-base', {
       services:
         runtime: (args, next) ->
           next null, {message: 'axiom-base'}
+    }
     mockery.registerMock "#{process.cwd()}/node_modules/axiom-sample", sample
 
   afterEach ->

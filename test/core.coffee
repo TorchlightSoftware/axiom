@@ -3,15 +3,26 @@ async = require 'async'
 _ = require 'lodash'
 logger = require 'torch'
 {focus} = require 'qi'
+{join} = require 'path'
 
-mockery = require './mockery'
+mockery = require 'mockery'
 bus = require '../lib/bus'
 core = require '../lib/core'
 
 
 describe 'core.request', ->
   beforeEach (done) ->
-    mockery.enable()
+    mockery.enable
+      warnOnReplace: false,
+      warnOnUnregistered: false
+
+    mockery.registerAllowables [join(__dirname, '..', 'package')]
+
+    mockery.registerMock "#{process.cwd()}/node_modules/axiom-base", {
+      services:
+        runtime: (args, next) ->
+          next null, {message: 'axiom-base'}
+    }
 
     core.init {timeout: 20}
     @moduleName = 'server'
