@@ -9,7 +9,7 @@ async = require 'async'
 _ = require 'lodash'
 
 bus = require './bus'
-
+util = require './util'
 
 getAxiomModules = (config) ->
   config or= {}
@@ -40,14 +40,20 @@ core =
   config:
     blacklist: []
     timeout: 2000
+    projectRoot: undefined
 
   # a place to record what responders we have attached
   responders: {}
 
   init: (config, modules) ->
+    core.projectRoot = util.findProjRoot()
 
     requireModule = (moduleName) ->
-      require "#{process.cwd()}/node_modules/axiom-#{moduleName}"
+      # Get a project directory-relative path for the axiom module's
+      # corresponding NPM module.
+      npmName = "axiom-#{moduleName}"
+      npmModuleName = util.projRel path.join('node_modules', npmName)
+      require npmModuleName
 
     core.reset()
     modules or= []
@@ -75,7 +81,15 @@ core =
   load: (moduleName, module) ->
     {config} = module
     config or= {}
-    services = law.create module
+    services = law.create {
+      services: module.services
+      # We create a custom resolver for 'lib' dependencies which, within
+      # a Law service, loads an NPM module relative to the project root.
+      resolvers:
+        lib: (name) ->
+          requireName = path.join util.projRel('node_modules'), name
+          return require(requireName)
+    }
 
     contexts = {}
 
@@ -347,5 +361,6 @@ core =
   # for sending interrupts
   signal: (channel, data) ->
 
+  util: require './util'
 
 module.exports = core
