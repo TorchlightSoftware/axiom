@@ -40,24 +40,32 @@ core =
   config:
     blacklist: []
     timeout: 2000
-    projectRoot: undefined
 
   # a place to record what responders we have attached
   responders: {}
 
   init: (config, modules) ->
-    core.projectRoot = util.findProjRoot()
 
     requireModule = (moduleName) ->
       # Get a project directory-relative path for the axiom module's
       # corresponding NPM module.
       npmName = "axiom-#{moduleName}"
       npmModuleName = util.projRel path.join('node_modules', npmName)
-      require npmModuleName
+      return require npmModuleName
 
     core.reset()
     modules or= []
+
+    # Attempt to load a global 'Axiom.*' file from the project root
+    try
+      axiomFile = require util.projRel 'Axiom'
+      _.merge core.config, axiomFile
+    catch err
+      throw err unless err.code is 'MODULE_NOT_FOUND'
+
+    # Merge in any programatically-passed config object
     _.merge core.config, config
+
     core.modules = _.union core.modules, modules
 
     # Require and load axiom-base
@@ -81,15 +89,16 @@ core =
   load: (moduleName, module) ->
     {config} = module
     config or= {}
-    services = law.create {
-      services: module.services
-      # We create a custom resolver for 'lib' dependencies which, within
-      # a Law service, loads an NPM module relative to the project root.
-      resolvers:
-        lib: (name) ->
-          requireName = path.join util.projRel('node_modules'), name
-          return require(requireName)
-    }
+    # Merge config overrides from '$projectRoot/axiom/<moduleName>'
+    overrideConfigPath = path.join util.projRel('axiom'), moduleName
+    try
+      overrideConfig = require overrideConfigPath
+      _.merge config, overrideConfig
+    catch err
+      throw err unless err.code is 'MODULE_NOT_FOUND'
+
+    # Initialize the services using a project-relative 'lib' resolver
+    services = law.create {services: module.services}
 
     contexts = {}
 
