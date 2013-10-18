@@ -16,7 +16,11 @@ describe 'core.request', ->
       warnOnReplace: false,
       warnOnUnregistered: false
 
-    mockery.registerAllowables [join(__dirname, '..', 'package')]
+    mockery.registerAllowables [
+      join(__dirname, '..', 'package')
+      join(__dirname, '..', 'Axiom')
+      join(__dirname, '..', 'axiom', 'base')
+    ]
 
     mockery.registerMock "#{process.cwd()}/node_modules/axiom-base", {
       services:
