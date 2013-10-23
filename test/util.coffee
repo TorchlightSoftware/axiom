@@ -26,29 +26,29 @@ describe 'util.findProjRoot', ->
     done()
 
 
-describe 'util.makeLoader', ->
+describe 'util.makeRetriever', ->
   beforeEach ->
     process.chdir path.join(sampleProjDir, 'b1', 'b2', 'b3')
-    @loader = util.makeLoader()
-    should.exist @loader
+    @retriever = util.makeRetriever()
+    should.exist @retriever
 
   it "should have correct 'projRoot'", (done) ->
-    should.exist @loader.projRoot
-    @loader.projRoot.should.eql sampleProjDir
+    should.exist @retriever.projRoot
+    @retriever.projRoot.should.eql sampleProjDir
     done()
 
   it "should construct correct project-relative paths", (done) ->
-    @loader.rel().should.eql sampleProjDir
-    @loader.rel('b1').should.eql path.join(sampleProjDir, 'b1')
-    @loader.rel('b1', 'b2').should.eql path.join(sampleProjDir, 'b1', 'b2')
+    @retriever.rel().should.eql sampleProjDir
+    @retriever.rel('b1').should.eql path.join(sampleProjDir, 'b1')
+    @retriever.rel('b1', 'b2').should.eql path.join(sampleProjDir, 'b1', 'b2')
     done()
 
   it 'should load project-relative modules', (done) ->
-    fake = @loader.load 'node_modules/axiom-fake'
+    fake = @retriever.retrieve 'node_modules/axiom-fake'
     should.exist fake
     done()
 
   it 'should load project-relative Axiom extensions', (done) ->
-    fake = @loader.loadExtension 'fake'
+    fake = @retriever.retrieveExtension 'fake'
     should.exist fake
     done()
