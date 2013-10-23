@@ -9,8 +9,10 @@ async = require 'async'
 _ = require 'lodash'
 
 bus = require './bus'
-{makeLoader} = require './util'
+{makeRetriever} = require './util'
 
+
+retriever = makeRetriever()
 
 getAxiomModules = (config) ->
   config or= {}
@@ -44,13 +46,13 @@ core =
   # a place to record what responders we have attached
   responders: {}
 
-  init: (config, modules, loader) ->
+  init: (config, modules, retriever) ->
     core.reset()
     modules or= []
-    core.loader = loader
+    core.retriever = retriever
 
     # Attempt to load a global 'Axiom.*' file from the project root
-    _.merge core.config, core.loader.load('Axiom')
+    _.merge core.config, core.retriever.retrieve('Axiom')
 
     # Merge in any programatically-passed config object
     _.merge core.config, config
@@ -58,7 +60,7 @@ core =
     core.modules = _.union core.modules, modules
 
     # Load the 'axiom-base'
-    core.load 'base', core.loader.loadExtension 'base'
+    core.load 'base', core.retriever.retrieveExtension 'base'
 
     # Require each axiom module.
     # Pass to load.
@@ -66,7 +68,7 @@ core =
       # In case we have passed in a blacklisted module
       continue if moduleName in core.config.blacklist
 
-      core.load moduleName, core.loader.loadExtension(moduleName)
+      core.load moduleName, core.retriever.retrieveExtension(moduleName)
 
   reset: ->
     core.responders = {}
@@ -78,7 +80,7 @@ core =
     config or= {}
 
     # Merge config overrides from '<projectRoot>/axiom/<moduleName>'
-    _.merge config, core.loader.load('axiom', moduleName)
+    _.merge config, core.retriever.retrieve('axiom', moduleName)
 
     # Initialize the services using a project-relative 'lib' resolver
     services = law.create {services: module.services}

@@ -3,11 +3,11 @@ mockery = require 'mockery'
 
 core = require '../lib/core'
 sample = require '../sample/sample'
-{makeLoader} = require '../lib/util'
+{makeRetriever} = require '../lib/util'
 
 describe 'core.init', ->
   beforeEach ->
-    @loader = makeLoader()
+    @loader = makeRetriever()
 
     mockery.enable
       warnOnReplace: false,
