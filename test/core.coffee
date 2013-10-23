@@ -8,7 +8,6 @@ logger = require 'torch'
 mockery = require 'mockery'
 bus = require '../lib/bus'
 core = require '../lib/core'
-{makeRetriever} = require '../lib/util'
 
 
 describe 'core.request', ->
@@ -29,7 +28,7 @@ describe 'core.request', ->
           next null, {message: 'axiom-base'}
     }
 
-    core.init {timeout: 20}, {}, makeRetriever()
+    core.init {timeout: 20}
     @moduleName = 'server'
     @serviceName = 'start'
     @channel = "#{@moduleName}.#{@serviceName}"
@@ -113,7 +112,7 @@ describe 'core.response', ->
   beforeEach (done) ->
     mockery.enable()
 
-    core.init {}, {}, makeRetriever()
+    core.init()
     @channel = 'testChannel'
     @data =
       x: 2
@@ -148,7 +147,7 @@ describe 'core.delegate', ->
 
   beforeEach (done) ->
     mockery.enable()
-    core.init {timeout: 20}, {}, makeRetriever()
+    core.init {timeout: 20}
     done()
 
   it 'should should return if there are no responders', (done) ->
@@ -269,7 +268,7 @@ describe 'core.listen', ->
   beforeEach (done) ->
     mockery.enable()
 
-    core.init {timeout: 20}, {}, makeRetriever()
+    core.init {timeout: 20}
     @channelA = 'testChannelA'
     @channelB = 'testChannelB'
     @dataA =

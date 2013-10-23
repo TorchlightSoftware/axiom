@@ -2,24 +2,25 @@ should = require 'should'
 mockery = require 'mockery'
 
 core = require '../lib/core'
+
 sample = require '../sample/sample'
-{makeRetriever} = require '../lib/util'
+
 
 describe 'core.init', ->
   beforeEach ->
-    @loader = makeRetriever()
+    @retriever = require '../lib/retriever'
 
     mockery.enable
       warnOnReplace: false,
       warnOnUnregistered: false
 
-    mockery.registerMock @loader.rel('node_modules', 'axiom-base'), {
+    mockery.registerMock @retriever.rel('node_modules', 'axiom-base'), {
       services:
         runtime: (args, next) ->
           next null, {message: 'axiom-base'}
     }
-    prefix = @loader.rel 'node_modules', 'axiom-sample'
-    mockery.registerMock @loader.rel('node_modules', 'axiom-sample'), sample
+    prefix = @retriever.rel 'node_modules', 'axiom-sample'
+    mockery.registerMock @retriever.rel('node_modules', 'axiom-sample'), sample
 
   afterEach ->
     core.reset()
@@ -29,7 +30,7 @@ describe 'core.init', ->
     core.reset()
 
   it 'should load axiom-base', (done) ->
-    core.init {}, {}, @loader
+    core.init()
 
     core.request 'base.runtime', {}, (err, result) ->
       should.not.exist err
@@ -39,7 +40,7 @@ describe 'core.init', ->
 
   it 'should dynamically load a module based on name', (done) ->
     data = {greeting: 'hello!'}
-    core.init {}, ['sample'], @loader
+    core.init {}, ['sample']
 
     core.request 'sample.echo', data, (err, result) ->
       should.not.exist err
@@ -48,7 +49,7 @@ describe 'core.init', ->
       done()
 
   it 'should not init a module that is blacklisted', (done) ->
-    core.init {blacklist: ['sample']}, ['sample'], @loader
+    core.init {blacklist: ['sample']}, ['sample']
 
     core.request 'sample.echo', {greeting: 'hello!'}, (err, result) ->
       should.exist err
