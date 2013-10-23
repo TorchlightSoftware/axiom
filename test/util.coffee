@@ -25,21 +25,30 @@ describe 'util.findProjRoot', ->
     root.should.eql sampleProjDir
     done()
 
-describe 'util.projRel', ->
-  it "should return the project root when relative path is '.'", (done) ->
-    process.chdir path.join(sampleProjDir, 'b1', 'b2', 'b3')
-    projRoot = util.findProjRoot()
 
-    relPath = util.projRel '.'
-    relPath.should.eql projRoot
+describe 'util.makeLoader', ->
+  beforeEach ->
+    process.chdir path.join(sampleProjDir, 'b1', 'b2', 'b3')
+    @loader = util.makeLoader()
+    should.exist @loader
+
+  it "should have correct 'projRoot'", (done) ->
+    should.exist @loader.projRoot
+    @loader.projRoot.should.eql sampleProjDir
     done()
 
-  it 'should return the right relative path', (done) ->
-    process.chdir path.join(sampleProjDir, 'b1', 'b2', 'b3')
-    projRoot = util.findProjRoot()
+  it "should construct correct project-relative paths", (done) ->
+    @loader.rel().should.eql sampleProjDir
+    @loader.rel('b1').should.eql path.join(sampleProjDir, 'b1')
+    @loader.rel('b1', 'b2').should.eql path.join(sampleProjDir, 'b1', 'b2')
+    done()
 
-    subPath = 'someplace'
-    expected = path.join(projRoot, subPath)
-    util.projRel(subPath).should.eql expected
+  it 'should load project-relative modules', (done) ->
+    fake = @loader.load 'node_modules/axiom-fake'
+    should.exist fake
+    done()
 
+  it 'should load project-relative Axiom extensions', (done) ->
+    fake = @loader.loadExtension 'fake'
+    should.exist fake
     done()
