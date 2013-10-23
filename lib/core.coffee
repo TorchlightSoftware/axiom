@@ -9,7 +9,8 @@ async = require 'async'
 _ = require 'lodash'
 
 bus = require './bus'
-util = require './util'
+{makeLoader} = require './util'
+
 
 getAxiomModules = (config) ->
   config or= {}
@@ -33,7 +34,6 @@ getAxiomModules = (config) ->
 
   return axiomModules
 
-
 core =
   modules: getAxiomModules()
 
@@ -44,42 +44,29 @@ core =
   # a place to record what responders we have attached
   responders: {}
 
-  init: (config, modules) ->
-
-    requireModule = (moduleName) ->
-      # Get a project directory-relative path for the axiom module's
-      # corresponding NPM module.
-      npmName = "axiom-#{moduleName}"
-      npmModuleName = util.projRel path.join('node_modules', npmName)
-      return require npmModuleName
-
+  init: (config, modules, loader) ->
     core.reset()
     modules or= []
+    core.loader = loader
 
     # Attempt to load a global 'Axiom.*' file from the project root
-    try
-      axiomFile = require util.projRel 'Axiom'
-      _.merge core.config, axiomFile
-    catch err
-      throw err unless err.code is 'MODULE_NOT_FOUND'
+    _.merge core.config, core.loader.load('Axiom')
 
     # Merge in any programatically-passed config object
     _.merge core.config, config
 
     core.modules = _.union core.modules, modules
 
-    # Require and load axiom-base
-    base = requireModule 'base'
-    core.load 'base', base
+    # Load the 'axiom-base'
+    core.load 'base', core.loader.loadExtension 'base'
 
     # Require each axiom module.
     # Pass to load.
-    #logger.magenta 'loading modules:', core.modules
     for moduleName in core.modules
       # In case we have passed in a blacklisted module
       continue if moduleName in core.config.blacklist
 
-      core.load moduleName, requireModule moduleName
+      core.load moduleName, core.loader.loadExtension(moduleName)
 
   reset: ->
     core.responders = {}
@@ -89,13 +76,9 @@ core =
   load: (moduleName, module) ->
     {config} = module
     config or= {}
-    # Merge config overrides from '$projectRoot/axiom/<moduleName>'
-    overrideConfigPath = path.join util.projRel('axiom'), moduleName
-    try
-      overrideConfig = require overrideConfigPath
-      _.merge config, overrideConfig
-    catch err
-      throw err unless err.code is 'MODULE_NOT_FOUND'
+
+    # Merge config overrides from '<projectRoot>/axiom/<moduleName>'
+    _.merge config, core.loader.load('axiom', moduleName)
 
     # Initialize the services using a project-relative 'lib' resolver
     services = law.create {services: module.services}
@@ -129,7 +112,6 @@ core =
               axiom: core
             }, done
 
-    #logger.blue "load '#{moduleName}' found services:", services
     for serviceName, serviceDef of services
       # attach a responder for each service definition
       core.respond "#{moduleName}.#{serviceName}", serviceDef
@@ -370,6 +352,5 @@ core =
   # for sending interrupts
   signal: (channel, data) ->
 
-  util: require './util'
 
 module.exports = core
