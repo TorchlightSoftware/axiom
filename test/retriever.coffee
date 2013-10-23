@@ -2,6 +2,9 @@ path = require 'path'
 
 should = require 'should'
 
+{findProjRoot} = require '../lib/util'
+
+
 testDir = __dirname
 projDir = path.dirname testDir
 sampleDir = path.join projDir, 'sample'
@@ -12,6 +15,7 @@ describe 'retriever', ->
   beforeEach ->
     process.chdir path.join(sampleProjDir, 'b1', 'b2', 'b3')
     @retriever = require '../lib/retriever'
+    @retriever.projRoot = findProjRoot()
 
   it "should have correct 'projRoot'", (done) ->
     should.exist @retriever.projRoot
