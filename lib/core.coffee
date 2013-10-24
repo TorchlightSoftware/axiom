@@ -19,6 +19,8 @@ getAxiomModules = (config) ->
   # Grab the project's 'package.json' as an object
   packageJson = retriever.retrieve 'package'
 
+  return [] unless packageJson.dependencies
+
   # Extract the NPM module names of the 'dependencies'
   dependencies = Object.keys packageJson.dependencies
 
@@ -58,7 +60,8 @@ core =
     core.modules = _.union core.modules, modules
 
     # Load the 'axiom-base'
-    core.load 'base', retriever.retrieveExtension 'base'
+    unless 'base' in core.modules
+      core.load 'base', retriever.retrieveExtension 'base'
 
     # Require each axiom module.
     # Pass to load.
