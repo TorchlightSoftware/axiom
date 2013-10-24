@@ -1,14 +1,27 @@
+path = require 'path'
+
 should = require 'should'
 mockery = require 'mockery'
 
 core = require '../lib/core'
+retriever = require '../lib/retriever'
+util = require '../lib/util'
 
 sample = require '../sample/sample'
 
 
+testDir = __dirname
+projDir = path.dirname testDir
+sampleDir = path.join projDir, 'sample'
+sampleProjDir = path.join sampleDir, 'project'
+
+
 describe 'core.init', ->
   beforeEach ->
+    process.chdir sampleProjDir
+
     @retriever = require '../lib/retriever'
+    @retriever.projRoot = util.findProjRoot()
 
     mockery.enable
       warnOnReplace: false,
@@ -58,3 +71,10 @@ describe 'core.init', ->
       should.not.exist result
 
       done()
+
+  it "should load a global 'Axiom' file from the project root", (done) ->
+    axiomFile = require path.join(sampleProjDir, 'Axiom')
+    should.exist axiomFile
+    core.init {}, {}, @retriever
+    core.config.should.eql axiomFile
+    done()
