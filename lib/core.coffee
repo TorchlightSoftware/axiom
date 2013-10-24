@@ -16,8 +16,8 @@ getAxiomModules = (config) ->
   config or= {}
   {blacklist} = config
 
-  # Grab 'package.json' as an object
-  packageJson = require path.join(__dirname, '..', 'package')
+  # Grab the project's 'package.json' as an object
+  packageJson = retriever.retrieve 'package'
 
   # Extract the NPM module names of the 'dependencies'
   dependencies = Object.keys packageJson.dependencies
@@ -287,7 +287,6 @@ core =
 
   # sends acknowledgement, error, completion to replyTo channels
   respond: (channel, service) ->
-    #logger.blue "attaching responder at:", channel
     responderId = uuid.v1()
 
     callback = (message, envelope) ->
