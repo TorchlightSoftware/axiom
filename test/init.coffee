@@ -2,18 +2,19 @@ path = require 'path'
 
 should = require 'should'
 mockery = require 'mockery'
+_ = require 'lodash'
 
 core = require '../lib/core'
 retriever = require '../lib/retriever'
 util = require '../lib/util'
-
-sample = require '../sample/sample'
 
 
 testDir = __dirname
 projDir = path.dirname testDir
 sampleDir = path.join projDir, 'sample'
 sampleProjDir = path.join sampleDir, 'project'
+
+sample = require path.join(sampleDir, 'sample')
 
 
 describe 'core.init', ->
@@ -78,3 +79,21 @@ describe 'core.init', ->
     core.init {}, {}, @retriever
     core.config.should.eql axiomFile
     done()
+
+  it "should assume an 'axiom' folder containing config overrides", (done) ->
+    core.init {}, ['sample'], @retriever
+    defaultSampleConfig = sample.config.whatsMyContext
+    should.exist defaultSampleConfig
+
+    overrideConfigPath = path.join sampleProjDir, 'axiom', 'sample'
+    overrideConfig = require(overrideConfigPath).whatsMyContext
+    should.exist overrideConfig
+
+    expectedConfig = _.merge {}, defaultSampleConfig, overrideConfig
+
+    core.request 'sample.whatsMyContext', {}, (err, result) ->
+      should.not.exist err
+      should.exist result
+
+      result.should.eql expectedConfig
+      done()

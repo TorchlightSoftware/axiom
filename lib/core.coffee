@@ -77,8 +77,7 @@ core =
     bus.utils.reset()
 
   load: (moduleName, module) ->
-    {config} = module
-    config or= {}
+    config = _.merge {}, module.config
 
     # Merge config overrides from '<projectRoot>/axiom/<moduleName>'
     _.merge config, retriever.retrieve('axiom', moduleName)
