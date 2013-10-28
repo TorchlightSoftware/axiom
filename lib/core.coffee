@@ -95,6 +95,7 @@ core =
         contexts[namespace] = {
           config: config[namespace]
           axiom: core
+          util: {retriever}
         }
 
       services[name] = def.bind contexts[namespace]
