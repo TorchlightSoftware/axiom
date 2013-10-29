@@ -18,7 +18,7 @@ describe 'core.request', ->
 
     mockery.registerAllowables [
       join(__dirname, '..', 'package')
-      join(__dirname, '..', 'Axiom')
+      join(__dirname, '..', 'axiom')
       join(__dirname, '..', 'axiom', 'base')
     ]
 
