@@ -82,18 +82,34 @@ describe 'core.init', ->
 
   it "should assume an 'axiom' folder containing config overrides", (done) ->
     core.init {}, ['sample'], @retriever
+
+    # Given an extension ('sample') with a default config for a namespace
+    # of a service ('whatsMyContext') which returns its '@config'
     defaultSampleConfig = sample.config.whatsMyContext
     should.exist defaultSampleConfig
 
+    # And an override config for the overall extension ('sample')
+    # within an 'axiom' folder in the project root
     overrideConfigPath = path.join sampleProjDir, 'axiom', 'sample'
+
+    # And the specific config subsection for the namespace of interest
     overrideConfig = require(overrideConfigPath).whatsMyContext
     should.exist overrideConfig
 
+    # And an overall expectation of what the overall namespace config
+    # should look like once the defaults have been overridden
     expectedConfig = _.merge {}, defaultSampleConfig, overrideConfig
 
+    # When the service is called
     core.request 'sample.whatsMyContext', {}, (err, result) ->
       should.not.exist err
+
+      # Given that it has returned the result, which is simply the
+      # value of '@config' within the service's context
       should.exist result
 
+      # The result ('@config') should be equal to the default namespace
+      # config, with the overrides merged over it.
       result.should.eql expectedConfig
+
       done()
