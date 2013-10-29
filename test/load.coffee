@@ -143,21 +143,3 @@ describe 'core.load', ->
     core.request "server.run/prepare", {}, (err, result) ->
       should.not.exist err
       core.request "server.test/prepare", {}, done
-
-  it "should expose a retriever in 'util'", (done) ->
-    {findProjRoot} = require '../lib/util'
-    should.exist findProjRoot
-    expectedProjRoot = findProjRoot()
-
-    server =
-      services:
-        "run/prepare": (args, fin) ->
-          should.exist @util
-          should.exist @util.retriever
-          @util.retriever.projRoot.should.eql expectedProjRoot
-          fin()
-
-    core.load "server", server
-    core.request "server.run/prepare", {}, (err, result) ->
-      should.not.exist err
-      done()

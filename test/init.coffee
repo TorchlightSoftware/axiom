@@ -8,7 +8,6 @@ core = require '../lib/core'
 retriever = require '../lib/retriever'
 util = require '../lib/util'
 
-
 testDir = __dirname
 projDir = path.dirname testDir
 sampleDir = path.join projDir, 'sample'
@@ -112,4 +111,65 @@ describe 'core.init', ->
       # config, with the overrides merged over it.
       result.should.eql expectedConfig
 
+      done()
+
+  it "should default to exposing a cloned 'retriever' in 'util'", (done) ->
+    # Given a clone of the global retriever
+    expectedRetriever = _.clone retriever
+
+    # And a service which asserts
+    server =
+      services:
+        "run/prepare": (args, fin) ->
+          # That a 'retriever' exists in the '@util' context
+          should.exist @util
+          should.exist @util.retriever
+
+          # And that it is equal to a clone of the default 'retriever'
+          @util.retriever.should.eql retriever
+          fin()
+
+    # When we initialize 'core' without injecting a 'retriever'
+    core.init()
+    core.load "server", server
+
+    # And the service called
+    core.request "server.run/prepare", {}, (err, result) ->
+      # It should return without its assertions failing
+      should.not.exist err
+      done()
+
+  it "should expose a clone of an injected 'retriever' in 'util'", (done) ->
+
+    # Given a test 'retriever' with a distinct 'projRoot'
+    testRetriever = _.clone retriever
+    testRetriever.projRoot = '/this/is/fake'
+    should.exist testRetriever
+
+    # That has been injected into Axiom core
+    core.init {}, {}, testRetriever
+
+    # And a service which...
+    server =
+      services:
+        "run/prepare": (args, fin) ->
+          should.exist @util
+          should.exist @util.retriever
+
+          # Asserts that the context-exposed 'retriever' is
+          # equal to the injected retriever ('testRetriever')
+          @util.retriever.should.eql testRetriever
+
+          # And assert that the exposed 'retriever' is not
+          # equal to the default 'retriever'
+          @util.retriever.should.not.eql retriever
+
+          fin()
+
+    core.load "server", server
+
+    # When the service is called
+    core.request "server.run/prepare", {}, (err, result) ->
+      # It should return without its assertions failing
+      should.not.exist err
       done()

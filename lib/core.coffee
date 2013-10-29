@@ -9,7 +9,7 @@ async = require 'async'
 _ = require 'lodash'
 
 bus = require './bus'
-retriever = require './retriever'
+retriever = _.clone require('./retriever')
 
 
 getAxiomModules = (config) ->
@@ -49,7 +49,7 @@ core =
   init: (config, modules, _retriever) ->
     core.reset()
     modules or= []
-    retriever ?= _retriever
+    retriever = _retriever if _retriever?
 
     # Attempt to load a global 'axiom.*' file from the project root
     _.merge core.config, retriever.retrieve('axiom')
@@ -74,6 +74,7 @@ core =
   reset: ->
     core.responders = {}
     core.modules = getAxiomModules()
+    core.retriever = _.clone require('./retriever')
     bus.utils.reset()
 
   load: (moduleName, module) ->

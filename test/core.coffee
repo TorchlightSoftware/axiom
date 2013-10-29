@@ -17,6 +17,7 @@ describe 'core.request', ->
       warnOnUnregistered: false
 
     mockery.registerAllowables [
+      './retriever'
       join(__dirname, '..', 'package')
       join(__dirname, '..', 'axiom')
       join(__dirname, '..', 'axiom', 'base')
