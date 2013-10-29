@@ -1,6 +1,6 @@
 {
   "name":"axiom",
-  "description":"Environment setup/runtime for single page applications.",
+  "description":"Environment setup/runtime standardization for Node.js applications.",
   "version":"0.0.5",
   "homepage":"http://github.com/TorchlightSoftware/axiom",
   "repository":"git://github.com/TorchlightSoftware/axiom.git",
