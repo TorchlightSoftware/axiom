@@ -51,8 +51,8 @@ core =
     modules or= []
     retriever ?= _retriever
 
-    # Attempt to load a global 'Axiom.*' file from the project root
-    _.merge core.config, retriever.retrieve('Axiom')
+    # Attempt to load a global 'axiom.*' file from the project root
+    _.merge core.config, retriever.retrieve('axiom')
 
     # Merge in any programatically-passed config object
     _.merge core.config, config

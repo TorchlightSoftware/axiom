@@ -73,8 +73,8 @@ describe 'core.init', ->
 
       done()
 
-  it "should load a global 'Axiom' file from the project root", (done) ->
-    axiomFile = require path.join(sampleProjDir, 'Axiom')
+  it "should load a global 'axiom' file from the project root", (done) ->
+    axiomFile = require path.join(sampleProjDir, 'axiom')
     should.exist axiomFile
     core.init {}, {}, @retriever
     core.config.should.eql axiomFile
