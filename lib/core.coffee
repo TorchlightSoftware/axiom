@@ -9,6 +9,7 @@ async = require 'async'
 _ = require 'lodash'
 
 bus = require './bus'
+# Clone a copy of the global default 'retriever'
 retriever = _.clone require('./retriever')
 
 
@@ -49,6 +50,9 @@ core =
   init: (config, modules, _retriever) ->
     core.reset()
     modules or= []
+
+    # Mutate our closure-captured './retriever' clone with an
+    # injected '_retriever', if it exists
     retriever = _retriever if _retriever?
 
     # Attempt to load a global 'axiom.*' file from the project root
@@ -74,7 +78,12 @@ core =
   reset: ->
     core.responders = {}
     core.modules = getAxiomModules()
+
+    # Re-clone the global './retriever' and use it to reset the closure-
+    # -captured 'retriever' reference for a clean slate, in case a
+    # '_retriever' had been injected upon the previous call to 'init'.
     core.retriever = _.clone require('./retriever')
+
     bus.utils.reset()
 
   load: (moduleName, module) ->
