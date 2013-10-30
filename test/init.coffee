@@ -141,26 +141,26 @@ describe 'core.init', ->
 
   it "should expose a clone of an injected 'retriever' in 'util'", (done) ->
 
-    # Given a test 'retriever' with a distinct 'projRoot'
-    testRetriever = _.clone retriever
-    testRetriever.projRoot = '/this/is/fake'
-    should.exist testRetriever
+    # Given a mock test 'retriever'
+    mockRetriever =
+      retrieve: (name...) -> {}
+      retrieveExtension: (name...) -> {}
 
     # That has been injected into Axiom core
-    core.init {}, {}, testRetriever
+    core.init {}, {}, mockRetriever
 
-    # And a service which...
+    # And a service which asserts
     server =
       services:
         "run/prepare": (args, fin) ->
           should.exist @util
           should.exist @util.retriever
 
-          # Asserts that the context-exposed 'retriever' is
-          # equal to the injected retriever ('testRetriever')
-          @util.retriever.should.eql testRetriever
+          # That the context-exposed 'retriever' is equal
+          # to the injected retriever ('mockRetriever')
+          @util.retriever.should.eql mockRetriever
 
-          # And assert that the exposed 'retriever' is not
+          # And that the exposed 'retriever' is not
           # equal to the default 'retriever'
           @util.retriever.should.not.eql retriever
 
