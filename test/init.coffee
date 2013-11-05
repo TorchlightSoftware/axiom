@@ -3,10 +3,10 @@ path = require 'path'
 should = require 'should'
 mockery = require 'mockery'
 _ = require 'lodash'
+logger = require 'torch'
 
 core = require '../lib/core'
-retriever = require '../lib/retriever'
-util = require '../lib/util'
+findProjectRoot = require '../lib/findProjectRoot'
 
 testDir = __dirname
 projDir = path.dirname testDir
@@ -20,8 +20,8 @@ describe 'core.init', ->
   beforeEach ->
     process.chdir sampleProjDir
 
-    @retriever = require '../lib/retriever'
-    @retriever.projRoot = util.findProjRoot()
+    @retriever = _.clone require '../lib/retriever'
+    @retriever.projectRoot = findProjectRoot(process.cwd())
 
     mockery.enable
       warnOnReplace: false,
@@ -82,94 +82,80 @@ describe 'core.init', ->
   it "should assume an 'axiom' folder containing config overrides", (done) ->
     core.init {}, ['sample'], @retriever
 
-    # Given an extension ('sample') with a default config for a namespace
-    # of a service ('whatsMyContext') which returns its '@config'
+    # Given an extension with a service and corresponding config entry
     defaultSampleConfig = sample.config.whatsMyContext
     should.exist defaultSampleConfig
 
-    # And an override config for the overall extension ('sample')
-    # within an 'axiom' folder in the project root
+    # And a config override in the local project
     overrideConfigPath = path.join sampleProjDir, 'axiom', 'sample'
-
-    # And the specific config subsection for the namespace of interest
     overrideConfig = require(overrideConfigPath).whatsMyContext
     should.exist overrideConfig
 
-    # And an overall expectation of what the overall namespace config
-    # should look like once the defaults have been overridden
     expectedConfig = _.merge {}, defaultSampleConfig, overrideConfig
 
     # When the service is called
-    core.request 'sample.whatsMyContext', {}, (err, result) ->
+    core.request 'sample.whatsMyContext', {}, (err, config) ->
       should.not.exist err
 
-      # Given that it has returned the result, which is simply the
-      # value of '@config' within the service's context
-      should.exist result
-
-      # The result ('@config') should be equal to the default namespace
-      # config, with the overrides merged over it.
-      result.should.eql expectedConfig
+      # Then the resulting @config should be the default merged with the override
+      should.exist config
+      config.should.eql expectedConfig
 
       done()
 
-  it "should default to exposing a cloned 'retriever' in 'util'", (done) ->
-    # Given a clone of the global retriever
-    expectedRetriever = _.clone retriever
+  it "'retriever' in 'util' should be default instance", (done) ->
+    defaultRetriever = @retriever
 
-    # And a service which asserts
+    # Given a service
     server =
       services:
         "run/prepare": (args, fin) ->
-          # That a 'retriever' exists in the '@util' context
-          should.exist @util
-          should.exist @util.retriever
 
-          # And that it is equal to a clone of the default 'retriever'
-          @util.retriever.should.eql retriever
+          # Then the retriever should include the default 'retriever'
+          should.exist @util
+          @util.should.include defaultRetriever
           fin()
 
-    # When we initialize 'core' without injecting a 'retriever'
+    # When core is initialized without injecting a 'retriever'
     core.init()
     core.load "server", server
 
-    # And the service called
+    # And the service is called
     core.request "server.run/prepare", {}, (err, result) ->
-      # It should return without its assertions failing
       should.not.exist err
       done()
 
-  it "should expose a clone of an injected 'retriever' in 'util'", (done) ->
+  it "should expose an injected 'retriever' in 'util'", (done) ->
+    defaultRetriever = @retriever
 
     # Given a mock test 'retriever'
     mockRetriever =
       retrieve: (name...) -> {}
       retrieveExtension: (name...) -> {}
 
-    # That has been injected into Axiom core
-    core.init {}, {}, mockRetriever
-
-    # And a service which asserts
+    # And a test service
     server =
       services:
         "run/prepare": (args, fin) ->
           should.exist @util
-          should.exist @util.retriever
 
-          # That the context-exposed 'retriever' is equal
-          # to the injected retriever ('mockRetriever')
-          @util.retriever.should.eql mockRetriever
+          # Then @util should include the mock retriever
+          @util.should.include mockRetriever
 
-          # And that the exposed 'retriever' is not
-          # equal to the default 'retriever'
-          @util.retriever.should.not.eql retriever
+          # And not the default retriever
+          @util.should.not.include defaultRetriever
 
           fin()
 
+    # When core is initialized with the mock retriever
+    core.init {}, {}, mockRetriever
+
+    # And the service is loaded
     core.load "server", server
 
-    # When the service is called
+    # And the service is called
     core.request "server.run/prepare", {}, (err, result) ->
+
       # It should return without its assertions failing
       should.not.exist err
       done()

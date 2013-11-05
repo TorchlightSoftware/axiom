@@ -9,63 +9,37 @@ async = require 'async'
 _ = require 'lodash'
 
 bus = require './bus'
-# Clone a copy of the global default 'retriever'
-retriever = _.clone require('./retriever')
-
-
-getAxiomModules = (config) ->
-  config or= {}
-  {blacklist} = config
-
-  # Grab the project's 'package.json' as an object
-  packageJson = retriever.retrieve 'package'
-
-  return [] unless packageJson.dependencies
-
-  # Extract the NPM module names of the 'dependencies'
-  dependencies = Object.keys packageJson.dependencies
-
-  # Filter out non-axiom NPM modules
-  axiomNpmModules = dependencies.filter (dep) -> /^axiom-\S\S*/.test dep
-
-  # Remove the 'axiom-' prefix
-  axiomModules = axiomNpmModules.map (m) -> m.slice('axiom-'.length)
-
-  # We only want the axiom modules not blacklisted, so take the
-  # set difference of 'axiomModules' \ 'blacklist'.
-  axiomModules = _.difference axiomModules, blacklist
-
-  return axiomModules
+getAxiomModules = require './getAxiomModules'
 
 core =
-  modules: getAxiomModules()
+  modules: []
 
-  config:
-    blacklist: []
-    timeout: 2000
+  config: {}
 
   # a place to record what responders we have attached
   responders: {}
 
-  init: (config, modules, _retriever) ->
+  init: (config, modules, retriever) ->
     core.reset()
     modules or= []
-
-    # Mutate our closure-captured './retriever' clone with an
-    # injected '_retriever', if it exists
-    retriever = _retriever if _retriever?
+    core.retriever = retriever or require('./retriever')
 
     # Attempt to load a global 'axiom.*' file from the project root
-    _.merge core.config, retriever.retrieve('axiom')
+    try
+      _.merge core.config, core.retriever.retrieve('axiom')
 
     # Merge in any programatically-passed config object
     _.merge core.config, config
 
+
+    # find and load modules
+    pkg = core.retriever.retrieve('package')
+    core.modules = getAxiomModules(pkg, core.config.blacklist)
     core.modules = _.union core.modules, modules
 
     # Load the 'axiom-base'
     unless 'base' in core.modules
-      core.load 'base', retriever.retrieveExtension 'base'
+      core.load 'base', core.retriever.retrieveExtension 'base'
 
     # Require each axiom module.
     # Pass to load.
@@ -73,24 +47,26 @@ core =
       # In case we have passed in a blacklisted module
       continue if moduleName in core.config.blacklist
 
-      core.load moduleName, retriever.retrieveExtension(moduleName)
+      moduleDef = core.retriever.retrieveExtension(moduleName)
+      #logger.cyan 'about to load:', {moduleName, moduleDef}
+      core.load moduleName, moduleDef
 
   reset: ->
     core.responders = {}
-    core.modules = getAxiomModules()
-
-    # Re-clone the global './retriever' and use it to reset the closure-
-    # -captured 'retriever' reference for a clean slate, in case a
-    # '_retriever' had been injected upon the previous call to 'init'.
-    core.retriever = _.clone require('./retriever')
+    core.modules = []
+    core.config =
+      blacklist: []
+      timeout: 2000
 
     bus.utils.reset()
 
   load: (moduleName, module) ->
-    config = _.merge {}, module.config
+    #logger.yellow 'loading:', {moduleName, module}
+    config = _.merge {}, (module.config or {})
 
     # Merge config overrides from '<projectRoot>/axiom/<moduleName>'
-    _.merge config, retriever.retrieve('axiom', moduleName)
+    try
+      _.merge config, core.retriever.retrieve('axiom', moduleName)
 
     # Initialize the services using a project-relative 'lib' resolver
     services = law.create {services: module.services}
@@ -105,7 +81,7 @@ core =
         contexts[namespace] = {
           config: config[namespace]
           axiom: core
-          util: {retriever}
+          util: _.merge {}, core.retriever
         }
 
       services[name] = def.bind contexts[namespace]

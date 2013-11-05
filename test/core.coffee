@@ -5,31 +5,15 @@ logger = require 'torch'
 {focus} = require 'qi'
 {join} = require 'path'
 
-mockery = require 'mockery'
 bus = require '../lib/bus'
 core = require '../lib/core'
 
+mockRetriever = require './helpers/mockRetriever'
 
 describe 'core.request', ->
   beforeEach (done) ->
-    mockery.enable
-      warnOnReplace: false,
-      warnOnUnregistered: false
 
-    mockery.registerAllowables [
-      './retriever'
-      join(__dirname, '..', 'package')
-      join(__dirname, '..', 'axiom')
-      join(__dirname, '..', 'axiom', 'base')
-    ]
-
-    mockery.registerMock "#{process.cwd()}/node_modules/axiom-base", {
-      services:
-        runtime: (args, next) ->
-          next null, {message: 'axiom-base'}
-    }
-
-    core.init {timeout: 20}
+    core.init {timeout: 20}, null, mockRetriever()
     @moduleName = 'server'
     @serviceName = 'start'
     @channel = "#{@moduleName}.#{@serviceName}"
@@ -41,7 +25,6 @@ describe 'core.request', ->
 
   afterEach ->
     core.reset()
-    mockery.disable()
 
   it 'should receive exactly one valid response', (done) ->
     core.respond @channel, (message, done) ->
@@ -111,9 +94,8 @@ describe 'core.response', ->
     core.reset()
 
   beforeEach (done) ->
-    mockery.enable()
 
-    core.init()
+    core.init {timeout: 20}, null, mockRetriever()
     @channel = 'testChannel'
     @data =
       x: 2
@@ -147,8 +129,7 @@ describe 'core.delegate', ->
     core.reset()
 
   beforeEach (done) ->
-    mockery.enable()
-    core.init {timeout: 20}
+    core.init {timeout: 20}, null, mockRetriever()
     done()
 
   it 'should should return if there are no responders', (done) ->
@@ -264,12 +245,10 @@ describe 'core.delegate', ->
 describe 'core.listen', ->
   afterEach ->
     core.reset()
-    mockery.disable()
 
   beforeEach (done) ->
-    mockery.enable()
 
-    core.init {timeout: 20}
+    core.init {timeout: 20}, null, mockRetriever()
     @channelA = 'testChannelA'
     @channelB = 'testChannelB'
     @dataA =
