@@ -10,60 +10,49 @@ _ = require 'lodash'
 
 bus = require './bus'
 getAxiomModules = require './getAxiomModules'
+internal = require './core/internal'
+
 
 core =
-  modules: []
-
-  config: {}
-
-  # A place to record what responders we have attached
-  responders: {}
-
   init: (config, retriever) ->
     core.reset()
     modules = config?.modules or []
-    core.retriever = retriever or require('./retriever')
+    internal.retriever = retriever or require('./retriever')
 
     # Attempt to load a global 'axiom.*' file from the project root
     try
-      _.merge core.config, core.retriever.retrieve('axiom')
+      _.merge internal.config, internal.retriever.retrieve('axiom')
 
     # Merge in any programatically-passed config object
-    _.merge core.config, config
+    _.merge internal.config, config
 
     # Find and load modules
-    pkg = core.retriever.retrieve('package')
-    core.modules = getAxiomModules(pkg, core.config.blacklist)
-    core.modules = _.union core.modules, modules
+    pkg = internal.retriever.retrieve('package')
+    internal.modules = getAxiomModules(pkg, internal.config.blacklist)
+    internal.modules = _.union internal.modules, modules
 
     # Load the 'axiom-base'
-    unless 'base' in core.modules
-      core.load 'base', core.retriever.retrieveExtension 'base'
+    unless 'base' in internal.modules
+      core.load 'base', internal.retriever.retrieveExtension 'base'
 
     # Require each axiom module.
     # Pass to load.
-    for moduleName in core.modules
+    for moduleName in internal.modules
       # In case we have passed in a blacklisted module
-      continue if moduleName in core.config.blacklist
+      continue if moduleName in internal.config.blacklist
 
-      moduleDef = core.retriever.retrieveExtension(moduleName)
+      moduleDef = internal.retriever.retrieveExtension(moduleName)
       core.load moduleName, moduleDef
 
   reset: ->
-    core.responders = {}
-    core.modules = []
-    core.config =
-      blacklist: []
-      timeout: 2000
-
-    bus.utils.reset()
+    internal.reset()
 
   load: (moduleName, module) ->
     config = _.merge {}, (module.config or {})
 
     # Merge config overrides from '<projectRoot>/axiom/<moduleName>'
     try
-      _.merge config, core.retriever.retrieve('axiom', moduleName)
+      _.merge config, internal.retriever.retrieve('axiom', moduleName)
 
     # Initialize the services using a project-relative 'lib' resolver
     services = law.create {services: module.services}
@@ -78,7 +67,7 @@ core =
         contexts[namespace] = {
           config: config[namespace]
           axiom: core
-          util: _.merge {}, core.retriever
+          util: _.merge {}, internal.retriever
         }
 
       services[name] = def.bind contexts[namespace]
@@ -117,7 +106,7 @@ core =
   request: (channel, data, done) ->
 
     # How many responders do we have
-    responders = core.responders[channel] or {}
+    responders = internal.responders[channel] or {}
     responderCount = _.keys(responders).length
 
     switch responderCount
@@ -141,7 +130,7 @@ core =
         topic: replyTo.topic.err
         data: err
 
-    timeoutId = timers.setTimeout onTimeout, core.config.timeout
+    timeoutId = timers.setTimeout onTimeout, internal.config.timeout
 
     # Default callback is of signature (message, envelope).
     # Wrap so we can pass a conventional (err, result)-style callback.
@@ -195,7 +184,7 @@ core =
 
     # Get an array of responderId's of listeners from whom we expect
     # some kind of response on this channel.
-    responders = core.responders[channel] or {}
+    responders = internal.responders[channel] or {}
     waitingOn = _.keys responders
 
     # return immediately if we have nothing to do
@@ -212,7 +201,7 @@ core =
 
     # Define an 'onTimeout' callback for when we don't get a response
     # (either error or success) in the configured time.
-    timeout = core.config.timeout
+    timeout = internal.config.timeout
     onTimeout = ->
       waitingOn.map (responderId) ->
         msg = "Responder with id #{responderId} timed out on channel '#{channel}'"
@@ -294,8 +283,8 @@ core =
     callback.responderId = responderId
 
     # Map this 'responderId' to the responder and its metadata
-    core.responders[channel] or= {}
-    core.responders[channel][responderId] =
+    internal.responders[channel] or= {}
+    internal.responders[channel][responderId] =
       callback: callback
 
     # Actually subscribe as a responder

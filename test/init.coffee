@@ -78,10 +78,11 @@ describe 'core.init', ->
       done()
 
   it "should load a global 'axiom' file from the project root", (done) ->
+    internal = require '../lib/core/internal'
     axiomFile = require path.join(sampleProjDir, 'axiom')
     should.exist axiomFile
     core.init @retriever
-    core.config.should.include axiomFile
+    internal.config.should.include axiomFile
     done()
 
   it "should assume an 'axiom' folder containing config overrides", (done) ->
