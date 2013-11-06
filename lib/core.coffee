@@ -335,7 +335,7 @@ core =
         callback err, envelope
 
   # For sending interrupts
-  signal: (channel, data) ->
+  signal: require('./signal')
 
 
 module.exports = core
