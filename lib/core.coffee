@@ -47,57 +47,7 @@ core =
   reset: ->
     internal.reset()
 
-  load: (moduleName, module) ->
-    config = _.merge {}, (module.config or {})
-
-    # Merge config overrides from '<projectRoot>/axiom/<moduleName>'
-    try
-      _.merge config, internal.retriever.retrieve('axiom', moduleName)
-
-    # Initialize the services using a project-relative 'lib' resolver
-    services = law.create {services: module.services}
-
-    contexts = {}
-
-    # Give each service a binding context containing the config.
-    # The context is shared between all services in a namespace.
-    for name, def of services
-      [namespace] = name.split '/'
-      unless contexts[namespace]
-        contexts[namespace] = {
-          config: config[namespace]
-          axiom: core
-          util: _.merge {}, internal.retriever
-        }
-
-      services[name] = def.bind contexts[namespace]
-
-    for serviceName, options of config
-      do (serviceName, options) ->
-        serviceChannel = "#{moduleName}.#{serviceName}"
-
-        if options.base
-          baseChannel = "base.#{options.base}"
-          core.respond serviceChannel, (args, done) ->
-            core.request baseChannel, {
-              moduleName
-              serviceName
-              args
-              config: options
-              axiom: core
-            }, done
-
-    for serviceName, serviceDef of services
-      # Attach a responder for each service definition
-      core.respond "#{moduleName}.#{serviceName}", serviceDef
-
-      # Check the root namespace for this service, and see if we have an alias for it
-      [namespace] = serviceName.split '/'
-      alias = config?[namespace]?.extends
-      if alias
-
-        # attach an aliased responder
-        core.respond "#{alias}.#{serviceName}", serviceDef
+  load: require('./core/load')
 
   # Subscribe to a response address.
   # Publish a message, with a response address in the envelope.
