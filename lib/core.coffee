@@ -326,13 +326,7 @@ core =
     return replyTo
 
   # Just listen
-  listen: (channel, topic, callback) ->
-    sub = bus.subscribe
-      channel: channel
-      topic: topic
-      callback: (data, envelope) ->
-        err = null
-        callback err, envelope
+  listen: require('./core/listen')
 
   # For sending interrupts
   signal: require('./core/signal')
