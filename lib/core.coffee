@@ -16,12 +16,12 @@ core =
 
   config: {}
 
-  # a place to record what responders we have attached
+  # A place to record what responders we have attached
   responders: {}
 
-  init: (config, modules, retriever) ->
+  init: (config, retriever) ->
     core.reset()
-    modules or= []
+    modules = config?.modules or []
     core.retriever = retriever or require('./retriever')
 
     # Attempt to load a global 'axiom.*' file from the project root
@@ -31,8 +31,7 @@ core =
     # Merge in any programatically-passed config object
     _.merge core.config, config
 
-
-    # find and load modules
+    # Find and load modules
     pkg = core.retriever.retrieve('package')
     core.modules = getAxiomModules(pkg, core.config.blacklist)
     core.modules = _.union core.modules, modules
@@ -48,7 +47,6 @@ core =
       continue if moduleName in core.config.blacklist
 
       moduleDef = core.retriever.retrieveExtension(moduleName)
-      #logger.cyan 'about to load:', {moduleName, moduleDef}
       core.load moduleName, moduleDef
 
   reset: ->
@@ -61,7 +59,6 @@ core =
     bus.utils.reset()
 
   load: (moduleName, module) ->
-    #logger.yellow 'loading:', {moduleName, module}
     config = _.merge {}, (module.config or {})
 
     # Merge config overrides from '<projectRoot>/axiom/<moduleName>'
@@ -102,10 +99,10 @@ core =
             }, done
 
     for serviceName, serviceDef of services
-      # attach a responder for each service definition
+      # Attach a responder for each service definition
       core.respond "#{moduleName}.#{serviceName}", serviceDef
 
-      # check the root namespace for this service, and see if we have an alias for it
+      # Check the root namespace for this service, and see if we have an alias for it
       [namespace] = serviceName.split '/'
       alias = config?[namespace]?.extends
       if alias
@@ -119,7 +116,7 @@ core =
   # Time out based on axiom config.
   request: (channel, data, done) ->
 
-    # how many responders do we have
+    # How many responders do we have
     responders = core.responders[channel] or {}
     responderCount = _.keys(responders).length
 
@@ -274,7 +271,7 @@ core =
       callback: callback
     }
 
-  # sends acknowledgement, error, completion to replyTo channels
+  # Sends acknowledgement, error, completion to replyTo channels
   respond: (channel, service) ->
     responderId = uuid.v1()
 
@@ -307,7 +304,7 @@ core =
       topic: 'request.#'
       callback: callback
 
-  # just send the message
+  # Just send the message
   send: (channel, data) ->
     topicId = uuid.v1()
     replyTo =
@@ -328,7 +325,7 @@ core =
 
     return replyTo
 
-  # just listen
+  # Just listen
   listen: (channel, topic, callback) ->
     sub = bus.subscribe
       channel: channel
@@ -337,7 +334,7 @@ core =
         err = null
         callback err, envelope
 
-  # for sending interrupts
+  # For sending interrupts
   signal: (channel, data) ->
 
 

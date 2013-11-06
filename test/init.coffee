@@ -53,7 +53,9 @@ describe 'core.init', ->
 
   it 'should dynamically load a module based on name', (done) ->
     data = {greeting: 'hello!'}
-    core.init {}, ['sample']
+    config =
+      modules: ['sample']
+    core.init config
 
     core.request 'sample.echo', data, (err, result) ->
       should.not.exist err
@@ -62,7 +64,10 @@ describe 'core.init', ->
       done()
 
   it 'should not init a module that is blacklisted', (done) ->
-    core.init {blacklist: ['sample']}, ['sample']
+    config =
+      blacklist: ['sample']
+      modules: ['sample']
+    core.init config
 
     core.request 'sample.echo', {greeting: 'hello!'}, (err, result) ->
       should.exist err
@@ -75,12 +80,12 @@ describe 'core.init', ->
   it "should load a global 'axiom' file from the project root", (done) ->
     axiomFile = require path.join(sampleProjDir, 'axiom')
     should.exist axiomFile
-    core.init {}, {}, @retriever
-    core.config.should.eql axiomFile
+    core.init @retriever
+    core.config.should.include axiomFile
     done()
 
   it "should assume an 'axiom' folder containing config overrides", (done) ->
-    core.init {}, ['sample'], @retriever
+    core.init {modules: ['sample']}, @retriever
 
     # Given an extension with a service and corresponding config entry
     defaultSampleConfig = sample.config.whatsMyContext
@@ -148,7 +153,7 @@ describe 'core.init', ->
           fin()
 
     # When core is initialized with the mock retriever
-    core.init {}, {}, mockRetriever
+    core.init {}, mockRetriever
 
     # And the service is loaded
     core.load "server", server

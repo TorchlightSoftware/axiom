@@ -42,26 +42,31 @@ main = ->
   ]
   args = _.omit parsed.argv, toOmit
 
+  if args?.debug
+    # Listen to any channel for info messages
+    core.listen
+      channel: '#'
+      topic: 'info.#'
+      callback: (err, envelope) ->
+        {timestamp, data} = envelope
+        logger.yellow "[#{timetamp}] #{data}"
+
   # Initialize Axiom, load the module.
   # Default to empty config, but if a config file path is defined
   # in the unix environment, try to load it.
   config = {}
-  configFile = process.env['axiom.config']
-  if fs.existsSync configFile
-    config = JSON.parse fs.readFileSync(configFile, {encoding: 'utf8'})
+  try
+    configPath = process.env['axiom.config']
+    config = require configPath if configPath?
+  catch err
+    throw err unless err.code is 'MODULE_NOT_FOUND'
+    logger.red "Could not load config file from location: #{}"
   modules = []
   modules.push moduleName
 
   core.init config, modules
 
   channel = [moduleName, serviceName].join('.')
-  # Listen to any channel for info messages
-  core.listen
-    channel: '#'
-    topic: 'info.#'
-    callback: (err, envelope) ->
-      {timestamp, data} = envelope
-      logger.yellow "[#{timetamp}] #{data}"
 
   core.request channel, args, (err, results) ->
     if err
@@ -69,21 +74,6 @@ main = ->
     else
       logger.green results
 
-
-if module is require.main
-  # Mock out pre-existing module
-  if process.env['axiom.env'] is 'testing'
-    mockery = require 'mockery'
-    mockery.enable
-      warnOnReplace: false,
-      warnOnUnregistered: false
-
-    mockery.registerMock 'axiom-base',
-      services:
-        echo: (args, next) ->
-          next null, args
-
-  main()
-
+main() if module is require.main
 
 module.exports = main

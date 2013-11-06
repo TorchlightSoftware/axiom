@@ -13,7 +13,7 @@ mockRetriever = require './helpers/mockRetriever'
 describe 'core.request', ->
   beforeEach (done) ->
 
-    core.init {timeout: 20}, null, mockRetriever()
+    core.init {timeout: 20}, mockRetriever()
     @moduleName = 'server'
     @serviceName = 'start'
     @channel = "#{@moduleName}.#{@serviceName}"
@@ -95,7 +95,7 @@ describe 'core.response', ->
 
   beforeEach (done) ->
 
-    core.init {timeout: 20}, null, mockRetriever()
+    core.init {timeout: 20}, mockRetriever()
     @channel = 'testChannel'
     @data =
       x: 2
@@ -129,7 +129,7 @@ describe 'core.delegate', ->
     core.reset()
 
   beforeEach (done) ->
-    core.init {timeout: 20}, null, mockRetriever()
+    core.init {timeout: 20}, mockRetriever()
     done()
 
   it 'should should return if there are no responders', (done) ->
@@ -248,7 +248,7 @@ describe 'core.listen', ->
 
   beforeEach (done) ->
 
-    core.init {timeout: 20}, null, mockRetriever()
+    core.init {timeout: 20}, mockRetriever()
     @channelA = 'testChannelA'
     @channelB = 'testChannelB'
     @dataA =
