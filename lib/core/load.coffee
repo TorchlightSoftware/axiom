@@ -6,7 +6,6 @@ internal = require './internal'
 request = require './request'
 respond = require './respond'
 
-
 module.exports = (moduleName, module) ->
   config = _.merge {}, (module.config or {})
 

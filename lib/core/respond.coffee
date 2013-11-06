@@ -1,4 +1,5 @@
 uuid = require 'uuid'
+
 bus = require '../bus'
 internal = require './internal'
 

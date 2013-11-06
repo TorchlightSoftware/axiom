@@ -1,5 +1,6 @@
 timers = require 'timers'
 uuid = require 'uuid'
+
 bus = require '../bus'
 
 module.exports = (channel, data) ->
