@@ -88,10 +88,15 @@ describe 'core.load', ->
       services:
         crushLikeBug: (args, fin) ->
           should.exist @axiom, 'expected axiom in context'
+
+          @axiom.should.have.keys ['init', 'reset', 'load', 'request', 'delegate',
+                                    'respond', 'send', 'listen', 'signal']
+
           should.exist @config, 'expected config in context'
           @config.should.eql {
             strength: 5
           }
+
           fin()
 
     core.load "robot", robot

@@ -1,12 +1,15 @@
 _ = require 'lodash'
 law = require 'law'
 
-core = require '../core'
 internal = require './internal'
 request = require './request'
 respond = require './respond'
 
 module.exports = (moduleName, module) ->
+
+  # lazy load this to avoid circular dependency
+  core = require '../core'
+
   config = _.merge {}, (module.config or {})
 
   # Merge config overrides from '<projectRoot>/axiom/<moduleName>'

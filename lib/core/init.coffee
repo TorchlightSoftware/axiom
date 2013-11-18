@@ -4,6 +4,7 @@ getAxiomModules = require '../getAxiomModules'
 
 internal = require './internal'
 load = require './load'
+logger = require 'torch'
 
 module.exports = (config, retriever) ->
   internal.reset()

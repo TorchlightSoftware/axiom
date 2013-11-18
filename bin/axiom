@@ -61,12 +61,14 @@ main = ->
   catch err
     throw err unless err.code is 'MODULE_NOT_FOUND'
     logger.red "Could not load config file from location: #{}"
+
   modules = []
   modules.push moduleName
+  config.modules = modules
 
-  core.init config, modules
+  core.init(config)
 
-  channel = [moduleName, serviceName].join('.')
+  channel = "#{moduleName}.#{serviceName}"
 
   core.request channel, args, (err, results) ->
     if err
