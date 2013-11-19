@@ -8,13 +8,9 @@ logger = require 'torch'
 core = require '../lib/core'
 findProjectRoot = require '../lib/findProjectRoot'
 
-testDir = __dirname
-projDir = path.dirname testDir
-sampleDir = path.join projDir, 'sample'
-sampleProjDir = path.join sampleDir, 'project'
-
-sample = require path.join(sampleDir, 'sample')
-
+sampleDir = path.join __dirname, '../sample'
+sampleProjDir = path.join sampleDir, 'project1'
+sample = require path.join sampleDir, 'sample'
 
 describe 'core.init', ->
   beforeEach ->
