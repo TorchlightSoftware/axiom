@@ -5,10 +5,12 @@ getAxiomModules = require '../getAxiomModules'
 internal = require './internal'
 load = require './load'
 logger = require 'torch'
-log = require './log'
 
 module.exports = (config, retriever) ->
-  log.info "Calling 'core.init'"
+  core = require '../core'
+
+  core.log.info "Calling 'core.init'"
+
   internal.reset()
   modules = config?.modules or []
   internal.retriever = retriever or require('../retriever')

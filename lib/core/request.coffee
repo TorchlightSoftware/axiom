@@ -4,10 +4,11 @@ _ = require 'lodash'
 bus = require '../bus'
 internal = require './internal'
 send = require './send'
-log = require './log'
 
 module.exports = (channel, data, done) ->
-  log.info "Calling 'core.request'"
+  core = require '../core'
+
+  core.log.info "Calling 'core.request'"
 
   # How many responders do we have
   responders = internal.responders[channel] or {}
