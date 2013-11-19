@@ -4,8 +4,10 @@ law = require 'law'
 internal = require './internal'
 request = require './request'
 respond = require './respond'
+log = require './log'
 
 module.exports = (moduleName, module) ->
+  log.info "Calling 'core.load'"
 
   # lazy load this to avoid circular dependency
   core = require '../core'

@@ -2,8 +2,11 @@ uuid = require 'uuid'
 
 bus = require '../bus'
 internal = require './internal'
+log = require './log'
 
 module.exports = (channel, service) ->
+  log.info "Calling 'core.respond'"
+
   responderId = uuid.v1()
 
   callback = (message, envelope) ->

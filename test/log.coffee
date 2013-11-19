@@ -2,6 +2,7 @@ should = require 'should'
 
 bus = require '../lib/bus'
 log = require '../lib/core/log'
+core = require '..'
 
 tests = [
   topic: 'debug'
@@ -17,8 +18,12 @@ tests = [
 # Helper to listen to topics on the Axiom logging
 # channel without making any API calls to 'core'.
 listen = (topic, callback) ->
+
   {channel} = log
-  bus.subscribe {channel, topic, callback}
+  sub = bus.subscribe {channel, topic, callback}
+
+  # Unsubscribe after being fired once
+  sub.once()
 
 # Test basic 'log' functionality
 describe 'log', ->
@@ -38,3 +43,24 @@ describe 'log', ->
 
         # When we log it via the given topic
         log[test.topic] test.data
+
+# Test 'info' coverage for public 'core' API
+describe "log, 'core' API", ->
+  beforeEach ->
+    core.reset()
+
+  for method in Object.keys(core)
+    do (method) ->
+      it "should log calls to 'core.#{method}'", (done) ->
+
+        # Given a listener on the 'info' topic of 'axiom.log'
+        listen 'info', (data) ->
+
+          # We should receive an informational message
+          should.exist data
+          data.should.eql "Calling 'core.#{method}'"
+
+          done()
+
+        # When we call the given public 'core' method
+        try core[method]()

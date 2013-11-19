@@ -2,8 +2,11 @@ timers = require 'timers'
 uuid = require 'uuid'
 
 bus = require '../bus'
+log = require './log'
 
 module.exports = (channel, data) ->
+  log.info "Calling 'core.send'"
+
   topicId = uuid.v1()
   replyTo =
     channel: channel

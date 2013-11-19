@@ -4,8 +4,11 @@ _ = require 'lodash'
 bus = require '../bus'
 internal = require './internal'
 send = require './send'
+log = require './log'
 
 module.exports = (channel, data, done) ->
+  log.info "Calling 'core.delegate'"
+
   # Same as request, but for multiple recipients on one channel.
   # Wait until we receive a response from each recipient
   # Time out based on axiom config - report timeouts for each recipient
