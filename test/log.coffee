@@ -49,7 +49,9 @@ describe "log, 'core' API", ->
   beforeEach ->
     core.reset()
 
-  for method in Object.keys(core)
+  loggedMethods = (m for m in Object.keys(core) when m isnt 'log')
+
+  for method in loggedMethods
     do (method) ->
       it "should log calls to 'core.#{method}'", (done) ->
 
