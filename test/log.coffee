@@ -1,7 +1,6 @@
 should = require 'should'
 
 bus = require '../lib/bus'
-log = require '../lib/core/log'
 core = require '..'
 
 tests = [
@@ -19,7 +18,7 @@ tests = [
 # channel without making any API calls to 'core'.
 listen = (topic, callback) ->
 
-  {channel} = log
+  {channel} = core.log
   sub = bus.subscribe {channel, topic, callback}
 
   # Unsubscribe after being fired once
@@ -42,7 +41,7 @@ describe 'log', ->
           done()
 
         # When we log it via the given topic
-        log[test.topic] test.data
+        core.log[test.topic] test.data
 
 # Test 'info' coverage for public 'core' API
 describe "log, 'core' API", ->
