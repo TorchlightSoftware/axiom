@@ -48,7 +48,7 @@ describe "log, 'core' API", ->
   beforeEach ->
     core.reset()
 
-  loggedMethods = (m for m in Object.keys(core) when m isnt 'log')
+  loggedMethods = Object.keys(core).filter (m) -> m isnt 'log'
 
   for method in loggedMethods
     do (method) ->
