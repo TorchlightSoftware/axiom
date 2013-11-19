@@ -18,11 +18,13 @@ describe 'log', ->
   for test in tests
     do (test) ->
       it "should log on #{test.topic}", (done) ->
+
         # Given a listener on the 'log' channel and given topic
         bus.subscribe
           channel: log.channel
           topic: test.topic
           callback: (data, envelope) ->
+
             # We should receive a log message
             should.exist data
             data.should.eql test.data
