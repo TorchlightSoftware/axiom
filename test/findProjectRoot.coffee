@@ -5,10 +5,7 @@ should = require 'should'
 
 findProjectRoot = require '../lib/findProjectRoot'
 
-testDir = __dirname
-projDir = path.dirname testDir
-sampleDir = path.join projDir, 'sample'
-sampleProjDir = path.join sampleDir, 'project'
+sampleProjDir = path.join __dirname, '../sample/project1'
 
 describe 'findProjectRoot', ->
   it 'should stop when it finds an package.json below another', (done) ->

@@ -5,7 +5,7 @@ should = require 'should'
 logger = require 'torch'
 
 findProjectRoot = require '../lib/findProjectRoot'
-sampleProjDir = join __dirname, '../sample/project'
+sampleProjDir = join __dirname, '../sample/project1'
 
 describe 'retriever', ->
   beforeEach ->
