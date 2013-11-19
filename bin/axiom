@@ -42,14 +42,22 @@ main = ->
   ]
   args = _.omit parsed.argv, toOmit
 
+  listen = (topic, color) ->
+    {channel} = axiom.log
+    callback = (err, envelope) ->
+      {timestamp, data} = envelope
+      logger[color] "[#{timetamp}] #{data}"
+    core.listen {channel, topic. callback}
+
+  # Listen to 'error' topic by default
+  unless args?['no-error']
+    listen 'error', 'red'
+
   if args?.debug
-    # Listen to any channel for info messages
-    core.listen
-      channel: '#'
-      topic: 'info.#'
-      callback: (err, envelope) ->
-        {timestamp, data} = envelope
-        logger.yellow "[#{timetamp}] #{data}"
+    listen 'info', 'yellow'
+
+  if args?.info
+    listen 'info', 'green'
 
   # Initialize Axiom, load the module.
   # Default to empty config, but if a config file path is defined
