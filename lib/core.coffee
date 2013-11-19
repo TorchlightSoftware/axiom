@@ -3,8 +3,6 @@ internal = require './core/internal'
 core =
   init: require('./core/init')
 
-  # reset: ->
-  #   internal.reset()
   reset: require('./core/reset')
 
   load: require('./core/load')
