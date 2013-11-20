@@ -1,3 +1,4 @@
+#!/usr/bin/env coffee
 logger = require 'torch'
 optimist = require 'optimist'
 _ = require 'lodash'
@@ -21,6 +22,7 @@ unless moduleName
   logger.red 'Missing required positional argument: moduleName'
   logger.yellow parsed.help()
   return
+
 unless serviceName
   logger.yellow parsed.help()
   logger.red 'Missing required positional argument: serviceName'
@@ -39,21 +41,21 @@ toOmit = [
 args = _.omit parsed.argv, toOmit
 
 listen = (topic, color) ->
-  {channel} = axiom.log
+  {channel} = core.log
   callback = (err, envelope) ->
-    {timestamp, data} = envelope
-    logger[color] "[#{timetamp}] #{data}"
-  core.listen {channel, topic. callback}
+    {timeStamp, data} = envelope
+    logger[color] "[#{timeStamp}] #{data}"
+  core.listen channel, topic, callback
 
 # Listen to 'error' topic by default
 unless args?['no-error']
   listen 'error', 'red'
 
 if args?.debug
-  listen 'info', 'yellow'
+  listen 'debug', 'yellow'
 
 if args?.info
-  listen 'info', 'green'
+  listen 'info', 'magenta'
 
 # Initialize Axiom, load the module.
 # Default to empty config, but if a config file path is defined
@@ -64,7 +66,8 @@ try
   config = require configPath if configPath?
 catch err
   throw err unless err.code is 'MODULE_NOT_FOUND'
-  logger.red "Could not load config file from location: #{}"
+  location = err
+  logger.red "Could not load config file from location '#{configPath}'"
 
 modules = []
 modules.push moduleName
@@ -79,5 +82,3 @@ core.request channel, args, (err, results) ->
     logger.red err.stack
   else
     logger.green results
-
-process.exit()
