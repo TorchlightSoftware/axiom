@@ -18,7 +18,8 @@
     "law":"",
     "uuid":"*",
     "async":"*",
-    "optimist":"*"
+    "optimist":"*",
+    "moment":"*"
   },
   "devDependencies":{
     "mocha":"*",

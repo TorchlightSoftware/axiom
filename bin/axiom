@@ -2,6 +2,7 @@
 logger = require 'torch'
 optimist = require 'optimist'
 _ = require 'lodash'
+moment = require 'moment'
 
 core = require '..'
 
@@ -43,7 +44,8 @@ logLevels.forEach ({topic, color}, index) ->
   if index <= targetLevel
     core.listen channel, topic, (err, envelope) ->
       {timeStamp, data} = envelope
-      logger[color] "[#{timeStamp}:#{topic.toUpperCase()}] #{data}"
+      time = moment(timeStamp).format('YYYY/MM/DD HH:mm:ss Z')
+      logger[color] "[#{time} #{topic.toUpperCase()}] #{data}"
 
 core.init()
 
