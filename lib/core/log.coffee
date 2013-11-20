@@ -1,12 +1,12 @@
 bus = require '../bus'
+logLevels = require './logLevels'
 
 channel = 'axiom.log'
 
-log = (topic) -> (data) ->
-  bus.publish {channel, topic, data}
+api = {channel, logLevels}
 
-module.exports =
-  channel: channel
-  debug: log 'debug'
-  error: log 'error'
-  info: log 'info'
+logLevels.forEach ({topic, color}, index) ->
+  api[topic] = (data) ->
+    bus.publish {channel, topic, data}
+
+module.exports = api

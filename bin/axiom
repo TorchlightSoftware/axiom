@@ -5,30 +5,25 @@ _ = require 'lodash'
 
 core = require '..'
 
-options = {}
+optimist.usage 'Usage: axiom <moduleName> <serviceName> [<--arg> <value> ...]'
+parsed = optimist.options {}
 
-usage = 'Usage: axiom <moduleName> <serviceName> [<--arg> <value> ...]'
-optimist.usage usage
-parsed = optimist.options options
-
-# Extract the positional arguments we demand
-positional = parsed.argv._
 # Should correspond to an installed NPM module
 # named 'axiom-<moduleName>' exposing service 'serviceName'
-[moduleName, serviceName] = positional
+[moduleName, serviceName] = parsed.argv._
 
 # TODO: Change this to instead alert specific error and print usage information
 unless moduleName
-  logger.red 'Missing required positional argument: moduleName'
+  logger.red "Missing required positional argument: 'moduleName'"
   logger.yellow parsed.help()
   return
 
 unless serviceName
+  logger.red "Missing required positional argument: 'serviceName'"
   logger.yellow parsed.help()
-  logger.red 'Missing required positional argument: serviceName'
   return
 
-# Extract the 'axiom' config object, which holds named args of the form 'axiom.<key>'
+# Anything with the prefix 'axiom' extends the config.  E.G. `axiom server run --axiom.foo=true`
 {axiom} = parsed.argv
 
 # Extract the remaining args for the service
@@ -40,45 +35,22 @@ toOmit = [
 ]
 args = _.omit parsed.argv, toOmit
 
-listen = (topic, color) ->
-  {channel} = core.log
-  callback = (err, envelope) ->
-    {timeStamp, data} = envelope
-    logger[color] "[#{timeStamp}] #{data}"
-  core.listen channel, topic, callback
+logLevel = args.log or 'warning'
+{channel, logLevels} = core.log
+targetLevel = _.findIndex logLevels, ({topic}) -> topic is logLevel
 
-# Listen to 'error' topic by default
-unless args?['no-error']
-  listen 'error', 'red'
+logLevels.forEach ({topic, color}, index) ->
+  if index <= targetLevel
+    core.listen channel, topic, (err, envelope) ->
+      {timeStamp, data} = envelope
+      logger[color] "[#{timeStamp}] #{data}"
 
-if args?.debug
-  listen 'debug', 'yellow'
-
-if args?.info
-  listen 'info', 'magenta'
-
-# Initialize Axiom, load the module.
-# Default to empty config, but if a config file path is defined
-# in the unix environment, try to load it.
-config = {}
-try
-  configPath = process.env['axiom.config']
-  config = require configPath if configPath?
-catch err
-  throw err unless err.code is 'MODULE_NOT_FOUND'
-  location = err
-  logger.red "Could not load config file from location '#{configPath}'"
-
-modules = []
-modules.push moduleName
-config.modules = modules
-
-core.init(config)
+core.init()
 
 channel = "#{moduleName}.#{serviceName}"
 
 core.request channel, args, (err, results) ->
-  if err
+  if err?
     logger.red err.stack
-  else
-    logger.green results unless _.isEmpty(results)
+  unless _.isEmpty(results)
+    logger.green results
