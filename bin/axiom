@@ -81,4 +81,4 @@ core.request channel, args, (err, results) ->
   if err
     logger.red err.stack
   else
-    logger.green results
+    logger.green results unless _.isEmpty(results)
