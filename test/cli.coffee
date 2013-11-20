@@ -28,6 +28,3 @@ describe 'cli', ->
         {source: 'stdout', message: 'Hello, world!\n'}
       ]
       done()
-
-    # exec "coffee #{rel('../bin/axiom')}", {cwd: sampleProject}, (err, stdout, stderr) ->
-    #   logger.cyan {err, stdout, stderr}
