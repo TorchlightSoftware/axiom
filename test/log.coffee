@@ -3,16 +3,7 @@ should = require 'should'
 bus = require '../lib/bus'
 core = require '..'
 
-tests = [
-  topic: 'debug'
-  data: 'hello, debug'
- ,
-  topic: 'error'
-  data: 'hello, error'
- ,
-  topic: 'info'
-  data: 'hello, info'
-]
+logLevels = require '../lib/core/logLevels'
 
 # Helper to listen to topics on the Axiom logging
 # channel without making any API calls to 'core'.
@@ -26,22 +17,22 @@ listen = (topic, callback) ->
 
 # Test basic 'log' functionality
 describe 'log', ->
-  for test in tests
+  for test in logLevels
     do (test) ->
+      {topic, color} = test
 
-      it "should log on #{test.topic}", (done) ->
+      it "should log on #{topic}", (done) ->
 
         # Given a listener on the 'log' channel and given topic
-        listen test.topic, (data) ->
+        listen topic, (data) ->
 
           # We should receive a log message
           should.exist data
-          data.should.eql test.data
-
+          data.should.eql color
           done()
 
         # When we log it via the given topic
-        core.log[test.topic] test.data
+        core.log[topic] color
 
 # Test 'info' coverage for public 'core' API
 describe "log, 'core' API", ->

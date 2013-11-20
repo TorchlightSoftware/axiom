@@ -1,6 +1,7 @@
 internal = require './internal'
-log = require './log'
 
 module.exports = ->
-  log.info "Calling 'core.reset'"
+  core = require '../core'
+  core.log.coreEntry 'reset'
+
   internal.reset()

@@ -8,10 +8,8 @@ logger = require 'torch'
 
 module.exports = (config, retriever) ->
   core = require '../core'
+  core.log.coreEntry 'init', {config, retriever}
 
-  core.log.info "Calling 'core.init'"
-
-  internal.reset()
   modules = config?.modules or []
   internal.retriever = retriever or require('../retriever')
 

@@ -7,8 +7,7 @@ send = require './send'
 
 module.exports = (channel, data, done) ->
   core = require '../core'
-
-  core.log.info "Calling 'core.delegate'"
+  core.log.coreEntry 'delegate', {channel, data}
 
   # Same as request, but for multiple recipients on one channel.
   # Wait until we receive a response from each recipient

@@ -6,11 +6,8 @@ request = require './request'
 respond = require './respond'
 
 module.exports = (moduleName, module) ->
-
-  # lazy load this to avoid circular dependency
   core = require '../core'
-
-  core.log.info "Calling 'core.load'"
+  core.log.coreEntry 'load', {moduleName}
 
   config = _.merge {}, (module.config or {})
 

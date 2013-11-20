@@ -43,7 +43,7 @@ logLevels.forEach ({topic, color}, index) ->
   if index <= targetLevel
     core.listen channel, topic, (err, envelope) ->
       {timeStamp, data} = envelope
-      logger[color] "[#{timeStamp}] #{data}"
+      logger[color] "[#{timeStamp}:#{topic.toUpperCase()}] #{data}"
 
 core.init()
 

@@ -23,9 +23,6 @@ core =
   # Just listen
   listen: require('./core/listen')
 
-  # For sending interrupts
-  signal: require('./core/signal')
-
   # For logging on the channel 'axiom.log'
   log: require('./core/log')
 

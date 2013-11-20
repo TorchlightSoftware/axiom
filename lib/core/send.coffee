@@ -5,8 +5,7 @@ bus = require '../bus'
 
 module.exports = (channel, data) ->
   core = require '../core'
-
-  core.log.info "Calling 'core.send'"
+  core.log.coreEntry 'send', {channel, data}
 
   topicId = uuid.v1()
   replyTo =
