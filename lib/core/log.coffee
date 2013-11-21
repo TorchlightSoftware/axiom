@@ -1,12 +1,20 @@
+{inspect} = require 'util'
+_ = require 'lodash'
 bus = require '../bus'
+logLevels = require './logLevels'
 
 channel = 'axiom.log'
 
-log = (topic) -> (data) ->
-  bus.publish {channel, topic, data}
+api = {channel, logLevels}
 
-module.exports =
-  channel: channel
-  debug: log 'debug'
-  error: log 'error'
-  info: log 'info'
+logLevels.forEach ({topic, color}, index) ->
+  api[topic] = (data) ->
+    bus.publish {channel, topic, data}
+
+api.coreEntry = (method, args) ->
+  message = "Calling 'core.#{method}'"
+  unless _.isEmpty args
+    message += " with args: #{inspect(args, null, null)}"
+  api.info message
+
+module.exports = api

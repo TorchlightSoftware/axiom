@@ -7,8 +7,7 @@ send = require './send'
 
 module.exports = (channel, data, done) ->
   core = require '../core'
-
-  core.log.info "Calling 'core.request'"
+  core.log.coreEntry 'request', {channel, data}
 
   # How many responders do we have
   responders = internal.responders[channel] or {}

@@ -2,8 +2,7 @@ bus = require '../bus'
 
 module.exports = (channel, topic, callback) ->
   core = require '../core'
-
-  core.log.info "Calling 'core.listen'"
+  core.log.coreEntry 'listen', {channel, topic}
 
   sub = bus.subscribe
     channel: channel

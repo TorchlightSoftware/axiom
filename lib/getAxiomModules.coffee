@@ -1,8 +1,12 @@
 _ = require 'lodash'
+logger = require 'torch'
+
+getKeys = (obj) ->
+  if obj? then Object.keys(obj) else undefined
 
 module.exports = (pkg, blacklist) ->
 
-  dependencies = _.union pkg?.dependencies, pkg?.devDependencies
+  dependencies = _.union getKeys(pkg?.dependencies), getKeys(pkg?.devDependencies)
 
   # Filter out non-axiom NPM modules
   axiomNpmModules = dependencies.filter (dep) -> /^axiom-\S\S*/.test dep

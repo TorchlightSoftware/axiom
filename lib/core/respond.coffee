@@ -5,8 +5,7 @@ internal = require './internal'
 
 module.exports = (channel, service) ->
   core = require '../core'
-
-  core.log.info "Calling 'core.respond'"
+  core.log.coreEntry 'respond', {channel}
 
   responderId = uuid.v1()
 
