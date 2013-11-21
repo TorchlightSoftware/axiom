@@ -19,13 +19,13 @@ positional = parsed.argv._
 
 # TODO: Change this to instead alert specific error and print usage information
 unless moduleName
-  logger.red 'Missing required positional argument: moduleName'
+  logger.red "Missing required positional argument: 'moduleName'"
   logger.yellow parsed.help()
   return
 
 unless serviceName
+  logger.red "Missing required positional argument: 'serviceName'"
   logger.yellow parsed.help()
-  logger.red 'Missing required positional argument: serviceName'
   return
 
 # Extract the 'axiom' config object, which holds named args of the form 'axiom.<key>'
