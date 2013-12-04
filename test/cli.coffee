@@ -26,8 +26,10 @@ removeTimestamps = (output) ->
     # If prefixed with a timestamp
     if /\[.*\].*/.test(message)
 
+      cutoff = (msg) -> msg.replace /^.*\] /, ''
+
       # Slice off the timestamp prefix
-      message = message.slice(34)
+      message = cutoff(message)
 
     return {source, message}
 
@@ -62,33 +64,12 @@ logTests = [
   args: ['hello', 'world', '--log=info']
   expected: [
     source: 'stdout'
-    message: "Calling 'core.init' with args: { config: undefined, retriever: undefined }\n"
-   ,
-    source: 'stdout'
-    message: "Calling 'core.load' with args: { moduleName: 'base' }\n"
-   ,
-    source: 'stdout'
-    message: "Calling 'core.load' with args: { moduleName: 'hello' }\n"
-   ,
-    source: 'stdout'
-    message: "Calling 'core.respond' with args: { channel: 'hello.world' }\n"
-   ,
-    source: 'stdout'
-    message: "Calling 'core.request' with args: { channel: 'hello.world', data: { log: 'info' } }\n"
-   ,
-    source: 'stdout'
-    message: "Calling 'core.send' with args: { channel: 'hello.world', data: { log: 'info' } }\n"
-   ,
-    source: 'stdout'
     message: 'Hello, world!\n'
   ]
  ,
   description: "should accept '--log=debug'"
   args: ['hello', 'world', '--log=debug']
   expected: [
-    source: 'stdout'
-    message: "Calling 'core.listen' with args: { channel: 'axiom.log', topic: 'debug' }\n"
-   ,
     source: 'stdout'
     message: "Calling 'core.init' with args: { config: undefined, retriever: undefined }\n"
    ,

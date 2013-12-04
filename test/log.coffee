@@ -83,7 +83,7 @@ describe "log, 'core' API", ->
       it "should log calls to 'core.#{method}'", (done) ->
 
         # Given a listener on the 'info' topic of 'axiom.log'
-        listen 'info', (data) ->
+        listen 'debug', (data) ->
           # We should receive an informational message
           should.exist data
 

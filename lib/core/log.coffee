@@ -15,6 +15,6 @@ api.coreEntry = (method, args) ->
   message = "Calling 'core.#{method}'"
   unless _.isEmpty args
     message += " with args: #{inspect(args, null, null)}"
-  api.info message
+  api.debug message
 
 module.exports = api
