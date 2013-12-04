@@ -23,7 +23,7 @@ These processes can extend existing life-cycles or define their own.
 
 * Yeoman - Used for formalizing workflows, workflows are not extensible, there is no standard for organizing/extending the application runtime.
 * FireShell - Ditto.
-* Anvil.js - Very similar design goals to Axiom, and in fact we use the same underlying message bus (Postal.js).  Whereas Anvil.js decided to back in the lifecycles, we wanted these to be extensible and therefore we have a more lightweight core than Anvil ships with.  We also wanted to extend the decoupled approach of tasks to building out the application runtime.
+* Anvil.js - Very similar design goals to Axiom, and in fact we use the same underlying message bus (Postal.js).  Whereas Anvil.js decided to bake in the lifecycles, we wanted these to be extensible and therefore we have a more lightweight core than Anvil ships with.  We also wanted to extend the decoupled approach of tasks to building out the application runtime.
 
 # Installation
 
