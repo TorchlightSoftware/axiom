@@ -81,7 +81,7 @@ describe 'core.init', ->
     internal.config.should.include axiomFile
     done()
 
-  it "should assume an 'axiom' folder containing config overrides", (done) ->
+  it "should assume an 'axiom_configs' folder containing config overrides", (done) ->
     core.init {modules: ['sample']}, @retriever
 
     # Given an extension with a service and corresponding config entry
@@ -89,7 +89,7 @@ describe 'core.init', ->
     should.exist defaultSampleConfig
 
     # And a config override in the local project
-    overrideConfigPath = path.join sampleProjDir, 'axiom', 'sample'
+    overrideConfigPath = path.join sampleProjDir, 'axiom_configs', 'sample'
     overrideConfig = require(overrideConfigPath).whatsMyContext
     should.exist overrideConfig
 
