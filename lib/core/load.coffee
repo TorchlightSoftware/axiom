@@ -9,7 +9,7 @@ module.exports = (moduleName, module) ->
   core = require '../core'
   core.log.coreEntry 'load', {moduleName}
 
-  config = _.merge {}, (module.config or {})
+  config = _.merge {}, module.config
 
   # Merge config overrides from '<projectRoot>/axiom/<moduleName>'
   try
