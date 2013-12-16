@@ -26,6 +26,7 @@ module.exports = (moduleName, module) ->
     [namespace] = name.split '/'
     unless contexts[namespace]
       contexts[namespace] = {
+        app: internal.config.app or {}
         config: config[namespace]
         axiom: core
         util: _.merge {}, internal.retriever
