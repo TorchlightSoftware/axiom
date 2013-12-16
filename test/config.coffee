@@ -111,3 +111,55 @@ describe 'application config', ->
       # It should return without its assertions failing
       should.not.exist err
       done()
+
+  it 'should expose app config to module configs', (done) ->
+
+    # Given an Axiom config with an 'app' section defined
+    axiomConfig =
+      app:
+        serverPort: 4000
+        apiPort: 4001
+
+    # And a module config as a function of the app config
+    moduleConfig = (app) ->
+
+      # It should return without its assertions failing
+      should.exist app
+      app.should.eql axiomConfig.app
+      done()
+      return app
+
+    # When core is initialized
+    initCore {
+      axiom: axiomConfig
+      axiom_configs:
+        server: moduleConfig
+    }
+
+  it 'should load an object based module config', (done) ->
+
+    # Given a module config
+    moduleConfig = {run: {foo: 'yes'}}
+
+    # And a run service
+    runService = (args, fin) ->
+      should.exist @config
+      @config.should.eql moduleConfig.run
+      fin()
+
+    # When core is initialized
+    initCore {
+      axiom_configs:
+        server: moduleConfig
+      node_modules:
+        'axiom-server':
+          services:
+            run: runService
+    }
+
+    # And the service is called
+    core.request 'server.run', {}, (err, result) ->
+
+      # It should return without its assertions failing
+      should.not.exist err
+      done()

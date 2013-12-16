@@ -1,11 +1,12 @@
 _ = require 'lodash'
 law = require 'law'
+logger = require 'torch'
 
 internal = require './internal'
 request = require './request'
 respond = require './respond'
 
-module.exports = (moduleName, module) ->
+module.exports = (moduleName, module={}) ->
   core = require '../core'
   core.log.coreEntry 'load', {moduleName}
 
@@ -13,7 +14,12 @@ module.exports = (moduleName, module) ->
 
   # Merge config overrides from '<projectRoot>/axiom/<moduleName>'
   try
-    _.merge config, internal.retriever.retrieve('axiom', moduleName)
+    projectOverrides = internal.retriever.retrieve('axiom_configs', moduleName)
+
+  if (typeof projectOverrides) is 'function'
+    projectOverrides = projectOverrides(internal.config.app)
+
+  _.merge config, projectOverrides
 
   # Initialize the services using a project-relative 'lib' resolver
   services = law.create {services: module.services}
@@ -26,8 +32,8 @@ module.exports = (moduleName, module) ->
     [namespace] = name.split '/'
     unless contexts[namespace]
       contexts[namespace] = {
-        app: internal.config.app or {}
-        config: config[namespace]
+        app: internal.config.app
+        config: config[namespace] or {}
         axiom: core
         util: _.merge {}, internal.retriever
       }
