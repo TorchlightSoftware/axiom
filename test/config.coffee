@@ -1,66 +1,66 @@
-path = require 'path'
-
 should = require 'should'
-mockery = require 'mockery'
+async = require 'async'
 _ = require 'lodash'
 logger = require 'torch'
+{focus} = require 'qi'
+{join} = require 'path'
 
+bus = require '../lib/bus'
 core = require '../lib/core'
-findProjectRoot = require '../lib/findProjectRoot'
 
-sampleDir = path.join __dirname, '../sample'
-sampleProjDir = path.join sampleDir, 'project3'
-sample = require path.join sampleDir, 'sample'
+mockRetriever = require './helpers/mockRetriever'
 
-describe 'config.app', ->
-  beforeEach ->
-    process.chdir sampleProjDir
+initCore = (axiomConfig, runService) ->
+  retriever = mockRetriever()
+  retriever.packages.axiom = axiomConfig
+  retriever.packages.node_modules['axiom-server'] =
+    services:
+      run: runService
 
-    @retriever = _.clone require '../lib/retriever'
-    @retriever.projectRoot = findProjectRoot(process.cwd())
+  core.init {timeout: 20}, retriever
 
-    mockery.enable
-      warnOnReplace: false,
-      warnOnUnregistered: false
-
-    mockery.registerMock @retriever.rel('node_modules', 'axiom-base'), {
-      services:
-        runtime: (args, next) ->
-          next null, {message: 'axiom-base'}
-    }
-    prefix = @retriever.rel 'node_modules', 'axiom-sample'
-    mockery.registerMock @retriever.rel('node_modules', 'axiom-sample'), sample
+describe 'core.request', ->
 
   afterEach ->
     core.reset()
-    mockery.disable()
 
-  after ->
-    core.reset()
+  it 'should expose the app config in a service', (done) ->
 
-  it 'should expose the application-wide config in extension service contexts when it exists', (done) ->
-    # Given an Axiom config
-    axiomConfig = require path.join(process.cwd(), 'axiom')
-    should.exist axiomConfig
+    # Given an Axiom config with an 'app' section defined
+    axiomConfig =
+      app:
+        serverPort: 4000
+        apiPort: 4001
 
-    # With an 'app' section defined
-    should.exist axiomConfig.app
-
-    # And a test service
-    server =
-      services:
-        run: (args, fin) ->
-
-          should.exist @app
-          @app.should.eql axiomConfig.app
-
-          fin()
+    # And a run service
+    runService = (args, fin) ->
+      should.exist @app
+      @app.should.eql axiomConfig.app
+      fin()
 
     # When core is initialized
-    core.init()
+    initCore axiomConfig, runService
 
-    # And the service is loaded
-    core.load 'server', server
+    # And the service is called
+    core.request 'server.run', {}, (err, result) ->
+
+      # It should return without its assertions failing
+      should.not.exist err
+      done()
+
+  it 'should expose an empty object for the app config', (done) ->
+
+    # Given an Axiom config with an 'app' section defined
+    axiomConfig = {}
+
+    # And a run service
+    runService = (args, fin) ->
+      should.exist @app
+      @app.should.eql {}
+      fin()
+
+    # When core is initialized
+    initCore axiomConfig, runService
 
     # And the service is called
     core.request 'server.run', {}, (err, result) ->

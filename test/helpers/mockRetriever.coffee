@@ -1,12 +1,15 @@
 {join} = require 'path'
+logger = require 'torch'
 
 module.exports = ->
   retriever =
 
     # a mock of packages returned
     packages: {
-      'package': {}
-      'node_modules':
+      package:
+        dependencies:
+          'axiom-server': '*'
+      node_modules:
         'axiom-base':
           {
             services:
