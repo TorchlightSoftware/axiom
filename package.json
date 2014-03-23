@@ -12,12 +12,10 @@
     "coffee-script":"*",
     "npm":"*",
     "lodash":"*",
-    "machina":"*",
     "postal":"*",
     "torch":"*",
     "law":"",
     "uuid":"*",
-    "async":"*",
     "optimist":"*",
     "moment":"*"
   },

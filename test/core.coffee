@@ -1,5 +1,4 @@
 should = require 'should'
-async = require 'async'
 _ = require 'lodash'
 logger = require 'torch'
 {focus} = require 'qi'
