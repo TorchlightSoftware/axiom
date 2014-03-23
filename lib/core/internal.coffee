@@ -21,4 +21,4 @@ module.exports = internal =
     internal.responders = {}
     internal.config = defaultConfig()
 
-    bus.utils.reset()
+    bus.reset()

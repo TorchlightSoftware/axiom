@@ -1,7 +1,3 @@
-# instantiate our instance of postal, passing it its lodash dependency
-_ = require 'lodash'
-uuid = require 'uuid'
-
-bus = require('postal')(_)
-
-module.exports = bus
+# postal used to export a constructor function that required manual dependency injection
+# this file should probably be removed and refactored to 'postal' requires
+module.exports =  require 'postal'
