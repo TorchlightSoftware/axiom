@@ -2,7 +2,7 @@ _ = require 'lodash'
 logger = require 'torch'
 moment = require 'moment'
 
-module.exports = (loggers) ->
+module.exports = (loggers=[]) ->
   core = require '../core'
   {channel, logLevels} = core.log
   getIndex = (name) -> _.findIndex logLevels, ({topic}) -> topic is name
