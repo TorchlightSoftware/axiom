@@ -36,18 +36,7 @@ toOmit = [
 ]
 args = _.omit parsed.argv, toOmit
 
-logLevel = args.log or 'info'
-{channel, logLevels} = core.log
-targetLevel = _.findIndex logLevels, ({topic}) -> topic is logLevel
-
-logLevels.forEach ({topic, color}, index) ->
-  if index <= targetLevel
-    core.listen channel, topic, (err, envelope) ->
-      {timeStamp, data} = envelope
-      time = moment(timeStamp).format('YYYY/MM/DD HH:mm:ss Z')
-      logger[color] "[#{time} #{topic.toUpperCase()}] #{data}"
-
-core.init()
+core.init({loggers: [{writer: 'console', level: args.log or 'info'}]})
 
 channel = "#{moduleName}.#{serviceName}"
 

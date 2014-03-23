@@ -1,7 +1,7 @@
 {
   "name":"axiom",
   "description":"Environment setup/runtime standardization for Node.js applications.",
-  "version":"0.0.6",
+  "version":"0.0.7",
   "homepage":"http://github.com/TorchlightSoftware/axiom",
   "repository":"git://github.com/TorchlightSoftware/axiom.git",
   "author":"Torchlight Software <info@torchlightsoftware.com> (http://torchlightsoftware.com)",

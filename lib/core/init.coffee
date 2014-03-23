@@ -7,7 +7,10 @@ load = require './load'
 logger = require 'torch'
 
 module.exports = (config, retriever) ->
+
+  # yay, logging
   core = require '../core'
+  core.wireUpLoggers(config.loggers)
   core.log.coreEntry 'init', {config, retriever}
 
   modules = config?.modules or []

@@ -26,4 +26,7 @@ core =
   # For logging on the channel 'axiom.log'
   log: require('./core/log')
 
+  # Sets up an array of log writers.
+  wireUpLoggers: require('./core/wireUpLoggers')
+
 module.exports = core
