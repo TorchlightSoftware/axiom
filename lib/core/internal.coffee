@@ -25,7 +25,9 @@ module.exports = internal =
       app: internal.config.app
       axiom: require '../core'
       util: _.merge {}, internal.retriever
+      config: {}
     }
+    return internal.contexts[ns]
 
   reset: ->
     internal.responders = {}

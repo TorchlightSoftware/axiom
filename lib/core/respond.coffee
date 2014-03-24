@@ -1,4 +1,5 @@
 uuid = require 'uuid'
+logger = require 'torch'
 
 bus = require '../bus'
 internal = require './internal'
@@ -6,6 +7,13 @@ internal = require './internal'
 module.exports = (channel, service) ->
   core = require '../core'
   core.log.coreEntry 'respond', {channel}
+
+  # Give each service a binding context containing the config.
+  # The context is shared between all services in a namespace.
+  [namespace] = channel.split '/'
+  service = service.bind(internal.setDefaultContext(namespace))
+
+  #logger.magenta "binding '#{channel}' to namespace '#{namespace}':", internal.contexts[namespace]
 
   responderId = uuid.v1()
 
