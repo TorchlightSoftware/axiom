@@ -8,7 +8,6 @@ describe 'core.load', ->
   afterEach ->
     core.reset()
 
-
   it 'should load a default base', (done) ->
     module =
       services:
@@ -78,6 +77,26 @@ describe 'core.load', ->
       data.should.eql {status: 'prepared'}
 
       done()
+
+  it 'aliased namespace should share context', (done) ->
+    server =
+      config:
+        run:
+          foo: 1
+
+    extension =
+      config:
+        run:
+          extends: 'server'
+      services:
+        'run/prepare': ->
+          should.exist @config?.foo
+          @config?.foo.should.eql 1
+          done()
+
+    core.load 'server', server
+    core.load 'extension', extension
+    core.request 'server.run/prepare', {}, (err, data) ->
 
 
   it 'should receive axiom/config in context', (done) ->

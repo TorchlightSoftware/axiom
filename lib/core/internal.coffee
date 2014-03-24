@@ -1,4 +1,5 @@
 bus = require '../bus'
+_ = require 'lodash'
 
 defaultConfig = ->
   return {
@@ -17,8 +18,18 @@ module.exports = internal =
 
   retriever: undefined
 
+  contexts: {}
+
+  setDefaultContext: (ns) ->
+    internal.contexts[ns] ?= {
+      app: internal.config.app
+      axiom: require '../core'
+      util: _.merge {}, internal.retriever
+    }
+
   reset: ->
     internal.responders = {}
     internal.config = defaultConfig()
+    internal.contexts = {}
 
     bus.reset()

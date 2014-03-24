@@ -8,9 +8,6 @@ mockRetriever = require './helpers/mockRetriever'
 
 initCore = (packages) ->
   retriever = mockRetriever()
-  retriever.package =
-    dependencies:
-      'axiom-server': '*'
   _.merge retriever.packages, packages
   core.init {timeout: 20}, retriever
 

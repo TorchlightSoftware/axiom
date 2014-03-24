@@ -21,24 +21,27 @@ module.exports = (moduleName, module={}) ->
 
   _.merge config, projectOverrides
 
+  # assign config values into the appropriate context
+  for namespace, def of config
+    internal.setDefaultContext(namespace)
+    _.merge internal.contexts[namespace], {config: def}
+
   # Initialize the services using a project-relative 'lib' resolver
   services = law.create {services: module.services}
-
-  contexts = {}
 
   # Give each service a binding context containing the config.
   # The context is shared between all services in a namespace.
   for name, def of services
     [namespace] = name.split '/'
-    unless contexts[namespace]
-      contexts[namespace] = {
-        app: internal.config.app
-        config: config[namespace] or {}
-        axiom: core
-        util: _.merge {}, internal.retriever
-      }
+    internal.setDefaultContext(namespace)
 
-    services[name] = def.bind contexts[namespace]
+    # could be an alias - make sure we get the config
+    _.merge internal.contexts[namespace], {
+      config: config[namespace] or {}
+    }
+
+    #logger.magenta "binding '#{name}' to namespace '#{namespace}':", internal.contexts[namespace]
+    services[name] = def.bind internal.contexts[namespace]
 
   for serviceName, options of config
     do (serviceName, options) ->
