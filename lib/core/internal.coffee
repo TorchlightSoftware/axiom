@@ -14,6 +14,9 @@ module.exports = internal =
   # A place to record what responders we have attached
   responders: {}
 
+  # A place to record what channels are linked
+  links: {}
+
   config: defaultConfig()
 
   retriever: undefined
@@ -29,9 +32,14 @@ module.exports = internal =
     }
     return internal.contexts[ns]
 
-  reset: ->
-    internal.responders = {}
-    internal.config = defaultConfig()
-    internal.contexts = {}
+  reset: (done) ->
+    done ?= ->
+    core = require '../core'
+    core.delegate "system.kill", {reason: 'core.reset'}, (err, args) ->
+      internal.responders = {}
+      internal.links = {}
+      internal.config = defaultConfig()
+      internal.contexts = {}
 
-    bus.reset()
+      bus.reset()
+      done()

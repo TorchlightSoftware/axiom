@@ -109,7 +109,8 @@ describe 'core.load', ->
           should.exist @axiom, 'expected axiom in context'
 
           @axiom.should.have.keys ['init', 'reset', 'load', 'request', 'delegate',
-                                    'respond', 'send', 'listen', 'log', 'wireUpLoggers']
+                                    'respond', 'send', 'listen', 'log', 'wireUpLoggers',
+                                    'link']
 
           should.exist @config, 'expected config in context'
           @config.should.eql {

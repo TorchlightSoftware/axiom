@@ -15,8 +15,12 @@ module.exports = (channel, data, done) ->
 
   # Get an array of responderId's of listeners from whom we expect
   # some kind of response on this channel.
-  responders = internal.responders[channel] or {}
-  waitingOn = _.keys responders
+  waitingOn = _.keys internal.responders[channel]
+
+  # add any responders on linked channels
+  if internal.links[channel]
+    for l in internal.links[channel]
+      waitingOn.push _.keys(internal.responders[l])...
 
   # return immediately if we have nothing to do
   if _.isEmpty waitingOn

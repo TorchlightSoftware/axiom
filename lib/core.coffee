@@ -29,4 +29,6 @@ core =
   # Sets up an array of log writers.
   wireUpLoggers: require('./core/wireUpLoggers')
 
+  link: require('./core/link')
+
 module.exports = core
