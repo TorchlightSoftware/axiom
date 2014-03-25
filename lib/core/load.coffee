@@ -21,16 +21,19 @@ module.exports = (moduleName, module={}) ->
 
   _.merge config, projectOverrides
 
-  # assign config values into the appropriate context
-  for namespace, def of config
-    fullNS = "#{moduleName}.#{namespace}"
-    internal.setDefaultContext(fullNS)
-    _.merge internal.contexts[fullNS], {config: def}
-
   # Initialize the services using a project-relative 'lib' resolver
   services = law.create {services: module.services}
 
   for serviceName, options of config
+
+    # assign config values into the appropriate context
+    if options.extends
+      fullNS = "#{options.extends}.#{serviceName}"
+    else
+      fullNS = "#{moduleName}.#{serviceName}"
+    internal.setDefaultContext(fullNS)
+    _.merge internal.contexts[fullNS], {config: options}
+
     do (serviceName, options) ->
       serviceChannel = "#{moduleName}.#{serviceName}"
 
@@ -47,7 +50,7 @@ module.exports = (moduleName, module={}) ->
 
   for serviceName, serviceDef of services
 
-    # Check the config for an alias
+    # Check the config for an 'extends'
     [namespace] = serviceName.split '/'
     alias = config?[namespace]?.extends
     if alias

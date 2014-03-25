@@ -66,8 +66,11 @@ describe 'core.load', ->
       config:
         run:
           extends: 'server'
+          foo: 1
       services:
         'run/prepare': (args, done) ->
+          should.exist @config.foo
+          @config.foo.should.eql 1
           done null, {status: 'prepared'}
 
     core.load 'extension', module
