@@ -42,3 +42,7 @@ module.exports = (config, retriever) ->
 
     moduleDef = internal.retriever.retrieveExtension(moduleName)
     load moduleName, moduleDef
+
+  for moduleName, moduleLocation of config.appExtensions
+    moduleDef = internal.retriever.retrieve(moduleLocation)
+    load moduleName, moduleDef

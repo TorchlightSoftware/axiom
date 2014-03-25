@@ -118,3 +118,13 @@ describe 'core.init', ->
       # It should return without its assertions failing
       should.not.exist err
       done()
+
+  it "should load an appExtension", (done) ->
+    config =
+      appExtensions:
+        doStuff: 'appExtensions/doStuff'
+
+    core.init config, @retriever
+    core.request 'doStuff.doStuff', {}, (err, result) ->
+      result.should.eql {status: 'stuff is done'}
+      done()
