@@ -1,45 +1,22 @@
 path = require 'path'
-
 should = require 'should'
-mockery = require 'mockery'
 _ = require 'lodash'
 logger = require 'torch'
 
 core = require '../lib/core'
-findProjectRoot = require '../lib/findProjectRoot'
 
-sampleDir = path.join __dirname, '../sample'
-sampleProjDir = path.join sampleDir, 'project1'
-sample = require path.join sampleDir, 'sample'
+proj1Dir = path.join __dirname, '../sample/project1'
 
 describe 'core.init', ->
-  beforeEach ->
-    process.chdir sampleProjDir
-
-    @retriever = _.clone require '../lib/retriever'
-    @retriever.projectRoot = findProjectRoot(process.cwd())
-
-    mockery.enable
-      warnOnReplace: false,
-      warnOnUnregistered: false
-
-    mockery.registerMock @retriever.rel('node_modules', 'axiom-base'), {
-      services:
-        runtime: (args, next) ->
-          next null, {message: 'axiom-base'}
-    }
-    prefix = @retriever.rel 'node_modules', 'axiom-sample'
-    mockery.registerMock @retriever.rel('node_modules', 'axiom-sample'), sample
+  before ->
+    @retriever =
+      projectRoot: proj1Dir
 
   afterEach ->
     core.reset()
-    mockery.disable()
-
-  after ->
-    core.reset()
 
   it 'should load axiom-base', (done) ->
-    core.init()
+    core.init {}, @retriever
 
     core.request 'base.runtime', {}, (err, result) ->
       should.not.exist err
@@ -51,7 +28,7 @@ describe 'core.init', ->
     data = {greeting: 'hello!'}
     config =
       modules: ['sample']
-    core.init config
+    core.init config, @retriever
 
     core.request 'sample.echo', data, (err, result) ->
       should.not.exist err
@@ -63,7 +40,7 @@ describe 'core.init', ->
     config =
       blacklist: ['sample']
       modules: ['sample']
-    core.init config
+    core.init config, @retriever
 
     core.request 'sample.echo', {greeting: 'hello!'}, (err, result) ->
       should.exist err
@@ -75,21 +52,23 @@ describe 'core.init', ->
 
   it "should load a global 'axiom' file from the project root", (done) ->
     internal = require '../lib/core/internal'
-    axiomFile = require path.join(sampleProjDir, 'axiom')
+    axiomFile = require path.join(proj1Dir, 'axiom')
     should.exist axiomFile
-    core.init @retriever
+    core.init {}, @retriever
     internal.config.should.include axiomFile
     done()
 
   it "should assume an 'axiom_configs' folder containing config overrides", (done) ->
     core.init {modules: ['sample']}, @retriever
 
+    sampleExtension = require path.join(proj1Dir, 'node_modules/axiom-sample')
+
     # Given an extension with a service and corresponding config entry
-    defaultSampleConfig = sample.config.whatsMyContext
+    defaultSampleConfig = sampleExtension.config.whatsMyContext
     should.exist defaultSampleConfig
 
     # And a config override in the local project
-    overrideConfigPath = path.join sampleProjDir, 'axiom_configs', 'sample'
+    overrideConfigPath = path.join proj1Dir, 'axiom_configs/sample'
     overrideConfig = require(overrideConfigPath).whatsMyContext
     should.exist overrideConfig
 
@@ -103,28 +82,6 @@ describe 'core.init', ->
       should.exist config
       config.should.eql expectedConfig
 
-      done()
-
-  it "'retriever' in 'util' should be default instance", (done) ->
-    defaultRetriever = @retriever
-
-    # Given a service
-    server =
-      services:
-        "run/prepare": (args, fin) ->
-
-          # Then the retriever should include the default 'retriever'
-          should.exist @util
-          @util.should.include defaultRetriever
-          fin()
-
-    # When core is initialized without injecting a 'retriever'
-    core.init()
-    core.load "server", server
-
-    # And the service is called
-    core.request "server.run/prepare", {}, (err, result) ->
-      should.not.exist err
       done()
 
   it "should expose an injected 'retriever' in 'util'", (done) ->

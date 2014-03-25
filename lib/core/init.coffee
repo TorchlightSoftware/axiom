@@ -14,7 +14,9 @@ module.exports = (config, retriever) ->
   core.log.coreEntry 'init', {config, retriever}
 
   modules = config?.modules or []
-  internal.retriever = retriever or require('../retriever')
+
+  # override base retriever properties with provided retriever
+  internal.retriever = _.merge {}, require('../retriever'), retriever
 
   # Attempt to load a global 'axiom.*' file from the project root
   try
