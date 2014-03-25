@@ -7,7 +7,6 @@ send = require './send'
 
 module.exports = (channel, data, done) ->
   core = require '../core'
-  core.log.coreEntry 'delegate', {channel, data}
 
   # Same as request, but for multiple recipients on one channel.
   # Wait until we receive a response from each recipient
@@ -21,6 +20,8 @@ module.exports = (channel, data, done) ->
   if internal.links[channel]
     for l in internal.links[channel]
       waitingOn.push _.keys(internal.responders[l])...
+
+  core.log.coreEntry 'delegate', {channel, data, waitingOn}
 
   # return immediately if we have nothing to do
   if _.isEmpty waitingOn

@@ -1,5 +1,6 @@
 uuid = require 'uuid'
 logger = require 'torch'
+{inspect} = require 'util'
 
 bus = require '../bus'
 internal = require './internal'
@@ -19,6 +20,7 @@ module.exports = (channel, service) ->
 
   callback = (message, envelope) ->
     service message, (err, result) ->
+      core.log.debug "responding: #{inspect {responderId, err, result}}"
       if err?
         topic = envelope.replyTo.topic.err
         data = err
