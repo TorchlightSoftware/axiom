@@ -8,22 +8,26 @@ logger = require 'torch'
 
 module.exports = (config, retriever) ->
 
-  # yay, logging
-  core = require '../core'
-  core.wireUpLoggers(config?.loggers)
-  core.log.coreEntry 'init', {config, retriever}
-
-  modules = config?.modules or []
-
-  # override base retriever properties with provided retriever
-  internal.retriever = _.merge {}, require('../retriever'), retriever
-
   # Attempt to load a global 'axiom.*' file from the project root
   try
     _.merge internal.config, internal.retriever.retrieve('axiom')
 
-  # Merge in any programatically-passed config object
+  # Merge in any programatically-passed config options
   _.merge internal.config, config
+  Object.freeze internal.config
+
+  # override base retriever properties with provided retriever
+  internal.retriever = _.merge {}, require('../retriever'), retriever
+  Object.freeze internal.retriever
+
+  # yay, logging
+  core = require '../core'
+  core.wireUpLoggers(internal.config.loggers)
+  core.log.coreEntry 'init',
+    config: internal.config
+    retriever: internal.retriever
+
+  modules = internal.config.modules or []
 
   # Find and load modules
   pkg = internal.retriever.retrieve('package')

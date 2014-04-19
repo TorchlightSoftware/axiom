@@ -4,6 +4,7 @@ _ = require 'lodash'
 bus = require '../bus'
 internal = require './internal'
 send = require './send'
+logger = require 'torch'
 
 module.exports = (channel, data, done) ->
   core = require '../core'
@@ -73,8 +74,11 @@ module.exports = (channel, data, done) ->
       timers.clearTimeout timeoutId
 
       unless _.isEmpty errors
-        err = new Error "Errors returned by responders on channel '#{channel}'"
-        err.errors = errors
+        errArray = for responder, error of errors
+          error.err.stack
+        errText = "Received errors from channel '#{channel}':\n#{errArray.join '\n'}"
+        err = new Error errText
+        err.errors = errArray
 
       done err, results
 

@@ -21,17 +21,6 @@ module.exports = internal =
 
   retriever: undefined
 
-  contexts: {}
-
-  setDefaultContext: (ns) ->
-    internal.contexts[ns] ?= {
-      app: internal.config.app
-      axiom: require '../core'
-      util: _.merge {}, internal.retriever
-      config: {}
-    }
-    return internal.contexts[ns]
-
   reset: (done) ->
     done ?= ->
     core = require '../core'
@@ -39,7 +28,6 @@ module.exports = internal =
       internal.responders = {}
       internal.links = {}
       internal.config = defaultConfig()
-      internal.contexts = {}
 
       bus.reset()
       done()

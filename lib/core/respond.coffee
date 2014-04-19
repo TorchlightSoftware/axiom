@@ -9,18 +9,11 @@ module.exports = (channel, service) ->
   core = require '../core'
   core.log.coreEntry 'respond', {channel}
 
-  # Give each service a binding context containing the config.
-  # The context is shared between all services in a namespace.
-  [namespace] = channel.split '/'
-  service = service.bind(internal.setDefaultContext(namespace))
-
-  #logger.magenta "binding '#{channel}' to namespace '#{namespace}':", internal.contexts[namespace]
-
   responderId = uuid.v1()
 
   callback = (message, envelope) ->
     service message, (err, result) ->
-      core.log.debug "responding: #{inspect {responderId, err, result}}"
+      core.log.debug "#{channel}:#{envelope.topic} responding: #{inspect {err, result}}"
       if err?
         topic = envelope.replyTo.topic.err
         data = err

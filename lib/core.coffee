@@ -7,6 +7,9 @@ core =
 
   load: require('./core/load')
 
+  # used to load processes from Protocol
+  loadProcess: require('./core/loadProcess')
+
   # Subscribe to a response address.
   # Publish a message, with a response address in the envelope.
   # Time out based on axiom config.

@@ -17,7 +17,7 @@ module.exports = (loggers=[]) ->
         {timeStamp, data, topic} = envelope
         time = moment(timeStamp).format('YYYY/MM/DD HH:mm:ss Z')
         {color} = _.find logLevels, (l) -> topic is l.topic
-        logger[color] "[#{time} #{topic.toUpperCase()}]", data
+        logger[color] "[#{time} #{topic.toUpperCase()}]", data...
 
     logLevels.forEach ({topic, color}, index) ->
       if index <= targetIndex

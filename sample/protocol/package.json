@@ -1,0 +1,10 @@
+{
+  "name": "protocol",
+  "version": "0.0.0",
+  "description": "Sample project using Axiom with a Protocol.",
+  "main": "index.js",
+  "scripts": {
+  },
+  "author": "Brandon Mason <contact@tlsft.com>",
+  "license": "MIT"
+}

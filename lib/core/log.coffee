@@ -8,7 +8,7 @@ channel = 'axiom.log'
 api = {channel, logLevels}
 
 logLevels.forEach ({topic, color}, index) ->
-  api[topic] = (data) ->
+  api[topic] = (data...) ->
     bus.publish {channel, topic, data}
 
 api.coreEntry = (method, args) ->
