@@ -6,16 +6,16 @@ moment = require 'moment'
 
 core = require '..'
 
-optimist.usage 'Usage: axiom <moduleName> <serviceName> [<--arg> <value> ...]'
+optimist.usage 'Usage: axiom <extensionName> <serviceName> [<--arg> <value> ...]'
 parsed = optimist.options {}
 
 # Should correspond to an installed NPM module
-# named 'axiom-<moduleName>' exposing service 'serviceName'
-[moduleName, serviceName] = parsed.argv._
+# named 'axiom-<extensionName>' exposing service 'serviceName'
+[extensionName, serviceName] = parsed.argv._
 
 # TODO: Change this to instead alert specific error and print usage information
-unless moduleName
-  logger.red "Missing required positional argument: 'moduleName'"
+unless extensionName
+  logger.red "Missing required positional argument: 'extensionName'"
   logger.yellow parsed.help()
   return
 
@@ -38,7 +38,7 @@ args = _.omit parsed.argv, toOmit
 
 core.init({loggers: [{writer: 'console', level: args.log or 'info'}]})
 
-channel = "#{moduleName}.#{serviceName}"
+channel = "#{extensionName}.#{serviceName}"
 
 core.request channel, args, (err, results) ->
   if err?

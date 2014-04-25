@@ -5,15 +5,19 @@ internal = require './internal'
 request = require './request'
 respond = require './respond'
 
-module.exports = (moduleName, module={}) ->
+module.exports = (extensionName, extension) ->
   core = require '../core'
-  core.log.coreEntry 'load', {moduleName}
+  core.log.coreEntry 'load', {extensionName}
 
-  config = module.config or {}
+  unless extension?
+    core.log.warning "Loading #{extensionName} with no corresponding definition."
+    extension = {}
 
-  # Merge config overrides from '<projectRoot>/axiom/<moduleName>'
+  config = extension.config or {}
+
+  # Merge config overrides from '<projectRoot>/axiom/<extensionName>'
   try
-    projectOverrides = internal.retriever.retrieve('axiom_configs', moduleName)
+    projectOverrides = internal.retriever.retrieve('axiom_configs', extensionName)
 
   if (typeof projectOverrides) is 'function'
     projectOverrides = projectOverrides(internal.config.general)
@@ -24,32 +28,17 @@ module.exports = (moduleName, module={}) ->
   Object.freeze(config)
 
   # Initialize the services using a project-relative 'lib' resolver
-  services = law.create {services: module.services}
+  services = law.create {services: extension.services}
 
-  if module.protocol
-    for namespace, processes of module.protocol
+  # load protocol/processes if present
+  if extension.protocol
+    for namespace, processes of extension.protocol
       for processName, settings of processes
         core.loadProcess(namespace, processName, settings)
 
-  #for serviceName, options of config
-
-    #do (serviceName, options) ->
-      #serviceChannel = "#{moduleName}.#{serviceName}"
-
-      #if options.base
-        #baseChannel = "base.#{options.base}"
-        #respond serviceChannel, (args, done) ->
-          #request baseChannel, {
-            #moduleName
-            #serviceName
-            #args
-            #config: options
-            #axiom: core
-          #}, done
-
   for serviceName, serviceDef of services
     context = Object.freeze {
-      moduleName
+      extensionName
       serviceName
       general: internal.config.general
       config
@@ -60,10 +49,10 @@ module.exports = (moduleName, module={}) ->
     serviceDef = serviceDef.bind(context)
 
     # Respond at defined attachment points
-    attachments = module.attachments?[serviceName]
+    attachments = extension.attachments?[serviceName]
     if attachments
       for attach in attachments
         respond "#{attach}", serviceDef
 
     # Attach a responder at the standard location
-    respond "#{moduleName}.#{serviceName}", serviceDef
+    respond "#{extensionName}.#{serviceName}", serviceDef

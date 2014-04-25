@@ -5,8 +5,10 @@ defaultConfig = ->
   return {
     blacklist: []
     timeout: 2000
-    app: {}
+    general: {}
   }
+
+defaultRetriever = require '../retriever'
 
 # internal state to keep track of the resources that have been loaded
 module.exports = internal =
@@ -19,7 +21,7 @@ module.exports = internal =
 
   config: defaultConfig()
 
-  retriever: undefined
+  retriever: defaultRetriever
 
   reset: (done) ->
     done ?= ->
@@ -28,6 +30,7 @@ module.exports = internal =
       internal.responders = {}
       internal.links = {}
       internal.config = defaultConfig()
+      internal.retriever = defaultRetriever
 
       bus.reset()
       done()

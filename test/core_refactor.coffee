@@ -10,36 +10,6 @@ describe 'refactor', ->
   afterEach ->
     core.reset()
 
-  describe 'config', ->
-
-    it 'should be accessible within an extension', (done) ->
-      serverExtension =
-        config:
-          port: 4000
-
-        services:
-          run: (args, fin) ->
-            4000.should.eql @config.port
-            fin()
-
-      core.load 'server', serverExtension
-      core.request 'server.run', {}, done
-
-    it 'should not be accessible from another extension', (done) ->
-      irrelevantExtension =
-        config:
-          irrelevantValue: 2
-
-      serverExtension =
-        services:
-          run: (args, fin) ->
-            @config.should.not.have.key 'irrelevantValue'
-            fin()
-
-      core.load 'irrelevant', irrelevantExtension
-      core.load 'server', serverExtension
-      core.request 'server.run', {}, done
-
   describe 'attachments', ->
 
     it 'should alias services', (done) ->

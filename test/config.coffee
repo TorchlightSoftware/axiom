@@ -6,157 +6,76 @@ logger = require 'torch'
 core = require '../lib/core'
 mockRetriever = require './helpers/mockRetriever'
 
-initCore = (packages) ->
+initCoreWithMock = (packages) ->
   retriever = mockRetriever()
   _.merge retriever.packages, packages
-  core.init {timeout: 20}, retriever
+  core.init {
+    timeout: 20
+  }, retriever
 
-describe 'application config', ->
+describe 'extension config', ->
+
+  beforeEach ->
+    core.wireUpLoggers [{writer: 'console', level: 'info'}]
 
   afterEach ->
     core.reset()
 
-  it 'should expose the app config in a service', (done) ->
+  it 'should receive general config', (done) ->
 
     # Given an Axiom config with an 'app' section defined
     axiomConfig =
-      app:
+      general:
         serverPort: 4000
         apiPort: 4001
 
-    # And a run service
-    runService = (args, fin) ->
-      should.exist @app
-      @app.should.eql axiomConfig.app
-      fin()
+    # And an extension config as a function of the app config
+    extensionConfig = (general) ->
+
+      # It should return without its assertions failing
+      should.exist general
+      general.should.eql axiomConfig.general
+      done()
+      return general
 
     # When core is initialized
-    initCore {
-      axiom: axiomConfig
+    initCoreWithMock {
+      package:
+        dependencies:
+          'axiom-server': '*'
       node_modules:
-        'axiom-server':
-          services:
-            run: runService
-    }
-
-    # And the service is called
-    core.request 'server.run', {}, (err, result) ->
-
-      # It should return without its assertions failing
-      should.not.exist err
-      done()
-
-  it 'should expose an empty object for the app config', (done) ->
-
-    # Given an Axiom config with an 'app' section defined
-    axiomConfig = {}
-
-    # And a run service
-    runService = (args, fin) ->
-      should.exist @app
-      @app.should.eql {}
-      fin()
-
-    # When core is initialized
-    initCore {
-      axiom: axiomConfig
-      node_modules:
-        'axiom-server':
-          services:
-            run: runService
-    }
-
-    # And the service is called
-    core.request 'server.run', {}, (err, result) ->
-
-      # It should return without its assertions failing
-      should.not.exist err
-      done()
-
-  it 'should expose app config to a base script', (done) ->
-
-    # Given an Axiom config with an 'app' section defined
-    axiomConfig =
-      app:
-        serverPort: 4000
-        apiPort: 4001
-
-    # And a run service that inherits from a base
-    baseService = (args, next) ->
-      should.exist @app
-      @app.should.eql axiomConfig.app
-      next()
-
-    # When core is initialized
-    initCore {
-      axiom: axiomConfig
-      node_modules:
-        'axiom-server':
-          config:
-            run:
-              base: 'runtime'
-        'axiom-base':
-          {
-            services:
-              runtime: baseService
-          }
-    }
-
-    # And the service is called
-    core.request 'server.run', {}, (err, result) ->
-
-      # It should return without its assertions failing
-      should.not.exist err
-      done()
-
-  it 'should expose app config to module configs', (done) ->
-
-    # Given an Axiom config with an 'app' section defined
-    axiomConfig =
-      app:
-        serverPort: 4000
-        apiPort: 4001
-
-    # And a module config as a function of the app config
-    moduleConfig = (app) ->
-
-      # It should return without its assertions failing
-      should.exist app
-      app.should.eql axiomConfig.app
-      done()
-      return app
-
-    # When core is initialized
-    initCore {
+        'axiom-server': {}
       axiom: axiomConfig
       axiom_configs:
-        server: moduleConfig
+        server: extensionConfig
+      #node_modules:
+        #'axiom-server': {}
     }
 
-  it 'should load an object based module config', (done) ->
+  it 'should be accessible within an extension', (done) ->
+    serverExtension =
+      config:
+        port: 4000
 
-    # Given a module config
-    moduleConfig = {run: {foo: 'yes'}}
+      services:
+        run: (args, fin) ->
+          4000.should.eql @config.port
+          fin()
 
-    # And a run service
-    runService = (args, fin) ->
-      should.exist @config
-      @config.should.eql moduleConfig.run
-      fin()
+    core.load 'server', serverExtension
+    core.request 'server.run', {}, done
 
-    # When core is initialized
-    initCore {
-      axiom_configs:
-        server: moduleConfig
-      node_modules:
-        'axiom-server':
-          services:
-            run: runService
-    }
+  it 'should not be accessible from another extension', (done) ->
+    irrelevantExtension =
+      config:
+        irrelevantValue: 2
 
-    # And the service is called
-    core.request 'server.run', {}, (err, result) ->
+    serverExtension =
+      services:
+        run: (args, fin) ->
+          @config.should.not.have.key 'irrelevantValue'
+          fin()
 
-      # It should return without its assertions failing
-      should.not.exist err
-      done()
+    core.load 'irrelevant', irrelevantExtension
+    core.load 'server', serverExtension
+    core.request 'server.run', {}, done

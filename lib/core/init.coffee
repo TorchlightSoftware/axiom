@@ -1,24 +1,23 @@
 _ = require 'lodash'
 
 getAxiomModules = require '../getAxiomModules'
-
 internal = require './internal'
 load = require './load'
-logger = require 'torch'
 
 module.exports = (config, retriever) ->
 
+  # override base retriever properties with provided retriever
+  internal.retriever = _.merge {}, internal.retriever, retriever
+  Object.freeze internal.retriever
+
   # Attempt to load a global 'axiom.*' file from the project root
   try
-    _.merge internal.config, internal.retriever.retrieve('axiom')
+    projectConfig = internal.retriever.retrieve('axiom')
+    _.merge internal.config, projectConfig
 
   # Merge in any programatically-passed config options
   _.merge internal.config, config
   Object.freeze internal.config
-
-  # override base retriever properties with provided retriever
-  internal.retriever = _.merge {}, require('../retriever'), retriever
-  Object.freeze internal.retriever
 
   # yay, logging
   core = require '../core'
@@ -33,10 +32,6 @@ module.exports = (config, retriever) ->
   pkg = internal.retriever.retrieve('package')
   internal.modules = getAxiomModules(pkg, internal.config.blacklist)
   internal.modules = _.union internal.modules, modules
-
-  # Load the 'axiom-base'
-  unless 'base' in internal.modules
-    load 'base', internal.retriever.retrieveExtension 'base'
 
   # Require each axiom module.
   # Pass to load.

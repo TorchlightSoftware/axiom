@@ -6,16 +6,18 @@ module.exports = ->
 
     # a mock of packages returned
     packages: {
-      package:
-        dependencies:
-          'axiom-server': '*'
-      node_modules:
-        'axiom-base':
-          {
-            services:
-              runtime: (args, next) ->
-                next null, {message: 'axiom-base'}
-          }
+
+      # core axiom config
+      axiom: {}
+
+      # extension configs
+      axiom_configs: {}
+
+      # package.json
+      package: {}
+
+      # put module name, export contents as key/value
+      node_modules: {}
     }
 
     projectRoot: ''
