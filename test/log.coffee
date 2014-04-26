@@ -1,4 +1,5 @@
 should = require 'should'
+logger = require 'torch'
 
 bus = require '../lib/bus'
 core = require '..'
@@ -31,7 +32,7 @@ describe 'log', ->
 
           # We should receive a log message
           should.exist data
-          data.should.eql color
+          data.should.eql [color]
           done()
 
         # When we log it via the given topic
@@ -40,18 +41,18 @@ describe 'log', ->
 methodTests = [
   method: 'init'
   args: ['config', 'retriever']
-  expected: "Calling 'core.init' with args: { config: 'config', retriever: 'retriever' }"
+  expected: "Calling 'core.init' with args: { config: { blacklist: [], timeout: 2000, general: {} },\n  retriever: \n   { projectRoot: '/Users/brandon/Projects/Code/js/axiom',\n     rel: [Function],\n     retrieve: [Function],\n     retrieveExtension: [Function] } }"
  ,
   method: 'reset'
   args: []
   expected: "Calling 'core.reset'"
  ,
   method: 'load'
-  args: ['moduleName']
-  expected: "Calling 'core.load' with args: { moduleName: 'moduleName' }"
+  args: ['extensionName']
+  expected: "Calling 'core.load' with args: { extensionName: 'extensionName' }"
  ,
   method: 'request'
-  args: ['channel', 'data']
+  args: ['channel', 'data', ->]
   expected: "Calling 'core.request' with args: { channel: 'channel', data: 'data' }"
 
  # this includes a UUID now and is non-trivial to test
@@ -90,9 +91,9 @@ describe "log, 'core' API", ->
           should.exist data
 
           # With the expected details
-          data.should.eql expected
+          data.should.eql [expected]
 
           done()
 
         # When we call the given public 'core' method
-        try core[method](args...)
+        core[method] args...
