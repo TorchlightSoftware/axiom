@@ -3,18 +3,20 @@ logger = require 'torch'
 
 core = require '..'
 
-
 describe 'core.load', ->
+  beforeEach ->
+    core.wireUpLoggers [{writer: 'console', level: 'info'}]
+
   afterEach ->
     core.reset()
 
-  it 'should load a default base', (done) ->
-    module =
+  it 'should load a service', (done) ->
+    server =
       services:
         run: (args, done) ->
           done null, {status: 'success'}
 
-    core.load 'server', module
+    core.load 'server', server
     core.request 'server.run', {}, (err, data) ->
       should.not.exist err
       should.exist data
@@ -22,37 +24,14 @@ describe 'core.load', ->
 
       done()
 
-
-  it 'should load a referenced base', (done) ->
-    core.load 'base', {
-      services:
-        lifecycle: (args, done) ->
-          done null, args.args
-    }
-
-    core.load 'server', {
-      config:
-        run:
-          base: 'lifecycle'
-    }
-
-    data = {x: 111}
-    core.request 'server.run', data, (err, result) ->
-      should.not.exist err
-      should.exist result
-      result.should.eql data
-
-      done()
-
-
   it 'should load a law service', (done) ->
-    module =
+    server =
       services:
         run:
           service: (args, done) ->
             done null, {status: 'success'}
 
-    core.load 'server', module
+    core.load 'server', server
     core.request 'server.run', {}, (err, data) ->
       should.not.exist err
       should.exist data
@@ -60,114 +39,78 @@ describe 'core.load', ->
 
       done()
 
-
-  it 'should load an aliased namespace', (done) ->
-    module =
-      config:
-        run:
-          extends: 'server'
-          foo: 1
+  it 'should alias services', (done) ->
+    connectExtension =
+      attachments:
+        startServer: ['server.run/load']
       services:
-        'run/prepare': (args, done) ->
-          should.exist @config.foo
-          @config.foo.should.eql 1
-          done null, {status: 'prepared'}
+        startServer: (args, fin) ->
+          fin()
 
-    core.load 'extension', module
-    core.request 'server.run/prepare', {}, (err, data) ->
-      should.not.exist err
-      should.exist data
-      data.should.eql {status: 'prepared'}
-
-      done()
-
-  it 'aliased namespace should share context', (done) ->
-    server =
-      config:
-        run:
-          foo: 1
-
-    extension =
-      config:
-        run:
-          extends: 'server'
-      services:
-        'run/prepare': ->
-          should.exist @config?.foo
-          @config?.foo.should.eql 1
-          done()
-
-    core.load 'server', server
-    core.load 'extension', extension
-    core.request 'server.run/prepare', {}, (err, data) ->
-
+    core.load 'connect', connectExtension
+    core.request 'server.run/load', {}, done
 
   it 'should receive axiom/config in context', (done) ->
     robot =
       config:
-        crushLikeBug:
-          strength: 5
+        strength: 5
       services:
         crushLikeBug: (args, fin) ->
           should.exist @axiom, 'expected axiom in context'
-
-          @axiom.should.have.keys ['init', 'reset', 'load', 'request', 'delegate',
-                                    'respond', 'send', 'listen', 'log', 'wireUpLoggers',
-                                    'link']
-
           should.exist @config, 'expected config in context'
-          @config.should.eql {
-            strength: 5
-          }
+          @config.should.eql robot.config
 
           fin()
 
     core.load "robot", robot
     core.request "robot.crushLikeBug", {}, done
 
-  it 'should share context between services in a namespace', (done) ->
-    server =
-      config:
-        run:
-          port: 4000
+  describe 'protocol', ->
 
-      services:
-        "run/prepare": (args, fin) ->
-          @foo = 7
-          fin()
+    it 'should create an agent process', (done) ->
+      protocol =
+        protocol:
+          server:
+            run:
+              type: 'agent'
+              signals:
+                start: ['load']
+                stop: ['unload']
 
-        "run/boot": (args, fin) ->
-          should.exist @foo, 'expected foo in context'
-          @foo.should.eql 7
-          fin()
+      # if this doesn't get called our test will time out
+      loader = (args, fin) ->
+        done()
 
-    core.load "server", server
-    core.request "server.run/prepare", {}, (err, result) ->
-      should.not.exist err
-      core.request "server.run/boot", {}, done
+      unloaded = false
+      unloader = (args, fin) ->
+        unloaded = true
+        fin()
 
-  it 'should not share context between services in different namespaces', (done) ->
-    server =
-      config:
-        run:
-          port: 4000
-        test:
-          timeout: 200
+      core.load 'protocol', protocol
+      core.respond 'server.run/load', loader
+      core.respond 'server.run/unload', unloader
+      core.request 'server.run', {}, ->
+        if unloaded
+          throw new Error 'agent should not unload'
 
-      services:
-        "run/prepare": (args, fin) ->
-          should.exist @config?.port, 'expected port in context'
-          @config.port.should.eql 4000
-          @foo = 7
-          fin()
+    it 'should create a task process', (done) ->
+      protocol =
+        protocol:
+          server:
+            run:
+              type: 'task'
+              signals:
+                start: ['load']
+                stop: ['unload']
 
-        "test/prepare": (args, fin) ->
-          should.exist @config?.timeout, 'expected timeout in context'
-          @config.timeout.should.eql 200
-          should.not.exist @foo
-          fin()
+      # if this doesn't get called our test will time out
+      unloaded = false
+      unloader = (args, fin) ->
+        unloaded = true
+        fin()
 
-    core.load "server", server
-    core.request "server.run/prepare", {}, (err, result) ->
-      should.not.exist err
-      core.request "server.test/prepare", {}, done
+      core.load 'protocol', protocol
+      core.respond 'server.run/unload', unloader
+      core.request 'server.run', {}, ->
+        unloaded.should.eql true
+        done()

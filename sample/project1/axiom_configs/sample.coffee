@@ -1,3 +1,2 @@
 module.exports =
-  whatsMyContext:
-    translateMe: 'hola!'
+  translateMe: 'hola!'

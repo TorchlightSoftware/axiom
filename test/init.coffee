@@ -15,15 +15,6 @@ describe 'core.init', ->
   afterEach ->
     core.reset()
 
-  it 'should load axiom-base', (done) ->
-    core.init {}, @retriever
-
-    core.request 'base.runtime', {}, (err, result) ->
-      should.not.exist err
-      should.exist result
-      result.should.eql {message: 'axiom-base'}
-      done()
-
   it 'should dynamically load a module based on name', (done) ->
     data = {greeting: 'hello!'}
     config =
@@ -58,18 +49,17 @@ describe 'core.init', ->
     internal.config.should.include axiomFile
     done()
 
-  it "should assume an 'axiom_configs' folder containing config overrides", (done) ->
+  it "should load a config override from the axiom_configs folder", (done) ->
     core.init {modules: ['sample']}, @retriever
 
     sampleExtension = require path.join(proj1Dir, 'node_modules/axiom-sample')
 
     # Given an extension with a service and corresponding config entry
-    defaultSampleConfig = sampleExtension.config.whatsMyContext
+    defaultSampleConfig = sampleExtension.config
     should.exist defaultSampleConfig
 
     # And a config override in the local project
-    overrideConfigPath = path.join proj1Dir, 'axiom_configs/sample'
-    overrideConfig = require(overrideConfigPath).whatsMyContext
+    overrideConfig = require path.join(proj1Dir, 'axiom_configs/sample')
     should.exist overrideConfig
 
     expectedConfig = _.merge {}, defaultSampleConfig, overrideConfig
