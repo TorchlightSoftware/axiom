@@ -34,14 +34,14 @@ removeTimestamps = (output) ->
     return {source, message}
 
 tests = [
-  description: "should fail with a help message if missing 'moduleName'"
+  description: "should fail with a help message if missing 'extensionName'"
   args: []
   expected: [
     source: 'stdout'
-    message: "Missing required positional argument: 'moduleName'\n"
+    message: "Missing required positional argument: 'extensionName'\n"
    ,
     source: 'stdout'
-    message: 'Usage: axiom <moduleName> <serviceName> [<--arg> <value> ...]\n\n\n'
+    message: 'Usage: axiom <extensionName> <serviceName> [<--arg> <value> ...]\n\n\n'
   ]
  ,
   description: "should fail with a help message if missing 'serviceName'"
@@ -51,7 +51,7 @@ tests = [
     message: "Missing required positional argument: 'serviceName'\n"
    ,
     source: 'stdout'
-    message: 'Usage: axiom <moduleName> <serviceName> [<--arg> <value> ...]\n\n\n'
+    message: 'Usage: axiom <extensionName> <serviceName> [<--arg> <value> ...]\n\n\n'
   ]
  ,
   description: 'should start the server'
@@ -76,10 +76,10 @@ logTests = [
     #message: "Calling 'core.init' with args: { config: undefined, retriever: undefined }\n"
    #,
     #source: 'stdout'
-    #message: "Calling 'core.load' with args: { moduleName: 'base' }\n"
+    #message: "Calling 'core.load' with args: { extensionName: 'base' }\n"
    #,
     #source: 'stdout'
-    #message: "Calling 'core.load' with args: { moduleName: 'hello' }\n"
+    #message: "Calling 'core.load' with args: { extensionName: 'hello' }\n"
    #,
     #source: 'stdout'
     #message: "Calling 'core.respond' with args: { channel: 'hello.world' }\n"

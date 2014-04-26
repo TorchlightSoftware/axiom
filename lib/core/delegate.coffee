@@ -75,10 +75,10 @@ module.exports = (channel, data, done) ->
 
       unless _.isEmpty errors
         errArray = for responder, error of errors
-          error.err.stack
+          error.err.message
         errText = "Received errors from channel '#{channel}':\n#{errArray.join '\n'}"
         err = new Error errText
-        err.errors = errArray
+        err.errors = errors
 
       done err, results
 

@@ -187,21 +187,21 @@ describe 'core.delegate', ->
 
     core.delegate channel, {}, (err, results) ->
       should.exist err
-      expectedMsg = "Errors returned by responders on channel '#{channel}'"
+      expectedMsg = "Received errors from channel '#{channel}':\n#{testError.message}"
       err.message.should.eql expectedMsg
 
-      should.exist err.errors
+      should.exist err.errors, 'expected errors'
       subErrors = (e.err for e in _.values err.errors)
-      should.exist subErrors
+      should.exist subErrors, 'expected subErrors'
       [subErr] = subErrors
-      should.exist subErr
+      should.exist subErr, 'expected subErr'
       subErr.should.eql testError
 
-      should.exist results
+      should.exist results, 'expected results'
       values = _.values results
-      should.exist values
+      should.exist values, 'expected values'
       [result] = values
-      should.exist result
+      should.exist result, 'expected result'
       result.data.should.eql testResponse
 
       done()
@@ -214,12 +214,13 @@ describe 'core.delegate', ->
       next null, wontTimeOutMsg
 
     # This WILL time out
-    core.respond channel, (message, next) ->
+    responderId = core.respond channel, (message, next) ->
       # next() will never get called.
 
     core.delegate channel, {}, (err, results) ->
       should.exist err
-      expectedMsg = "Errors returned by responders on channel '#{channel}'"
+
+      expectedMsg = "Received errors from channel '#{channel}':\nResponder with id #{responderId} timed out on channel '#{channel}'"
       err.message.should.eql expectedMsg
 
       should.exist err.errors

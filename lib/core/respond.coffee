@@ -40,3 +40,6 @@ module.exports = (channel, service) ->
     channel: channel
     topic: 'request.#'
     callback: callback
+
+  # return responderId for test/verification purposes
+  return responderId
