@@ -4,7 +4,6 @@ _ = require 'lodash'
 bus = require '../bus'
 internal = require './internal'
 send = require './send'
-logger = require 'torch'
 
 module.exports = (channel, data, done) ->
   core = require '../core'
@@ -53,20 +52,24 @@ module.exports = (channel, data, done) ->
   timeoutId = timers.setTimeout onTimeout, timeout
 
   callback = (message, envelope) ->
-    {responderId} = envelope
+    {responderId, extension} = envelope
+    extension ?= responderId
+
     _.pull waitingOn, responderId
 
     [condition, middle..., topicId] = envelope.topic.split('.')
 
     switch condition
+
       when 'err'
-        errors[responderId] =
-          err: message
-          envelope: envelope
+        errors[extension] = message
+
+      # merge the original input with the new message
       when 'success'
-        results[responderId] =
-          data: message
-          envelope: envelope
+        if data.__delegation_result
+          results[extension] = _.merge {}, data[extension], message
+        else
+          results[extension] = _.merge {}, data, message
 
     if waitingOn.length is 0
       errSub.unsubscribe()
@@ -75,11 +78,13 @@ module.exports = (channel, data, done) ->
 
       unless _.isEmpty errors
         errArray = for responder, error of errors
-          error.err.message
+          error.message
         errText = "Received errors from channel '#{channel}':\n#{errArray.join '\n'}"
         err = new Error errText
         err.errors = errors
 
+      results.__delegation_result = true
+      results.__input = data
       done err, results
 
   # Subscribe to the 'err' response for topicId

@@ -47,6 +47,7 @@ module.exports = (extensionName, extension) ->
     }
 
     serviceDef = serviceDef.bind(context)
+    serviceDef.extension = extensionName
 
     # Respond at defined attachment points
     attachments = extension.attachments?[serviceName]

@@ -65,6 +65,18 @@ describe 'core.load', ->
     core.load "robot", robot
     core.request "robot.crushLikeBug", {}, done
 
+  it 'should attach the extension name to services', (done) ->
+    robot =
+      services:
+        crushLikeBug: (args, fin) ->
+          fin()
+
+    core.load "robot", robot
+    core.send "robot.crushLikeBug", {}
+    core.listen 'robot.crushLikeBug', 'success.#', (err, envelope) ->
+      envelope.extension.should.eql 'robot'
+      done()
+
   describe 'protocol', ->
 
     it 'should create an agent process', (done) ->

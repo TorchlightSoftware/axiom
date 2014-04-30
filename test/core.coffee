@@ -151,27 +151,18 @@ describe 'core.delegate', ->
   it 'should should receive multiple responses', (done) ->
     channel = 'testChannel'
 
-    core.respond channel, (message, next) ->
+    res1 = core.respond channel, (message, next) ->
       next null, {helloFrom: 'responderA'}
 
-    core.respond channel, (message, next) ->
+    res2 = core.respond channel, (message, next) ->
       next null, {helloFrom: 'responderB'}
 
     core.delegate channel, {}, (err, results) ->
       should.not.exist err
       should.exist results
 
-      values = _.values results
-      should.exist values
-
-      data = _.pluck values, 'data'
-      should.exist data
-
-      data.should.eql [
-        { helloFrom: 'responderA' }
-        { helloFrom: 'responderB' }
-      ]
-
+      results[res1].should.eql { helloFrom: 'responderA' }
+      results[res2].should.eql { helloFrom: 'responderB' }
       done()
 
   it 'should return an err when a responder returns one', (done) ->
@@ -191,7 +182,7 @@ describe 'core.delegate', ->
       err.message.should.eql expectedMsg
 
       should.exist err.errors, 'expected errors'
-      subErrors = (e.err for e in _.values err.errors)
+      subErrors = _.values err.errors
       should.exist subErrors, 'expected subErrors'
       [subErr] = subErrors
       should.exist subErr, 'expected subErr'
@@ -202,7 +193,7 @@ describe 'core.delegate', ->
       should.exist values, 'expected values'
       [result] = values
       should.exist result, 'expected result'
-      result.data.should.eql testResponse
+      result.should.eql testResponse
 
       done()
 
@@ -210,36 +201,115 @@ describe 'core.delegate', ->
     channel = 'testChannel'
 
     wontTimeOutMsg = {message: "I won't time out"}
-    core.respond channel, (message, next) ->
+    successId = core.respond channel, (message, next) ->
       next null, wontTimeOutMsg
 
     # This WILL time out
-    responderId = core.respond channel, (message, next) ->
+    errId = core.respond channel, (message, next) ->
       # next() will never get called.
 
     core.delegate channel, {}, (err, results) ->
       should.exist err
 
-      expectedMsg = "Received errors from channel '#{channel}':\nResponder with id #{responderId} timed out on channel '#{channel}'"
+      expectedMsg = "Received errors from channel '#{channel}':\nResponder with id #{errId} timed out on channel '#{channel}'"
       err.message.should.eql expectedMsg
 
       should.exist err.errors
 
-      [responderId] = _.keys err.errors
-      should.exist responderId
+      subErr = err.errors[errId]
+      should.exist subErr, 'expected subErr'
 
-      subErr = err.errors[responderId]?.err
-      should.exist subErr
-
-      errMsg = "Responder with id #{responderId} timed out on channel '#{channel}'"
+      errMsg = "Responder with id #{errId} timed out on channel '#{channel}'"
       subErr.message.should.eql errMsg
 
       should.exist results
-      [result] = _.values results
+      result = results[successId]
       should.exist result
-      should.exist result.data
-      result.data.should.eql wontTimeOutMsg
+      result.should.eql wontTimeOutMsg
 
+      done()
+
+  it 'should collect args', (done) ->
+
+    # Given a pitch function
+    pitch = (args, fin) ->
+      fin null, {foo: 1}
+    pitch.extension = 'sandbox'
+
+    # And I attach the endpoints
+    responderId = core.respond 'pitch', pitch
+
+    # When I delegate
+    core.delegate 'pitch', {input: 2}, (err, result) ->
+      should.not.exist err
+      should.exist result?.sandbox, 'expected responder data'
+      should.exist result.__delegation_result, 'expected __delegation_result'
+      result.__delegation_result.should.eql true
+      should.exist result.__input, 'expected __input'
+      result.__input.should.eql {input: 2}
+      result.sandbox.should.eql {input: 2, foo: 1}
+      done()
+
+  it 'should collect errors', (done) ->
+
+    # Given an error service
+    error = (args, fin) ->
+      fin(new Error 'oops')
+    error.extension = 'sandbox'
+
+    # And I attach the endpoints
+    responderId = core.respond 'error', error
+
+    # When I delegate
+    core.delegate 'error', {something: 1}, (err, result) ->
+      should.exist err?.errors?.sandbox, 'expected err for responder'
+      should.exist result, 'expected result'
+      result.should.eql
+        __delegation_result: true
+        __input: {something: 1}
+      done()
+
+  it 'should distribute args', (done) ->
+
+    # Given a sandbox extension
+    responderId = core.load 'sandbox',
+      services:
+        pitch: (args, fin) ->
+          args.should.eql {bar: 2, foo: 1}
+          fin null, args
+
+    args =
+      __delegation_result: true
+      __input: {bar: 2}
+      sandbox: {foo: 1}
+      other: {value: "shouldn't see"}
+
+    # When I delegate
+    core.delegate 'sandbox.pitch', args, (err, result) ->
+      should.not.exist err
+      should.exist result?.sandbox, 'expected responder data'
+      result.sandbox.should.eql {bar: 2, foo: 1}
+      done()
+
+  it 'should use input args', (done) ->
+
+    # Given a sandbox extension
+    responderId = core.load 'sandbox',
+      services:
+        pitch: (args, fin) ->
+          args.should.eql {bar: 2}
+          fin null, args
+
+    args =
+      __delegation_result: true
+      __input: {bar: 2}
+      other: {value: "shouldn't see"}
+
+    # When I delegate
+    core.delegate 'sandbox.pitch', args, (err, result) ->
+      should.not.exist err
+      should.exist result?.sandbox, 'expected responder data'
+      result.sandbox.should.eql {bar: 2}
       done()
 
 describe 'core.listen', ->

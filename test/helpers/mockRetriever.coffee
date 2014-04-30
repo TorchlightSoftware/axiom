@@ -1,37 +1,37 @@
 {join} = require 'path'
 logger = require 'torch'
+_ = require 'lodash'
 
-module.exports = ->
-  retriever =
+retriever =
 
-    # a mock of packages returned
-    packages: {
+  # a mock of packages returned
+  packages: {
 
-      # core axiom config
-      axiom: {}
+    # core axiom config
+    axiom: {}
 
-      # extension configs
-      axiom_configs: {}
+    # extension configs
+    axiom_configs: {}
 
-      # package.json
-      package: {}
+    # package.json
+    package: {}
 
-      # put module name, export contents as key/value
-      node_modules: {}
-    }
+    # put module name, export contents as key/value
+    node_modules: {}
+  }
 
-    projectRoot: ''
-    rel: (args...) ->
-      join retriever.projectRoot, args...
+  projectRoot: ''
+  rel: (args...) ->
+    join @projectRoot, args...
 
-    retrieve: (args...) ->
-      #logger.yellow 'retrieving:', args
-      result = retriever.packages
-      for path in args
-        result = result[path]
-      return result
+  retrieve: (args...) ->
+    #logger.yellow 'retrieving:', args
+    result = @packages
+    for path in args
+      result = result[path]
+    return result
 
-    retrieveExtension: (name) ->
-      retriever.retrieve 'node_modules', "axiom-#{name}"
+  retrieveExtension: (name) ->
+    @retrieve 'node_modules', "axiom-#{name}"
 
-  return retriever
+module.exports = -> _.cloneDeep retriever

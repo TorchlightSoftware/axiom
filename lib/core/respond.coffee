@@ -1,6 +1,6 @@
 uuid = require 'uuid'
-logger = require 'torch'
 {inspect} = require 'util'
+_ = require 'lodash'
 
 bus = require '../bus'
 internal = require './internal'
@@ -12,6 +12,9 @@ module.exports = (channel, service) ->
   responderId = uuid.v1()
 
   callback = (message, envelope) ->
+    if message.__delegation_result
+      message = _.merge {}, message.__input, message[service.extension]
+
     service message, (err, result) ->
       core.log.debug "#{channel}:#{envelope.topic} responding: #{inspect {err, result}}"
       if err?
@@ -26,6 +29,7 @@ module.exports = (channel, service) ->
         topic: topic
         data: data
         responderId: responderId
+        extension: service.extension
 
   # Create a unique identifier for this responder
   callback.responderId = responderId

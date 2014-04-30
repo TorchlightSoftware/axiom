@@ -23,7 +23,7 @@ describe 'extension config', ->
 
   it 'should receive general config', (done) ->
 
-    # Given an Axiom config with an 'app' section defined
+    # Given an Axiom config with a 'general' section defined
     axiomConfig =
       general:
         serverPort: 4000
