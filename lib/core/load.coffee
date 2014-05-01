@@ -40,8 +40,8 @@ module.exports = (extensionName, extension) ->
     context = Object.freeze {
       extensionName
       serviceName
-      general: internal.config.general
       config
+      general: internal.config.general
       axiom: core
       util: internal.retriever
     }

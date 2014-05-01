@@ -20,6 +20,9 @@ core =
   # Sends acknowledgement, error, completion to replyTo channels
   respond: require('./core/respond')
 
+  # Remove the responder once it has replied once
+  respondOnce: require('./core/respondOnce')
+
   # Just send the message
   send: require('./core/send')
 

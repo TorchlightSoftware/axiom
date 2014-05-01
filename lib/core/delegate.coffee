@@ -7,6 +7,7 @@ send = require './send'
 
 module.exports = (channel, data, done) ->
   core = require '../core'
+  data ?= {}
 
   # Same as request, but for multiple recipients on one channel.
   # Wait until we receive a response from each recipient
@@ -66,8 +67,9 @@ module.exports = (channel, data, done) ->
 
       # merge the original input with the new message
       when 'success'
-        if data.__delegation_result
-          results[extension] = _.merge {}, data[extension], message
+        if data?.__delegation_result
+          base = data[extension] or data.__input
+          results[extension] = _.merge {}, base, message
         else
           results[extension] = _.merge {}, data, message
 
@@ -84,7 +86,7 @@ module.exports = (channel, data, done) ->
         err.errors = errors
 
       results.__delegation_result = true
-      results.__input = data
+      results.__input = data.__input or data
       done err, results
 
   # Subscribe to the 'err' response for topicId

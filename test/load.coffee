@@ -105,7 +105,7 @@ describe 'core.load', ->
         if unloaded
           throw new Error 'agent should not unload'
 
-    it 'should create a task process', (done) ->
+    it 'should call unload on a task process', (done) ->
       protocol =
         protocol:
           server:
@@ -126,3 +126,85 @@ describe 'core.load', ->
       core.request 'server.run', {}, ->
         unloaded.should.eql true
         done()
+
+    it 'should pass unload args through stages', (done) ->
+
+      protocol =
+        protocol:
+          server:
+            run:
+              type: 'task'
+              signals:
+                start: ['load', 'link']
+
+        attachments:
+          loader: ['server.run/load']
+          linker: ['server.run/link']
+
+        services:
+          loader: (args, fin) ->
+            args.should.eql {a: 1}
+            fin null, {b: 2}
+
+          linker: (args, fin) ->
+            args.should.eql {a: 1, b: 2}
+            fin null, {c: 3}
+
+      core.load 'protocol', protocol
+      core.request 'server.run', {a: 1}, (err, result) ->
+        should.not.exist err, 'expected no err'
+        should.exist result, 'expected result'
+        done()
+
+    it 'should pass "unload" args from "load"', (done) ->
+      protocol =
+        protocol:
+          server:
+            run:
+              type: 'task'
+              signals:
+                start: ['load']
+                stop: ['unload']
+
+        attachments:
+          loader: ['server.run/load']
+          unloader: ['server.run/unload']
+
+        services:
+          loader: (args, fin) ->
+            args.should.eql {a: 1}
+            fin null, {b: 2}
+
+          unloader: (args, fin) ->
+            args.should.eql {a: 1, b: 2}
+            fin null, {c: 3}
+
+      core.load 'protocol', protocol
+      core.request 'server.run', {a: 1}, (err, result) ->
+        should.not.exist err, 'expected no err'
+        should.exist result, 'expected result'
+        done()
+
+    it 'should call unload when an agent is killed', (done) ->
+      protocol =
+        protocol:
+          server:
+            run:
+              type: 'agent'
+              signals:
+                stop: ['unload']
+
+        attachments:
+          unloader: ['server.run/unload']
+
+        services:
+
+          # if this doesn't get called our test will time out
+          unloader: (args, fin) ->
+            fin()
+            done()
+
+
+      core.load 'protocol', protocol
+      core.request 'server.run', {}, ->
+        core.request 'server.run/stop', {}, ->

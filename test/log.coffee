@@ -62,7 +62,7 @@ methodTests = [
   #expected: "Calling 'core.delegate' with args: { channel: 'channel', data: 'data' }"
  ,
   method: 'respond'
-  args: ['channel']
+  args: ['channel', ->]
   expected: "Calling 'core.respond' with args: { channel: 'channel' }"
  ,
   method: 'send'

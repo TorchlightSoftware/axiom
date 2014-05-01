@@ -6,13 +6,15 @@ bus = require '../bus'
 internal = require './internal'
 
 module.exports = (channel, service) ->
+  return unless (typeof service) is 'function'
+
   core = require '../core'
   core.log.coreEntry 'respond', {channel}
 
   responderId = uuid.v1()
 
   callback = (message, envelope) ->
-    if message.__delegation_result
+    if message?.__delegation_result
       message = _.merge {}, message.__input, message[service.extension]
 
     service message, (err, result) ->
@@ -40,10 +42,13 @@ module.exports = (channel, service) ->
     callback: callback
 
   # Actually subscribe as a responder
-  bus.subscribe
+  subscription = bus.subscribe
     channel: channel
     topic: 'request.#'
     callback: callback
 
-  # return responderId for test/verification purposes
-  return responderId
+  subscription.responderId = responderId
+
+  # return subscription so it can be cancelled
+  # and the responderId can be compared
+  return subscription

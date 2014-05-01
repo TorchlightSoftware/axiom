@@ -151,11 +151,15 @@ describe 'core.delegate', ->
   it 'should should receive multiple responses', (done) ->
     channel = 'testChannel'
 
-    res1 = core.respond channel, (message, next) ->
+    sub = core.respond channel, (message, next) ->
       next null, {helloFrom: 'responderA'}
 
-    res2 = core.respond channel, (message, next) ->
+    res1 = sub.responderId
+
+    sub = core.respond channel, (message, next) ->
       next null, {helloFrom: 'responderB'}
+
+    res2 = sub.responderId
 
     core.delegate channel, {}, (err, results) ->
       should.not.exist err
@@ -201,12 +205,16 @@ describe 'core.delegate', ->
     channel = 'testChannel'
 
     wontTimeOutMsg = {message: "I won't time out"}
-    successId = core.respond channel, (message, next) ->
+    sub = core.respond channel, (message, next) ->
       next null, wontTimeOutMsg
 
+    successId = sub.responderId
+
     # This WILL time out
-    errId = core.respond channel, (message, next) ->
+    sub = core.respond channel, (message, next) ->
       # next() will never get called.
+
+    errId = sub.responderId
 
     core.delegate channel, {}, (err, results) ->
       should.exist err
