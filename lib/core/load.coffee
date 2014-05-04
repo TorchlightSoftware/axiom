@@ -4,6 +4,7 @@ law = require 'law'
 internal = require './internal'
 request = require './request'
 respond = require './respond'
+getSafeCore = require '../getSafeCore'
 
 module.exports = (extensionName, extension) ->
   core = require '../core'
@@ -36,13 +37,14 @@ module.exports = (extensionName, extension) ->
       for processName, settings of processes
         core.loadProcess(namespace, processName, settings)
 
+  safeCore = getSafeCore(extensionName, core)
   for serviceName, serviceDef of services
     context = Object.freeze {
       extensionName
       serviceName
       config
       general: internal.config.general
-      axiom: core
+      axiom: safeCore
       util: internal.retriever
     }
 

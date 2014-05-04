@@ -65,6 +65,18 @@ describe 'core.load', ->
     core.load "robot", robot
     core.request "robot.crushLikeBug", {}, done
 
+  it "should limit an extension's messages to its namespace", (done) ->
+    robot =
+      services:
+        crushLikeBug: (args, fin) ->
+          @axiom.send 'reportStatus', {status: 'success'}
+          fin()
+
+    core.load 'robot', robot
+    core.listen 'robot.reportStatus', '#', (err, result) ->
+      done()
+    core.request 'robot.crushLikeBug', {}, ->
+
   it 'should attach the extension name to services', (done) ->
     robot =
       services:

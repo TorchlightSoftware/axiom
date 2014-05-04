@@ -1,40 +1,11 @@
-internal = require './core/internal'
+{readdirSync} = require 'fs'
+{basename} = require 'path'
 
-core =
-  init: require('./core/init')
+# read all the files in the core directory and expose them as API functions
+files = readdirSync __dirname + '/core'
+api = {}
+for fname in files
+  name = basename fname, '.coffee'
+  api[name] = require "./core/#{name}"
 
-  reset: require('./core/reset')
-
-  load: require('./core/load')
-
-  # used to load processes from Protocol
-  loadProcess: require('./core/loadProcess')
-
-  # Subscribe to a response address.
-  # Publish a message, with a response address in the envelope.
-  # Time out based on axiom config.
-  request: require('./core/request')
-
-  delegate: require('./core/delegate')
-
-  # Sends acknowledgement, error, completion to replyTo channels
-  respond: require('./core/respond')
-
-  # Remove the responder once it has replied once
-  respondOnce: require('./core/respondOnce')
-
-  # Just send the message
-  send: require('./core/send')
-
-  # Just listen
-  listen: require('./core/listen')
-
-  # For logging on the channel 'axiom.log'
-  log: require('./core/log')
-
-  # Sets up an array of log writers.
-  wireUpLoggers: require('./core/wireUpLoggers')
-
-  link: require('./core/link')
-
-module.exports = core
+module.exports = api
