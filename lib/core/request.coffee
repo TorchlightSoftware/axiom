@@ -10,10 +10,9 @@ module.exports = (channel, data, done) ->
   core.log.coreEntry 'request', {channel, data}
 
   # How many responders do we have
-  responders = internal.responders[channel] or {}
-  responderCount = _.keys(responders).length
+  responders = internal.getResponders(channel)
 
-  switch responderCount
+  switch responders.length
     when 0
       return done new Error "No responders for request: '#{channel}'"
 

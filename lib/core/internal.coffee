@@ -20,6 +20,17 @@ module.exports = internal =
   # A place to record what channels are linked
   links: {}
 
+  # get responders and linked responders for a channel
+  getResponders: (channel) ->
+    allResponders = _.keys @responders[channel]
+
+    # add any responders on linked channels
+    if @links[channel]
+      for l in @links[channel]
+        allResponders.push _.keys(@responders[l])...
+
+    return allResponders
+
   config: defaultConfig()
 
   retriever: defaultRetriever

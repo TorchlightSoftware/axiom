@@ -15,12 +15,7 @@ module.exports = (channel, data, done) ->
 
   # Get an array of responderId's of listeners from whom we expect
   # some kind of response on this channel.
-  waitingOn = _.keys internal.responders[channel]
-
-  # add any responders on linked channels
-  if internal.links[channel]
-    for l in internal.links[channel]
-      waitingOn.push _.keys(internal.responders[l])...
+  waitingOn = internal.getResponders(channel)
 
   core.log.coreEntry 'delegate', {channel, data, waitingOn}
 
