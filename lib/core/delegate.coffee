@@ -26,7 +26,7 @@ module.exports = (channel, data, done) ->
 
   # return immediately if we have nothing to do
   if _.isEmpty waitingOn
-    return done()
+    return done null, data
 
   # We will accumulate results in these objects, which map
   # responderId's to errors and results.

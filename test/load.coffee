@@ -184,6 +184,34 @@ describe 'core.load', ->
           protocol: {a: 1, b: 2, c: 3}
         done()
 
+    it 'should pass proper args when a stage is skipped', (done) ->
+
+      protocol =
+        protocol:
+          server:
+            run:
+              type: 'task'
+              signals:
+                start: ['load', 'link']
+
+        attachments:
+          linker: ['server.run/link']
+
+        services:
+          linker: (args, fin) ->
+            args.should.eql {a: 1}
+            fin null, {c: 3}
+
+      core.load 'protocol', protocol
+      core.request 'server.run', {a: 1}, (err, result) ->
+        should.not.exist err, 'expected no err'
+        should.exist result, 'expected result'
+        result.should.eql
+          __delegation_result: true
+          __input: {a: 1}
+          protocol: {a: 1, c: 3}
+        done()
+
     it 'should call unload when an agent is killed', (done) ->
       protocol =
         protocol:
