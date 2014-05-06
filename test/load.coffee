@@ -58,6 +58,7 @@ describe 'core.load', ->
       services:
         crushLikeBug: (args, fin) ->
           should.exist @axiom, 'expected axiom in context'
+          should.not.exist @axiom.link, 'expected no link method on axiom helper'
           should.exist @config, 'expected config in context'
           @config.should.eql robot.config
 
@@ -128,6 +129,18 @@ describe 'core.load', ->
       core.request 'server.run', {}, ->
         if unloaded
           throw new Error 'agent should not unload'
+
+    it 'should include link in @axiom', (done) ->
+      protocol =
+        protocol: {}
+        services:
+          linkStuff: (args, fin) ->
+            should.exist @axiom.link
+            fin()
+            done()
+
+      core.load 'protocol', protocol
+      core.request 'protocol.linkStuff', {}, ->
 
     it 'should call unload on a task process', (done) ->
       protocol =

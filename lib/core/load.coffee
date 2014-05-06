@@ -38,7 +38,7 @@ module.exports = (extensionName, extension) ->
       for processName, settings of processes
         core.loadProcess(namespace, processName, settings)
 
-  safeCore = getSafeCore(extensionName, core)
+  safeCore = getSafeCore(extensionName, core, extension.protocol?)
   safeRetriever = getSafeRetriever(extensionName, internal.retriever)
 
   for serviceName, serviceDef of services

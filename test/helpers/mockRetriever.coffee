@@ -25,7 +25,6 @@ retriever =
     join @root, args...
 
   retrieve: (args...) ->
-    #logger.yellow 'retrieving:', args
     result = @packages
     for path in args
       result = result[path]
