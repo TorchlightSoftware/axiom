@@ -11,12 +11,12 @@ module.exports =
   # The root of the project.
   # Determined relative to the value of process.cwd()
   # in the calling context of 'makeLoader'.
-  projectRoot: findProjectRoot(process.cwd())
+  root: findProjectRoot(process.cwd())
 
   # Relative path construction helper.
   # Creates paths prefixed by the value of 'loader.projectRoot'.
   rel: (args...) ->
-    join(@projectRoot, args...)
+    join(@root, args...)
 
   # Calls 'require' on a subpath constructed by prefixing
   # 'path' with the path to the project root.

@@ -1,14 +1,15 @@
 should = require 'should'
 logger = require 'torch'
+mockRetriever = require './helpers/mockRetriever'
 
 core = require '..'
 
 describe 'core.load', ->
-  beforeEach ->
-    core.wireUpLoggers [{writer: 'console', level: 'info'}]
-
-  afterEach ->
-    core.reset()
+  beforeEach (done) ->
+    core.reset (err) ->
+      core.init {}, mockRetriever()
+      core.wireUpLoggers [{writer: 'console', level: 'info'}]
+      done(err)
 
   it 'should load a service', (done) ->
     server =
@@ -76,6 +77,17 @@ describe 'core.load', ->
     core.listen 'robot.reportStatus', '#', (err, result) ->
       done()
     core.request 'robot.crushLikeBug', {}, ->
+
+  it "should limit an extension's retriever to its namespace", (done) ->
+    robot =
+      services:
+        crushLikeBug: (args, fin) ->
+          path = @retriever.rel('foo/bar')
+          path.should.eql 'robot/foo/bar'
+          fin()
+
+    core.load 'robot', robot
+    core.request 'robot.crushLikeBug', {}, done
 
   it 'should attach the extension name to services', (done) ->
     robot =
@@ -168,6 +180,29 @@ describe 'core.load', ->
         should.exist result, 'expected result'
         done()
 
+    it 'should call unload when an agent is killed', (done) ->
+      protocol =
+        protocol:
+          server:
+            run:
+              type: 'agent'
+              signals:
+                stop: ['unload']
+
+        attachments:
+          unloader: ['server.run/unload']
+
+        services:
+
+          # if this doesn't get called our test will time out
+          unloader: (args, fin) ->
+            fin()
+            done()
+
+      core.load 'protocol', protocol
+      core.request 'server.run', {}, ->
+        core.delegate 'system.kill', {}, ->
+
     it 'should pass "unload" args from "load"', (done) ->
       protocol =
         protocol:
@@ -196,27 +231,3 @@ describe 'core.load', ->
         should.not.exist err, 'expected no err'
         should.exist result, 'expected result'
         done()
-
-    it 'should call unload when an agent is killed', (done) ->
-      protocol =
-        protocol:
-          server:
-            run:
-              type: 'agent'
-              signals:
-                stop: ['unload']
-
-        attachments:
-          unloader: ['server.run/unload']
-
-        services:
-
-          # if this doesn't get called our test will time out
-          unloader: (args, fin) ->
-            fin()
-            done()
-
-
-      core.load 'protocol', protocol
-      core.request 'server.run', {}, ->
-        core.request 'server.run/stop', {}, ->

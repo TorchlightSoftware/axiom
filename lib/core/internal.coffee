@@ -1,5 +1,6 @@
 bus = require '../bus'
 _ = require 'lodash'
+logger = require 'torch'
 
 defaultConfig = ->
   return {
@@ -33,4 +34,4 @@ module.exports = internal =
       internal.retriever = defaultRetriever
 
       bus.reset()
-      done()
+      done(err, args)

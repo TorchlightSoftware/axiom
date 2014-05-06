@@ -11,19 +11,17 @@ mockRetriever = require './helpers/mockRetriever'
 
 describe 'core.request', ->
   beforeEach (done) ->
+    core.reset =>
 
-    core.init {timeout: 20}, mockRetriever()
-    @moduleName = 'server'
-    @serviceName = 'start'
-    @channel = "#{@moduleName}.#{@serviceName}"
-    @data =
-      x: 2
-      y: 'hello'
+      core.init {timeout: 20}, mockRetriever()
+      @moduleName = 'server'
+      @serviceName = 'start'
+      @channel = "#{@moduleName}.#{@serviceName}"
+      @data =
+        x: 2
+        y: 'hello'
 
-    done()
-
-  afterEach ->
-    core.reset()
+      done()
 
   it 'should receive exactly one valid response', (done) ->
     core.respond @channel, (message, done) ->
@@ -89,17 +87,14 @@ describe 'core.request', ->
 
 
 describe 'core.response', ->
-  afterEach ->
-    core.reset()
-
   beforeEach (done) ->
-
-    core.init {timeout: 20}, mockRetriever()
-    @channel = 'testChannel'
-    @data =
-      x: 2
-      y: 'hello'
-    done()
+    core.reset =>
+      core.init {timeout: 20}, mockRetriever()
+      @channel = 'testChannel'
+      @data =
+        x: 2
+        y: 'hello'
+      done()
 
   it 'should send exactly one valid response', (done) ->
     echo = (message, next) -> next null, message
@@ -124,12 +119,10 @@ describe 'core.response', ->
 
 
 describe 'core.delegate', ->
-  afterEach ->
-    core.reset()
-
   beforeEach (done) ->
-    core.init {timeout: 20}, mockRetriever()
-    done()
+    core.reset =>
+      core.init {timeout: 20}, mockRetriever()
+      done()
 
   it 'should should return if there are no responders', (done) ->
     channel = 'testChannel'
@@ -321,24 +314,21 @@ describe 'core.delegate', ->
       done()
 
 describe 'core.listen', ->
-  afterEach ->
-    core.reset()
-
   beforeEach (done) ->
+    core.reset =>
+      core.init {timeout: 20}, mockRetriever()
+      @channelA = 'testChannelA'
+      @channelB = 'testChannelB'
+      @dataA =
+        x: 2
+        y: 'hello'
+      @dataB =
+        x: 111
+        y: 'goodbye'
+      @topicA = 'info.A'
+      @topicB = 'info.B'
 
-    core.init {timeout: 20}, mockRetriever()
-    @channelA = 'testChannelA'
-    @channelB = 'testChannelB'
-    @dataA =
-      x: 2
-      y: 'hello'
-    @dataB =
-      x: 111
-      y: 'goodbye'
-    @topicA = 'info.A'
-    @topicB = 'info.B'
-
-    done()
+      done()
 
   it 'should listen with a standard-signature callback', (done) ->
     core.listen @channelA, @topicA, (err, result) =>

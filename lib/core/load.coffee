@@ -5,6 +5,7 @@ internal = require './internal'
 request = require './request'
 respond = require './respond'
 getSafeCore = require '../getSafeCore'
+getSafeRetriever = require '../getSafeRetriever'
 
 module.exports = (extensionName, extension) ->
   core = require '../core'
@@ -38,6 +39,8 @@ module.exports = (extensionName, extension) ->
         core.loadProcess(namespace, processName, settings)
 
   safeCore = getSafeCore(extensionName, core)
+  safeRetriever = getSafeRetriever(extensionName, internal.retriever)
+
   for serviceName, serviceDef of services
     context = Object.freeze {
       extensionName
@@ -45,7 +48,7 @@ module.exports = (extensionName, extension) ->
       config
       general: internal.config.general
       axiom: safeCore
-      util: internal.retriever
+      retriever: safeRetriever
     }
 
     serviceDef = serviceDef.bind(context)

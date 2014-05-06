@@ -11,11 +11,11 @@ describe 'retriever', ->
   beforeEach ->
     targetDir = join(sampleProjDir, 'b1', 'b2', 'b3')
     @retriever = _.clone require '../lib/retriever'
-    @retriever.projectRoot = findProjectRoot(targetDir)
+    @retriever.root = findProjectRoot(targetDir)
 
-  it "should have correct 'projectRoot'", (done) ->
-    should.exist @retriever?.projectRoot
-    @retriever.projectRoot.should.eql sampleProjDir
+  it "should have correct 'root'", (done) ->
+    should.exist @retriever?.root
+    @retriever.root.should.eql sampleProjDir
     done()
 
   it "should construct correct project-relative paths", (done) ->

@@ -20,9 +20,9 @@ retriever =
     node_modules: {}
   }
 
-  projectRoot: ''
+  root: ''
   rel: (args...) ->
-    join @projectRoot, args...
+    join @root, args...
 
   retrieve: (args...) ->
     #logger.yellow 'retrieving:', args

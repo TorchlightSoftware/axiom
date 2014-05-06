@@ -18,8 +18,8 @@ describe 'extension config', ->
   beforeEach ->
     core.wireUpLoggers [{writer: 'console', level: 'info'}]
 
-  afterEach ->
-    core.reset()
+  beforeEach (done) ->
+    core.reset(done)
 
   it 'should receive general config', (done) ->
 

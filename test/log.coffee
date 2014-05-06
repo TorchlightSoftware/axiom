@@ -18,8 +18,8 @@ listen = (topic, callback) ->
 
 # Test basic 'log' functionality
 describe 'log', ->
-  after ->
-    core.reset()
+  beforeEach (done) ->
+    core.reset(done)
 
   for test in logLevels
     do (test) ->
@@ -41,11 +41,7 @@ describe 'log', ->
 methodTests = [
   method: 'init'
   args: ['config', 'retriever']
-  expected: "Calling 'core.init' with args: { config: { blacklist: [], timeout: 2000, general: {} },\n  retriever: \n   { projectRoot: '/Users/brandon/Projects/Code/js/axiom',\n     rel: [Function],\n     retrieve: [Function],\n     retrieveExtension: [Function] } }"
- ,
-  method: 'reset'
-  args: []
-  expected: "Calling 'core.reset'"
+  expected: "Calling 'core.init' with args: { config: { blacklist: [], timeout: 2000, general: {} },\n  retriever: \n   { root: '/Users/brandon/Projects/Code/js/axiom',\n     rel: [Function],\n     retrieve: [Function],\n     retrieveExtension: [Function] } }"
  ,
   method: 'load'
   args: ['extensionName']
@@ -76,8 +72,8 @@ methodTests = [
 
 # Test 'info' coverage for public 'core' API
 describe "log, 'core' API", ->
-  beforeEach ->
-    core.reset()
+  beforeEach (done) ->
+    core.reset(done)
 
   for test in methodTests
     do (test) ->

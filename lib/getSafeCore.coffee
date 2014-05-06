@@ -17,4 +17,4 @@ module.exports = (extensionName, core) ->
   for fn in ['request', 'delegate', 'respond', 'respondOnce', 'send', 'listen']
     api[fn] = limit core[fn]
 
-  return api
+  return Object.freeze api

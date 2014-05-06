@@ -10,10 +10,10 @@ proj1Dir = path.join __dirname, '../sample/project1'
 describe 'core.init', ->
   before ->
     @retriever =
-      projectRoot: proj1Dir
+      root: proj1Dir
 
-  afterEach ->
-    core.reset()
+  beforeEach (done) ->
+    core.reset(done)
 
   it 'should dynamically load a module based on name', (done) ->
     data = {greeting: 'hello!'}
@@ -74,11 +74,12 @@ describe 'core.init', ->
 
       done()
 
-  it "should expose an injected 'retriever' in 'util'", (done) ->
+  it "should expose an injected 'retriever'", (done) ->
     defaultRetriever = @retriever
 
     # Given a mock test 'retriever'
     mockRetriever =
+      root: ''
       retrieve: (name...) -> {}
       retrieveExtension: (name...) -> {}
 
@@ -86,13 +87,13 @@ describe 'core.init', ->
     server =
       services:
         "run/prepare": (args, fin) ->
-          should.exist @util
+          should.exist @retriever
 
-          # Then @util should include the mock retriever
-          @util.should.include mockRetriever
+          # Then @retriever should include the mock retriever
+          @retriever.root.should.eql 'server'
 
-          # And not the default retriever
-          @util.should.not.include defaultRetriever
+          @retriever.should.have.keys ['root', 'rel', 'retrieve']
+          @retriever.should.not.have.keys ['retrieveExtension']
 
           fin()
 
