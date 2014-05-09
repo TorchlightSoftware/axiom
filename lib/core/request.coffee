@@ -21,7 +21,7 @@ module.exports = (channel, data, done) ->
       replyTo = send channel, data
 
     else
-      return done new Error "Ambiguous: #{responderCount} responders for request: '#{channel}'"
+      return done new Error "Ambiguous: #{responders.length} responders for request: '#{channel}'"
 
   # Define an 'onTimeout' callback for when we don't get a response
   # (either error or success) in the configured time.

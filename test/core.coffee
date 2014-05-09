@@ -85,6 +85,15 @@ describe 'core.request', ->
 
       done()
 
+  it 'should return an "ambiguous" error when there are multiple responders', (done) ->
+    core.respond @channel, ->
+    core.respond @channel, ->
+    core.request @channel, @data, (err, result) =>
+      should.exist err
+      err.message.should.eql "Ambiguous: 2 responders for request: '#{@channel}'"
+      should.not.exist result
+      done()
+
 
 describe 'core.response', ->
   beforeEach (done) ->
