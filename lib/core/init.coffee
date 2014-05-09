@@ -12,7 +12,7 @@ module.exports = (config, retriever) ->
 
   # Attempt to load a global 'axiom.*' file from the project root
   try
-    projectConfig = internal.retriever.retrieve('axiom')
+    projectConfig = internal.retriever.retrieve('config/axiom')
     _.merge internal.config, projectConfig
 
   # Merge in any programatically-passed config options

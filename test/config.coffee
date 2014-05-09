@@ -45,8 +45,8 @@ describe 'extension config', ->
           'axiom-server': '*'
       node_modules:
         'axiom-server': {}
-      axiom: axiomConfig
-      axiom_configs:
+      config:
+        axiom: axiomConfig
         server: extensionConfig
       #node_modules:
         #'axiom-server': {}

@@ -19,7 +19,7 @@ module.exports = (extensionName, extension) ->
 
   # Merge config overrides from '<projectRoot>/axiom/<extensionName>'
   try
-    projectOverrides = internal.retriever.retrieve('axiom_configs', extensionName)
+    projectOverrides = internal.retriever.retrieve('config', extensionName)
 
   if (typeof projectOverrides) is 'function'
     projectOverrides = projectOverrides(internal.config.general)

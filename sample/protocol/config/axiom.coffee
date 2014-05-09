@@ -6,7 +6,7 @@ module.exports =
   includeExtensions:
     app: require './workInProgress'
 
-  # These might be broken extensions, which are included in node_modules
+  # These might be broken extensions, which are included in package.json
   # but which you don't want to load at the moment.
   excludeExtensions: ['foo', 'bar']
 

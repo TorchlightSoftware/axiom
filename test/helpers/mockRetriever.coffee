@@ -11,7 +11,7 @@ retriever =
     axiom: {}
 
     # extension configs
-    axiom_configs: {}
+    config: {}
 
     # package.json
     package: {}
@@ -25,6 +25,8 @@ retriever =
     join @root, args...
 
   retrieve: (args...) ->
+    args = _(args).map((n)->n.split '/').flatten().value()
+
     result = @packages
     for path in args
       result = result[path]

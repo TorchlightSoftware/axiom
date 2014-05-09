@@ -41,15 +41,15 @@ describe 'core.init', ->
 
       done()
 
-  it "should load a global 'axiom' file from the project root", (done) ->
+  it "should load 'axiom' file from the project config directory", (done) ->
     internal = require '../lib/core/internal'
-    axiomFile = require path.join(proj1Dir, 'axiom')
+    axiomFile = require path.join(proj1Dir, 'config/axiom')
     should.exist axiomFile
     core.init {}, @retriever
     internal.config.should.include axiomFile
     done()
 
-  it "should load a config override from the axiom_configs folder", (done) ->
+  it "should load a config override from the config folder", (done) ->
     core.init {modules: ['sample']}, @retriever
 
     sampleExtension = require path.join(proj1Dir, 'node_modules/axiom-sample')
@@ -59,7 +59,7 @@ describe 'core.init', ->
     should.exist defaultSampleConfig
 
     # And a config override in the local project
-    overrideConfig = require path.join(proj1Dir, 'axiom_configs/sample')
+    overrideConfig = require path.join(proj1Dir, 'config/sample')
     should.exist overrideConfig
 
     expectedConfig = _.merge {}, defaultSampleConfig, overrideConfig

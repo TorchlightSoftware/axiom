@@ -10,6 +10,8 @@ mockRetriever = require './helpers/mockRetriever'
 loggers = undefined
 
 describe 'internal', ->
+  beforeEach (done) ->
+    core.reset(done)
 
   it 'reset should call system.kill', (done) ->
     called = false
@@ -19,7 +21,8 @@ describe 'internal', ->
       called = true
       doneKilling()
 
-    core.reset ->
+    core.reset (err) ->
+      should.not.exist err, 'expected no err'
       called.should.eql true
       done()
 

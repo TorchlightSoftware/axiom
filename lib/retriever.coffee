@@ -6,7 +6,7 @@ logger = require 'torch'
 # - Project-relative path helper
 # - General project-relative loader
 # - Project-relative Axiom extension loader
-module.exports =
+module.exports = Object.freeze
 
   # The root of the project.
   # Determined relative to the value of process.cwd()
