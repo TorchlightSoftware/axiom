@@ -22,7 +22,6 @@
   },
   "devDependencies":{
     "mocha":"*",
-    "connect":"*",
     "should":"*",
     "qi":"*"
   },
