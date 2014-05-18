@@ -12,6 +12,6 @@ module.exports =
 
   # These settings are passed to all extension configurations,
   # and provide a way to distribute common values.
-  general:
+  config:
     serverPort: 4000
     apiPort: 4001

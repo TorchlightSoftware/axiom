@@ -8,6 +8,7 @@ send = require './send'
 module.exports = (channel, data, done) ->
   core = require '../core'
   data ?= {}
+  done ?= ->
 
   # Same as request, but for multiple recipients on one channel.
   # Wait until we receive a response from each recipient

@@ -22,7 +22,7 @@ module.exports = (extensionName, extension) ->
     projectOverrides = internal.retriever.retrieve('config', extensionName)
 
   if (typeof projectOverrides) is 'function'
-    projectOverrides = projectOverrides(internal.config.general)
+    projectOverrides = projectOverrides(internal.config.config)
 
   _.merge config, projectOverrides
 
@@ -46,7 +46,7 @@ module.exports = (extensionName, extension) ->
       extensionName
       serviceName
       config
-      general: internal.config.general
+      systemConfig: internal.config.config
       axiom: safeCore
       retriever: safeRetriever
     }

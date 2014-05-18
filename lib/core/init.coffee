@@ -10,9 +10,9 @@ module.exports = (config, retriever) ->
   internal.retriever = _.merge {}, internal.retriever, retriever
   Object.freeze internal.retriever
 
-  # Attempt to load a global 'axiom.*' file from the project root
+  # Attempt to load the project's export as a config
   try
-    projectConfig = internal.retriever.retrieve('config/axiom')
+    projectConfig = internal.retriever.retrieve('')
     _.merge internal.config, projectConfig
 
   # Merge in any programatically-passed config options

@@ -21,32 +21,32 @@ describe 'extension config', ->
   beforeEach (done) ->
     core.reset(done)
 
-  it 'should receive general config', (done) ->
+  it 'should receive project config', (done) ->
 
-    # Given an Axiom config with a 'general' section defined
-    axiomConfig =
-      general:
+    # Given a project config with a 'config' section defined
+    projectConfig =
+      config:
         serverPort: 4000
         apiPort: 4001
 
     # And an extension config as a function of the app config
-    extensionConfig = (general) ->
+    extensionConfig = (app) ->
 
       # It should return without its assertions failing
-      should.exist general
-      general.should.eql axiomConfig.general
+      should.exist app
+      app.should.eql projectConfig.config
       done()
-      return general
+      return app
 
     # When core is initialized
     initCoreWithMock {
+      '': projectConfig
       package:
         dependencies:
           'axiom-server': '*'
       node_modules:
         'axiom-server': {}
       config:
-        axiom: axiomConfig
         server: extensionConfig
       #node_modules:
         #'axiom-server': {}

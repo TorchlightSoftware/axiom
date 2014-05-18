@@ -41,7 +41,7 @@ describe 'log', ->
 methodTests = [
   method: 'init'
   args: ['config', 'retriever']
-  expected: "Calling 'core.init' with args: { config: { blacklist: [], timeout: 2000, general: {} },\n  retriever: \n   { root: '/Users/brandon/Projects/Code/js/axiom',\n     rel: [Function],\n     retrieve: [Function],\n     retrieveExtension: [Function] } }"
+  expected: "Calling 'core.init' with args:"
  ,
   method: 'load'
   args: ['extensionName']
@@ -51,11 +51,10 @@ methodTests = [
   args: ['channel', 'data', ->]
   expected: "Calling 'core.request' with args: { channel: 'channel', data: 'data' }"
 
- # this includes a UUID now and is non-trivial to test
- #,
-  #method: 'delegate'
-  #args: ['channel', 'data']
-  #expected: "Calling 'core.delegate' with args: { channel: 'channel', data: 'data' }"
+ ,
+  method: 'delegate'
+  args: ['channel', 'data']
+  expected: "Calling 'core.delegate' with args: { channel: 'channel', data: 'data', waitingOn: [] }"
  ,
   method: 'respond'
   args: ['channel', ->]
@@ -82,12 +81,12 @@ describe "log, 'core' API", ->
       it "should log calls to 'core.#{method}'", (done) ->
 
         # Given a listener on the 'info' topic of 'axiom.log'
-        listen 'debug', (data) ->
+        listen 'debug', ([data]) ->
           # We should receive an informational message
           should.exist data
 
           # With the expected details
-          data.should.eql [expected]
+          data.should.include expected
 
           done()
 

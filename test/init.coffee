@@ -41,12 +41,12 @@ describe 'core.init', ->
 
       done()
 
-  it "should load 'axiom' file from the project config directory", (done) ->
+  it "should load the project export as a config", (done) ->
     internal = require '../lib/core/internal'
-    axiomFile = require path.join(proj1Dir, 'config/axiom')
-    should.exist axiomFile
+    projectConfig = require proj1Dir
+    should.exist projectConfig
     core.init {}, @retriever
-    internal.config.should.include axiomFile
+    internal.config.should.include projectConfig
     done()
 
   it "should load a config override from the config folder", (done) ->
