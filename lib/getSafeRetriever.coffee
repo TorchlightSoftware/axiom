@@ -3,7 +3,7 @@
 module.exports = (extensionName, retriever) ->
 
   return Object.freeze {
-    root: retriever.rel(extensionName)
+    root: retriever.rel('system', extensionName)
 
     rel: retriever.rel
 

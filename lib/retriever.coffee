@@ -1,6 +1,5 @@
 {join} = require 'path'
 findProjectRoot = require './findProjectRoot'
-logger = require 'torch'
 
 # Should be an object that exposes:
 # - Project-relative path helper

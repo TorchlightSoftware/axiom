@@ -84,7 +84,7 @@ describe 'core.load', ->
       services:
         crushLikeBug: (args, fin) ->
           path = @retriever.rel('foo/bar')
-          path.should.eql 'robot/foo/bar'
+          path.should.eql 'system/robot/foo/bar'
           fin()
 
     core.load 'robot', robot

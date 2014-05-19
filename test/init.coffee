@@ -90,7 +90,7 @@ describe 'core.init', ->
           should.exist @retriever
 
           # Then @retriever should include the mock retriever
-          @retriever.root.should.eql 'server'
+          @retriever.root.should.eql 'system/server'
 
           @retriever.should.have.keys ['root', 'rel', 'retrieve']
           @retriever.should.not.have.keys ['retrieveExtension']
