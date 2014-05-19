@@ -14,6 +14,12 @@ defaultRetriever = require '../retriever'
 # internal state to keep track of the resources that have been loaded
 module.exports = internal =
 
+  # The protocol this system is running
+  protocol: {}
+
+  # Any extensions we will load
+  extensions: {}
+
   # A place to record what responders we have attached
   responders: {}
 
@@ -39,6 +45,8 @@ module.exports = internal =
     done ?= ->
     core = require '../core'
     core.delegate "system.kill", {reason: 'core.reset'}, (err, args) ->
+      internal.protocol = {}
+      internal.extensions = {}
       internal.responders = {}
       internal.links = {}
       internal.config = defaultConfig()

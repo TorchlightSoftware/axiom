@@ -15,16 +15,17 @@ initCoreWithMock = (packages) ->
 
 describe 'extension config', ->
 
-  beforeEach ->
-    core.wireUpLoggers [{writer: 'console', level: 'info'}]
-
   beforeEach (done) ->
-    core.reset(done)
+    core.reset (err) ->
+      core.wireUpLoggers [{writer: 'console', level: 'info'}]
+      done(err)
 
   it 'should receive project config', (done) ->
 
     # Given a project config with a 'config' section defined
     projectConfig =
+      extensions:
+        server: '*'
       config:
         serverPort: 4000
         apiPort: 4001
@@ -41,15 +42,10 @@ describe 'extension config', ->
     # When core is initialized
     initCoreWithMock {
       '': projectConfig
-      package:
-        dependencies:
-          'axiom-server': '*'
       node_modules:
         'axiom-server': {}
       config:
         server: extensionConfig
-      #node_modules:
-        #'axiom-server': {}
     }
 
   it 'should be accessible within an extension', (done) ->

@@ -1,14 +1,9 @@
 module.exports =
 
-  # These might be works in progress intended for future life
-  # as a public extension.  Or, they might be intentially private
-  # extensions.
-  includeExtensions:
-    app: require './workInProgress'
+  extensions:
 
-  # These might be broken extensions, which are included in package.json
-  # but which you don't want to load at the moment.
-  excludeExtensions: ['foo', 'bar']
+    # Use * to indicate an extension from node_modules.
+    hello: '*'
 
   # These settings are passed to all extension configurations,
   # and provide a way to distribute common values.

@@ -18,7 +18,8 @@ describe 'core.init', ->
   it 'should dynamically load a module based on name', (done) ->
     data = {greeting: 'hello!'}
     config =
-      modules: ['sample']
+      extensions:
+        sample: '*'
     core.init config, @retriever
 
     core.request 'sample.echo', data, (err, result) ->
@@ -50,7 +51,7 @@ describe 'core.init', ->
     done()
 
   it "should load a config override from the config folder", (done) ->
-    core.init {modules: ['sample']}, @retriever
+    core.init {extensions: {sample: '*'}}, @retriever
 
     sampleExtension = require path.join(proj1Dir, 'node_modules/axiom-sample')
 
@@ -108,14 +109,4 @@ describe 'core.init', ->
 
       # It should return without its assertions failing
       should.not.exist err
-      done()
-
-  it "should load an appExtension", (done) ->
-    config =
-      appExtensions:
-        doStuff: 'appExtensions/doStuff'
-
-    core.init config, @retriever
-    core.request 'doStuff.doStuff', {}, (err, result) ->
-      result.should.eql {status: 'stuff is done'}
       done()

@@ -2,18 +2,24 @@ _ = require 'lodash'
 law = require 'law'
 
 internal = require './internal'
-request = require './request'
 respond = require './respond'
 getSafeCore = require '../getSafeCore'
 getSafeRetriever = require '../getSafeRetriever'
 
-module.exports = (extensionName, extension) ->
+module.exports = (extensionName, extensionLocation) ->
+
   core = require '../core'
   core.log.coreEntry 'load', {extensionName}
 
+  if extensionLocation is '*'
+    extension = internal.retriever.retrieveExtension(extensionName)
+  else if _.isString extensionLocation
+    extension = internal.retriever.retrieve(extensionLocation)
+  else if _.isObject extensionLocation
+    extension = extensionLocation
+
   unless extension?
-    core.log.warning "Loading #{extensionName} with no corresponding definition."
-    extension = {}
+    return core.log.warning "Could not load extension '#{extensionName}'.  Unrecognized contents:", extensionLocation
 
   config = extension.config or {}
 

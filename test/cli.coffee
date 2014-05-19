@@ -3,11 +3,11 @@ should = require 'should'
 logger = require 'torch'
 {spawn, exec} = require 'child_process'
 
-rel = (name) -> path.join __dirname, name
+rel = (name) -> path.join __dirname, '..', name
 
-command = rel '../bin/axiom'
+command = rel 'bin/axiom'
 
-sampleProject = rel '../sample/project2'
+sampleProject = rel 'sample/project2'
 
 cliRun = (args) ->
   cli = spawn command, args, {cwd: sampleProject}
