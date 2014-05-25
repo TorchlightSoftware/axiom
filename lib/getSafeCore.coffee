@@ -9,7 +9,7 @@ module.exports = (extensionName, core, isProtocol) ->
 
   api = {
     # TODO: limit to extension and create default routing
-    log: _(core.log).without 'coreEntry'
+    log: _.omit core.log, 'coreEntry'
   }
 
   # all these functions take 'channel' as their first arg,

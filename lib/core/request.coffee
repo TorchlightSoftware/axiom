@@ -2,6 +2,10 @@ timers = require 'timers'
 _ = require 'lodash'
 
 bus = require '../bus'
+{ NoRespondersError
+  AmbiguousRespondersError
+  TimeoutError} = require '../errors'
+
 internal = require './internal'
 send = require './send'
 
@@ -14,19 +18,19 @@ module.exports = (channel, data, done) ->
 
   switch responders.length
     when 0
-      return done new Error "No responders for request: '#{channel}'"
+      return done new NoRespondersError {channel}
 
     when 1
       # Send the message
       replyTo = send channel, data
 
     else
-      return done new Error "Ambiguous: #{responders.length} responders for request: '#{channel}'"
+      return done new AmbiguousRespondersError {responders, channel}
 
   # Define an 'onTimeout' callback for when we don't get a response
   # (either error or success) in the configured time.
   onTimeout = ->
-    err = new Error "Request timed out on channel '#{channel}'"
+    err = new TimeoutError {channel}
 
     bus.publish
       channel: replyTo.channel

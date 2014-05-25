@@ -51,12 +51,13 @@ describe 'core.load', ->
     core.load 'connect', connectExtension
     core.request 'server.run/load', {}, done
 
-  it 'should receive axiom/config in context', (done) ->
+  it 'should receive axiom/config/errors in context', (done) ->
     robot =
       config:
         strength: 5
       services:
         crushLikeBug: (args, fin) ->
+          should.exist @errors, 'expected errors in context'
           should.exist @axiom, 'expected axiom in context'
           should.not.exist @axiom.link, 'expected no link method on axiom helper'
           should.exist @config, 'expected config in context'

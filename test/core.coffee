@@ -37,14 +37,8 @@ describe 'core.request', ->
 
   it 'should pass an error to the callback the response returns one', (done) ->
     testError = new Error 'testError'
-    bus.subscribe
-      channel: @channel
-      topic: 'request.#'
-      callback: (message, envelope) ->
-        bus.publish
-          channel: envelope.replyTo.channel
-          topic: envelope.replyTo.topic.err
-          data: testError
+    core.respond @channel, (args, fin) ->
+      fin testError
 
     core.request @channel, @data, (err, message) =>
       should.exist err
@@ -68,10 +62,12 @@ describe 'core.request', ->
     replyTo = core.request @channel, @data, test
 
   it 'should return a timeout error when it times out', (done) ->
+    {TimeoutError} = require '../lib/errors'
     core.respond @channel, -> # I can't hear you
     core.request @channel, @data, (err, result) =>
       should.exist err
-      err.message.should.eql "Request timed out on channel '#{@channel}'"
+      err.message.should.eql "Request timed out on channel: '#{@channel}'"
+      err.should.be.instanceOf TimeoutError
       should.not.exist result
       done()
 

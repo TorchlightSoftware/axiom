@@ -5,6 +5,7 @@ internal = require './internal'
 respond = require './respond'
 getSafeCore = require '../getSafeCore'
 getSafeRetriever = require '../getSafeRetriever'
+errors = require '../errors'
 
 module.exports = (extensionName, extensionLocation) ->
 
@@ -52,6 +53,7 @@ module.exports = (extensionName, extensionLocation) ->
       extensionName
       serviceName
       config
+      errors
       systemConfig: internal.config.config
       axiom: safeCore
       retriever: safeRetriever

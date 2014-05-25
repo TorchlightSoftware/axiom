@@ -1,5 +1,6 @@
 _ = require 'lodash'
 async = require 'async'
+logger = require 'torch'
 
 module.exports = (namespace, processName, settings) ->
   core = require '../core'
@@ -23,14 +24,15 @@ module.exports = (namespace, processName, settings) ->
 
         runStage = (stageName) ->
           (args, next) ->
-            core.delegate "#{namespace}.#{processName}/#{stageName}", args, next
+            service = "#{namespace}.#{processName}/#{stageName}"
+            core.delegate service, args, (err, result) ->
+              _.merge processState, result unless err?
+              next err, processState
 
         stages = stageNames.map(runStage)
         stages[0] = stages[0].bind null, args
 
-        async.waterfall stages, (err, result) ->
-          _.merge processState, result unless err?
-          done(err, result)
+        async.waterfall stages, done
 
       # attach the signal to the pipeline
       attachSignal = (signal, once) ->

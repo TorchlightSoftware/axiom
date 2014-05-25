@@ -1,40 +1,42 @@
 {
-  "name":"axiom",
-  "description":"Environment setup/runtime standardization for Node.js applications.",
-  "version":"0.1.0",
-  "homepage":"http://github.com/TorchlightSoftware/axiom",
-  "repository":"git://github.com/TorchlightSoftware/axiom.git",
-  "author":"Torchlight Software <info@torchlightsoftware.com> (http://torchlightsoftware.com)",
-  "main":"./index.js",
-  "bin":{"axiom": "./bin/axiom"},
-
-  "dependencies":{
-    "coffee-script":"*",
-    "npm":"*",
-    "async":"*",
-    "lodash":"*",
-    "postal":"*",
-    "torch":"*",
-    "law":"",
-    "uuid":"*",
-    "optimist":"*",
-    "moment":"*"
+  "name": "axiom",
+  "description": "Environment setup/runtime standardization for Node.js applications.",
+  "version": "0.1.0",
+  "homepage": "http://github.com/TorchlightSoftware/axiom",
+  "repository": "git://github.com/TorchlightSoftware/axiom.git",
+  "author": "Torchlight Software <info@torchlightsoftware.com> (http://torchlightsoftware.com)",
+  "main": "./index.js",
+  "bin": {
+    "axiom": "./bin/axiom"
   },
-  "devDependencies":{
-    "mocha":"*",
-    "should":"*",
-    "qi":"*"
+  "dependencies": {
+    "coffee-script": "*",
+    "npm": "*",
+    "async": "*",
+    "lodash": "*",
+    "postal": "*",
+    "torch": "^0.2.3",
+    "law": "",
+    "uuid": "*",
+    "optimist": "*",
+    "moment": "*",
+    "tea-error": "^0.1.0"
   },
-  "engines":{
-    "node":">= 0.8.4"
+  "devDependencies": {
+    "mocha": "*",
+    "should": "*",
+    "qi": "*"
   },
-  "licenses":[
+  "engines": {
+    "node": ">= 0.8.4"
+  },
+  "licenses": [
     {
-      "type":"MIT",
-      "url":"http://github.com/torchlightsoftware/axiom/raw/master/LICENSE"
+      "type": "MIT",
+      "url": "http://github.com/torchlightsoftware/axiom/raw/master/LICENSE"
     }
   ],
   "scripts": {
-    "test":"mocha"
+    "test": "mocha"
   }
 }

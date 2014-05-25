@@ -26,9 +26,6 @@ module.exports = (config, retriever) ->
     config: internal.config
     retriever: internal.retriever
 
-  # Load the system protocol.
-  load 'protocol', internal.config.protocol if internal.config.protocol?
-
   # Load each extension.
   for extensionName, extensionLocation of internal.config.extensions
     load extensionName, extensionLocation
