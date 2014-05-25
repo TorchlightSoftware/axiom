@@ -4,6 +4,7 @@ _ = require 'lodash'
 bus = require '../bus'
 internal = require './internal'
 send = require './send'
+{DelegateTimeoutError, ErrorCollection} = require '../errors'
 
 module.exports = (channel, data, done) ->
   core = require '../core'
@@ -37,8 +38,7 @@ module.exports = (channel, data, done) ->
   timeout = internal.config.timeout
   onTimeout = ->
     waitingOn.map (responderId) ->
-      msg = "Responder with id #{responderId} timed out on channel '#{channel}'"
-      err = new Error msg
+      err = new DelegateTimeoutError {channel, responderId}
 
       bus.publish
         channel: replyTo.channel
@@ -75,11 +75,7 @@ module.exports = (channel, data, done) ->
       timers.clearTimeout timeoutId
 
       unless _.isEmpty errors
-        errArray = for responder, error of errors
-          error.message
-        errText = "Received errors from channel '#{channel}':\n#{errArray.join '\n'}"
-        err = new Error errText
-        err.errors = errors
+        err = new ErrorCollection {channel, errors}
 
       results.__delegation_result = true
       results.__input = data.__input or data

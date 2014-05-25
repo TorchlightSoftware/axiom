@@ -20,8 +20,8 @@ class AmbiguousRespondersError extends AxiomError
 
     super message, context, start
 
-class TimeoutError extends AxiomError
-  name: 'AxiomError/TimeoutError'
+class RequestTimeoutError extends AxiomError
+  name: 'AxiomError/RequestTimeoutError'
 
   constructor: (context, start) ->
     {channel} = context
@@ -29,4 +29,27 @@ class TimeoutError extends AxiomError
 
     super message, context, start
 
-module.exports = {NoRespondersError, AmbiguousRespondersError, TimeoutError}
+class DelegateTimeoutError extends AxiomError
+  name: 'AxiomError/RequestTimeoutError'
+
+  constructor: (context, start) ->
+    {channel, responderId} = context
+    message = "Responder with id '#{responderId}' timed out on channel: '#{channel}'"
+
+    super message, context, start
+
+
+class ErrorCollection extends AxiomError
+  name: 'AxiomError/ErrorCollection'
+
+  constructor: (context, start) ->
+    {channel, errors} = context
+
+    errArray = for responder, error of errors
+      error.message
+    message = "Received errors from channel '#{channel}':\n#{errArray.join '\n'}"
+
+    super message, context, start
+
+module.exports = {NoRespondersError, AmbiguousRespondersError,
+  RequestTimeoutError, DelegateTimeoutError, ErrorCollection}

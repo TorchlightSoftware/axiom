@@ -62,12 +62,12 @@ describe 'core.request', ->
     replyTo = core.request @channel, @data, test
 
   it 'should return a timeout error when it times out', (done) ->
-    {TimeoutError} = require '../lib/errors'
+    {RequestTimeoutError} = require '../lib/errors'
     core.respond @channel, -> # I can't hear you
     core.request @channel, @data, (err, result) =>
       should.exist err
       err.message.should.eql "Request timed out on channel: '#{@channel}'"
-      err.should.be.instanceOf TimeoutError
+      err.should.be.instanceOf RequestTimeoutError
       should.not.exist result
       done()
 
@@ -217,7 +217,7 @@ describe 'core.delegate', ->
     core.delegate channel, {}, (err, results) ->
       should.exist err
 
-      expectedMsg = "Received errors from channel '#{channel}':\nResponder with id #{errId} timed out on channel '#{channel}'"
+      expectedMsg = "Received errors from channel '#{channel}':\nResponder with id '#{errId}' timed out on channel: '#{channel}'"
       err.message.should.eql expectedMsg
 
       should.exist err.errors
@@ -225,7 +225,7 @@ describe 'core.delegate', ->
       subErr = err.errors[errId]
       should.exist subErr, 'expected subErr'
 
-      errMsg = "Responder with id #{errId} timed out on channel '#{channel}'"
+      errMsg = "Responder with id '#{errId}' timed out on channel: '#{channel}'"
       subErr.message.should.eql errMsg
 
       should.exist results

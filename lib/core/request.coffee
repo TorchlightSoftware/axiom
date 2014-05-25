@@ -4,7 +4,7 @@ _ = require 'lodash'
 bus = require '../bus'
 { NoRespondersError
   AmbiguousRespondersError
-  TimeoutError} = require '../errors'
+  RequestTimeoutError} = require '../errors'
 
 internal = require './internal'
 send = require './send'
@@ -30,7 +30,7 @@ module.exports = (channel, data, done) ->
   # Define an 'onTimeout' callback for when we don't get a response
   # (either error or success) in the configured time.
   onTimeout = ->
-    err = new TimeoutError {channel}
+    err = new RequestTimeoutError {channel}
 
     bus.publish
       channel: replyTo.channel
