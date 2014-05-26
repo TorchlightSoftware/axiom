@@ -9,28 +9,33 @@ bus = require '../bus'
 internal = require './internal'
 send = require './send'
 
-module.exports = (channel, data, done) ->
+module.exports = request = (channel, data, done) ->
   core = require '../core'
   core.log.coreEntry 'request', {channel, data}
+
+  entryPoint = if request.caller.extensionName?
+    request.caller
+  else
+    request
 
   # How many responders do we have
   responders = internal.getResponders(channel)
 
   switch responders.length
     when 0
-      return done new NoRespondersError {channel}
+      return done new NoRespondersError {channel}, entryPoint
 
     when 1
       # Send the message
       replyTo = send channel, data
 
     else
-      return done new AmbiguousRespondersError {responders, channel}
+      return done new AmbiguousRespondersError {responders, channel}, entryPoint
 
   # Define an 'onTimeout' callback for when we don't get a response
   # (either error or success) in the configured time.
   onTimeout = ->
-    err = new RequestTimeoutError {channel}
+    err = new RequestTimeoutError {channel}, entryPoint
 
     bus.publish
       channel: replyTo.channel

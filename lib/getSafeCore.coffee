@@ -4,8 +4,10 @@ module.exports = (extensionName, core, isProtocol) ->
 
   # prefix the channel with the extensionName
   limit = (fn) ->
-    (channel, args...) ->
+    safe = (channel, args...) ->
       fn "#{extensionName}.#{channel}", args...
+    safe.extensionName = extensionName
+    return safe
 
   api = {
     # TODO: limit to extension and create default routing

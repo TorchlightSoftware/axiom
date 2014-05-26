@@ -5,8 +5,15 @@ bus = require '../bus'
 internal = require './internal'
 send = require './send'
 {DelegateTimeoutError, ErrorCollection} = require '../errors'
+logger = require 'torch'
 
-module.exports = (channel, data, done) ->
+module.exports = delegate = (channel, data, done) ->
+
+  entryPoint = if delegate.caller.extensionName?
+    delegate.caller
+  else
+    delegate
+
   core = require '../core'
   data ?= {}
   done ?= ->
@@ -38,7 +45,7 @@ module.exports = (channel, data, done) ->
   timeout = internal.config.timeout
   onTimeout = ->
     waitingOn.map (responderId) ->
-      err = new DelegateTimeoutError {channel, responderId}
+      err = new DelegateTimeoutError {channel, responderId}, entryPoint
 
       bus.publish
         channel: replyTo.channel
@@ -75,7 +82,7 @@ module.exports = (channel, data, done) ->
       timers.clearTimeout timeoutId
 
       unless _.isEmpty errors
-        err = new ErrorCollection {channel, errors}
+        err = new ErrorCollection {channel, errors}, entryPoint
 
       results.__delegation_result = true
       results.__input = data.__input or data
