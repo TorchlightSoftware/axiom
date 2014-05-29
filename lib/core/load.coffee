@@ -63,9 +63,9 @@ module.exports = (extensionName, extensionLocation) ->
     serviceDef.extension = extensionName
 
     # Respond at defined attachment points
-    attachments = extension.attachments?[serviceName]
-    if attachments
-      for attach in attachments
+    extensionPoints = extension.extends?[serviceName]
+    if extensionPoints
+      for attach in extensionPoints
         respond "#{attach}", serviceDef
 
     # Attach a responder at the standard location

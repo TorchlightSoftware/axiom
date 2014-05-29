@@ -42,7 +42,7 @@ describe 'core.load', ->
 
   it 'should alias services', (done) ->
     connectExtension =
-      attachments:
+      extends:
         startServer: ['server.run/load']
       services:
         startServer: (args, fin) ->
@@ -175,7 +175,7 @@ describe 'core.load', ->
               signals:
                 start: ['load', 'link']
 
-        attachments:
+        extends:
           loader: ['server.run/load']
           linker: ['server.run/link']
 
@@ -208,7 +208,7 @@ describe 'core.load', ->
               signals:
                 start: ['load', 'link']
 
-        attachments:
+        extends:
           linker: ['server.run/link']
 
         services:
@@ -235,7 +235,7 @@ describe 'core.load', ->
               signals:
                 stop: ['unload']
 
-        attachments:
+        extends:
           unloader: ['server.run/unload']
 
         services:
@@ -259,7 +259,7 @@ describe 'core.load', ->
                 start: ['load']
                 stop: ['unload']
 
-        attachments:
+        extends:
           loader: ['server.run/load']
           unloader: ['server.run/unload']
 
