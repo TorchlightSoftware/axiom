@@ -4,9 +4,9 @@ logger = require 'torch'
 
 defaultConfig = ->
   return {
-    blacklist: []
     timeout: 2000
     general: {}
+    logDepth: 5
   }
 
 defaultRetriever = require '../retriever'

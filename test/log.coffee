@@ -45,28 +45,28 @@ methodTests = [
  ,
   method: 'load'
   args: ['extensionName']
-  expected: "Calling 'core.load' with args: { extensionName: 'extensionName' }"
+  expected: "Calling 'core.load' with args:"
  ,
   method: 'request'
   args: ['channel', 'data', ->]
-  expected: "Calling 'core.request' with args: { channel: 'channel', data: 'data' }"
+  expected: "Calling 'core.request' with args:"
 
  ,
   method: 'delegate'
   args: ['channel', 'data']
-  expected: "Calling 'core.delegate' with args: { channel: 'channel', data: 'data', waitingOn: [] }"
+  expected: "Calling 'core.delegate' with args:"
  ,
   method: 'respond'
   args: ['channel', ->]
-  expected: "Calling 'core.respond' with args: { channel: 'channel' }"
+  expected: "Calling 'core.respond' with args:"
  ,
   method: 'send'
   args: ['channel', 'data']
-  expected: "Calling 'core.send' with args: { channel: 'channel', data: 'data' }"
+  expected: "Calling 'core.send' with args:"
  ,
   method: 'listen'
   args: ['channel', 'topic']
-  expected: "Calling 'core.listen' with args: { channel: 'channel', topic: 'topic' }"
+  expected: "Calling 'core.listen' with args:"
 ]
 
 # Test 'info' coverage for public 'core' API

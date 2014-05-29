@@ -12,9 +12,7 @@ logLevels.forEach ({topic, color}, index) ->
     bus.publish {channel, topic, data}
 
 api.coreEntry = (method, args) ->
-  message = "Calling 'core.#{method}'"
-  unless _.isEmpty args
-    message += " with args: #{inspect(args, null, null)}"
-  api.debug message
+  message = "Calling 'core.#{method}' with args:\n"
+  api.debug message, args
 
 module.exports = api

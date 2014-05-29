@@ -56,15 +56,18 @@ tests = [
  ,
   description: 'should start the server'
   args: ['hello', 'world']
-  expected: [{source: 'stdout', message: 'Hello, world!\n'}]
+  expected: [
+    {source: 'stdout', message: 'Hello, world!\n'}
+    {source: 'stdout', message: 'Success!\n'}
+  ]
 ]
 
 logTests = [
   description: "should accept '--log=info'"
   args: ['hello', 'world', '--log=info']
   expected: [
-    source: 'stdout'
-    message: 'Hello, world!\n'
+    {source: 'stdout', message: 'Hello, world!\n'}
+    {source: 'stdout', message: 'Success!\n'}
   ]
  # DISABLED:  console does not behave as expected due to buffering.
  #

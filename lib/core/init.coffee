@@ -11,9 +11,12 @@ module.exports = (config, retriever) ->
   Object.freeze internal.retriever
 
   # Attempt to load the project's export as a config
+  loadError = null
   try
     projectConfig = internal.retriever.retrieve('')
     _.merge internal.config, projectConfig
+
+  catch e # logger not initialize yet so just save the error
 
   # Merge in any programatically-passed config options
   _.merge internal.config, config
@@ -22,6 +25,10 @@ module.exports = (config, retriever) ->
   # yay, logging
   core = require '../core'
   core.wireUpLoggers(internal.config.loggers)
+
+  if e
+    core.log.warning 'Error loading project config:', e.stack
+
   core.log.coreEntry 'init',
     config: internal.config
     retriever: internal.retriever

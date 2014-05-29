@@ -43,5 +43,5 @@ channel = "#{extensionName}.#{serviceName}"
 core.request channel, args, (err, results) ->
   if err?
     logger.red err.stack
-  unless _.isEmpty(results)
-    logger.green results
+  else
+    logger.green 'Success!'
