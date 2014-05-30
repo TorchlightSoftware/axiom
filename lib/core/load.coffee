@@ -45,6 +45,11 @@ module.exports = (extensionName, extensionLocation) ->
       for processName, settings of processes
         core.loadProcess(namespace, processName, settings)
 
+  # Link to defined control points
+  if extension.controls?
+    for point, target of extension.controls
+      core.link "#{extensionName}/#{point}", target
+
   safeCore = getSafeCore(extensionName, core, extension.protocol?)
   safeRetriever = getSafeRetriever(extensionName, internal.retriever)
 

@@ -40,7 +40,7 @@ describe 'core.load', ->
 
       done()
 
-  it 'should alias services', (done) ->
+  it 'should extend the protocol', (done) ->
     connectExtension =
       extends:
         startServer: ['server.run/load']
@@ -50,6 +50,23 @@ describe 'core.load', ->
 
     core.load 'connect', connectExtension
     core.request 'server.run/load', {}, done
+
+  it 'should control the protocol', (done) ->
+    mochaExtension =
+      controls:
+        loadBeforeStep: 'server/test.before' #2
+
+    otherExtension =
+      extends:
+        setupOther: ['server/test.before'] #3
+      services:
+        setupOther: (args, fin) -> #4
+          fin()
+          done()
+
+    core.load 'mocha', mochaExtension
+    core.load 'other', otherExtension
+    core.request 'mocha/loadBeforeStep', {}, -> #1
 
   it 'should receive axiom/config/errors in context', (done) ->
     robot =
