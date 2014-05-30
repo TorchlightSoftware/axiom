@@ -54,11 +54,11 @@ describe 'core.load', ->
   it 'should control the protocol', (done) ->
     mochaExtension =
       controls:
-        loadBeforeStep: 'server/test.before' #2
+        loadBeforeStep: 'server.test/before' #2
 
     otherExtension =
       extends:
-        setupOther: ['server/test.before'] #3
+        setupOther: ['server.test/before'] #3
       services:
         setupOther: (args, fin) -> #4
           fin()
@@ -66,7 +66,7 @@ describe 'core.load', ->
 
     core.load 'mocha', mochaExtension
     core.load 'other', otherExtension
-    core.request 'mocha/loadBeforeStep', {}, -> #1
+    core.request 'mocha.loadBeforeStep', {}, -> #1
 
   it 'should receive axiom/config/errors in context', (done) ->
     robot =
