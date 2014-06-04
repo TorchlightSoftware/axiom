@@ -4,7 +4,7 @@ _ = require 'lodash'
 bus = require '../bus'
 internal = require './internal'
 send = require './send'
-{DelegateTimeoutError, ErrorCollection} = require '../errors'
+{DelegateTimeoutError, ErrorCollection} = require '../errorTypes'
 logger = require 'torch'
 
 module.exports = delegate = (channel, data, done) ->

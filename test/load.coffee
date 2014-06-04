@@ -68,16 +68,31 @@ describe 'core.load', ->
     core.load 'other', otherExtension
     core.request 'mocha.loadBeforeStep', {}, -> #1
 
-  it 'should receive axiom/config/errors in context', (done) ->
+  it 'should receive axiom utils in context', (done) ->
     robot =
       config:
         strength: 5
       services:
         crushLikeBug: (args, fin) ->
-          should.exist @errors, 'expected errors in context'
-          should.exist @axiom, 'expected axiom in context'
-          should.not.exist @axiom.link, 'expected no link method on axiom helper'
-          should.exist @config, 'expected config in context'
+          @should.have.keys [
+            'extensionName'
+            'serviceName'
+            'config'
+            'errorTypes'
+            'systemConfig'
+            'appUtils'
+            'log'
+            'request'
+            'delegate'
+            'respond'
+            'respondOnce'
+            'send'
+            'listen'
+            'root'
+            'rel'
+            'retrieve'
+          ]
+
           @config.should.eql robot.config
 
           fin()
@@ -89,7 +104,7 @@ describe 'core.load', ->
     robot =
       services:
         crushLikeBug: (args, fin) ->
-          @axiom.send 'reportStatus', {status: 'success'}
+          @send 'reportStatus', {status: 'success'}
           fin()
 
     core.load 'robot', robot
@@ -101,7 +116,7 @@ describe 'core.load', ->
     robot =
       services:
         crushLikeBug: (args, fin) ->
-          path = @retriever.rel('foo/bar')
+          path = @rel('foo/bar')
           path.should.eql 'system/robot/foo/bar'
           fin()
 
@@ -148,12 +163,12 @@ describe 'core.load', ->
         if unloaded
           throw new Error 'agent should not unload'
 
-    it 'should include link in @axiom', (done) ->
+    it 'should include link in context', (done) ->
       protocol =
         protocol: {}
         services:
           linkStuff: (args, fin) ->
-            should.exist @axiom.link
+            should.exist @link
             fin()
             done()
 

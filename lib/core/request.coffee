@@ -4,7 +4,7 @@ _ = require 'lodash'
 bus = require '../bus'
 { NoRespondersError
   AmbiguousRespondersError
-  RequestTimeoutError} = require '../errors'
+  RequestTimeoutError} = require '../errorTypes'
 
 internal = require './internal'
 send = require './send'

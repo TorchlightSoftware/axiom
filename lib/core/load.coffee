@@ -5,7 +5,7 @@ internal = require './internal'
 respond = require './respond'
 getSafeCore = require '../getSafeCore'
 getSafeRetriever = require '../getSafeRetriever'
-errors = require '../errors'
+errorTypes = require '../errorTypes'
 
 module.exports = (extensionName, extensionLocation) ->
 
@@ -50,19 +50,19 @@ module.exports = (extensionName, extensionLocation) ->
     for point, target of extension.controls
       core.link "#{extensionName}.#{point}", target
 
-  safeCore = getSafeCore(extensionName, core, extension.protocol?)
-  safeRetriever = getSafeRetriever(extensionName, internal.retriever)
-
   for serviceName, serviceDef of services
-    context = Object.freeze {
+    context = {
       extensionName
       serviceName
       config
-      errors
+      errorTypes
       systemConfig: internal.config.config
-      axiom: safeCore
-      retriever: safeRetriever
+      appUtils: core
     }
+    _.merge context, getSafeCore(extensionName, core, extension.protocol?)
+    _.merge context, getSafeRetriever(extensionName, internal.retriever)
+
+    Object.freeze context
 
     serviceDef = serviceDef.bind(context)
     serviceDef.extension = extensionName

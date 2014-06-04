@@ -62,7 +62,7 @@ describe 'core.request', ->
     replyTo = core.request @channel, @data, test
 
   it 'should return a timeout error when it times out', (done) ->
-    {RequestTimeoutError} = require '../lib/errors'
+    {RequestTimeoutError} = require '../lib/errorTypes'
     core.respond @channel, -> # I can't hear you
     core.request @channel, @data, (err, result) =>
       should.exist err

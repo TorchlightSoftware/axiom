@@ -88,13 +88,9 @@ describe 'core.init', ->
     server =
       services:
         "run/prepare": (args, fin) ->
-          should.exist @retriever
 
-          # Then @retriever should include the mock retriever
-          @retriever.root.should.eql 'system/server'
-
-          @retriever.should.have.keys ['root', 'rel', 'retrieve']
-          @retriever.should.not.have.keys ['retrieveExtension']
+          # Then the mock retriever should be included in the context
+          @root.should.eql 'system/server'
 
           fin()
 
