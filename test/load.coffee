@@ -81,6 +81,7 @@ describe 'core.load', ->
             'errorTypes'
             'systemConfig'
             'appUtils'
+            'appRetriever'
             'log'
             'request'
             'delegate'

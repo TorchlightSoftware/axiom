@@ -31,7 +31,7 @@ module.exports = (extensionName, extensionLocation) ->
   if (typeof projectOverrides) is 'function'
     projectOverrides = projectOverrides(internal.config.config)
 
-  _.merge config, projectOverrides
+  _.merge config, projectOverrides, internal.args?[extensionName]
 
   # config is now immutable
   Object.freeze(config)
@@ -58,6 +58,7 @@ module.exports = (extensionName, extensionLocation) ->
       errorTypes
       systemConfig: internal.config.config
       appUtils: core
+      appRetriever: internal.retriever
     }
     _.merge context, getSafeCore(extensionName, core, extension.protocol?)
     _.merge context, getSafeRetriever(extensionName, internal.retriever)

@@ -36,11 +36,15 @@ toOmit = [
 ]
 args = _.omit parsed.argv, toOmit
 
-core.init({loggers: [{writer: 'console', level: args.log or 'info'}]})
+config = _.merge {
+  loggers: [{writer: 'console', level: args.log or 'info'}]
+}, axiom
+
+core.init(config, null, args)
 
 channel = "#{extensionName}.#{serviceName}"
 
-core.request channel, args, (err, results) ->
+core.request channel, {}, (err, results) ->
   if err?
     logger.red err.stack
   else

@@ -14,7 +14,7 @@ cliRun = (args) ->
   output = []
   ['stdout', 'stderr'].forEach (source) ->
     cli[source].setEncoding 'utf8'
-    cli[source].on 'data', logger.yellow
+    #cli[source].on 'data', logger.yellow
     cli[source].on 'data', (message) -> output.push({source, message})
 
   return {cli, output}
@@ -58,6 +58,12 @@ tests = [
   args: ['hello', 'world']
   expected: [
     {source: 'stdout', message: 'Hello, world!\n'}
+    {source: 'stdout', message: 'Success!\n'}
+  ]
+  description: 'should pass args'
+  args: ['hello', 'args', '--hello.foo=1']
+  expected: [
+    {source: 'stdout', message: '{ foo: 1 }\n'}
     {source: 'stdout', message: 'Success!\n'}
   ]
 ]

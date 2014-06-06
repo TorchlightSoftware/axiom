@@ -4,7 +4,10 @@ internal = require './internal'
 load = require './load'
 logger = require 'torch'
 
-module.exports = (config, retriever) ->
+module.exports = (config, retriever, args) ->
+
+  # save command line args for merging with extension-specific configs
+  internal.args = args
 
   # override base retriever properties with provided retriever
   internal.retriever = _.merge {}, internal.retriever, retriever
