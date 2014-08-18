@@ -39,3 +39,14 @@ module.exports = (config, retriever, args) ->
   # Load each extension.
   for extensionName, extensionLocation of internal.config.extensions
     load extensionName, extensionLocation
+
+  # Configure routes
+  for route in (internal.config.routes or [])
+    if _.isArray(route)
+      [relation, from, to] = route
+    else
+      {relation, from, to} = route
+
+    switch relation
+      when 'link'
+        core.link from, to

@@ -1,17 +1,21 @@
 module.exports =
 
-  # These might be works in progress intended for future life
-  # as a public extension.  Or, they might be intentially private
-  # extensions.
-  includeExtensions:
-    app: require './workInProgress'
+  protocol: '*'
 
-  # These might be broken extensions, which are included in package.json
-  # but which you don't want to load at the moment.
-  excludeExtensions: ['foo', 'bar']
+  # Extensions standardize technology configuration and integration.
+  # They can be Public (require via npm),
+  # or Private (require a package on the local fs).
+  extensions:
+    connect: '*'
+    fusionPower: require './workInProgress'
 
   # These settings are passed to all extension configurations,
   # and provide a way to distribute common values.
   config:
     serverPort: 4000
     apiPort: 4001
+
+  routes: [
+    # rel,       from,           to
+    ['link', 'connect.status', 'fusionPower.status']
+  ]

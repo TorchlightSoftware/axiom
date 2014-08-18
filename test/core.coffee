@@ -35,7 +35,7 @@ describe 'core.request', ->
 
       done()
 
-  it 'should pass an error to the callback the response returns one', (done) ->
+  it 'should pass an error to the callback', (done) ->
     testError = new Error 'testError'
     core.respond @channel, (args, fin) ->
       fin testError

@@ -38,3 +38,16 @@ describe 'core.link', ->
       data.should.eql {greeting: 'hello'}
 
       done()
+
+  it "should forward a namespace", (done) ->
+
+    {responderId} = core.respond 'sample.greet', (args, done) ->
+      done null, {greeting: 'hello'}
+
+    core.link 'salutation', 'sample'
+
+    core.request 'salutation.greet', {}, (err, result) ->
+      should.not.exist err
+      should.exist result
+      result.should.eql {greeting: 'hello'}
+      done()

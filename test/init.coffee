@@ -106,3 +106,25 @@ describe 'core.init', ->
       # It should return without its assertions failing
       should.not.exist err
       done()
+
+  it "should link two channels", (done) ->
+
+    config =
+      extensions:
+
+        greeting:
+          services:
+            hello: (args, done) ->
+              done null, {message: 'Hello, world!'}
+
+      routes: [
+        ['link', 'outside.hello', 'greeting.hello']
+      ]
+
+    core.init config, @retriever
+
+    core.request 'outside.hello', {}, (err, result) ->
+      should.not.exist err
+      should.exist result
+      result.should.eql {message: 'Hello, world!'}
+      done()
