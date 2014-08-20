@@ -1,11 +1,10 @@
 module.exports =
 
-  protocol: '*'
-
   # Extensions standardize technology configuration and integration.
   # They can be Public (require via npm),
   # or Private (require a package on the local fs).
   extensions:
+    protocol: '*'
     connect: '*'
     fusionPower: require './workInProgress'
 
