@@ -113,12 +113,12 @@ describe 'core.load', ->
       done()
     core.request 'robot.crushLikeBug', {}, ->
 
-  it "should limit an extension's retriever to its namespace", (done) ->
+  it "rel should load paths anywhere within the app", (done) ->
     robot =
       services:
         crushLikeBug: (args, fin) ->
           path = @rel('foo/bar')
-          path.should.eql 'system/robot/foo/bar'
+          path.should.eql 'foo/bar'
           fin()
 
     core.load 'robot', robot

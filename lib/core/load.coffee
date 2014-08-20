@@ -4,7 +4,6 @@ law = require 'law'
 internal = require './internal'
 respond = require './respond'
 getSafeCore = require '../getSafeCore'
-getSafeRetriever = require '../getSafeRetriever'
 errorTypes = require '../errorTypes'
 
 module.exports = (extensionName, extensionLocation) ->
@@ -61,7 +60,7 @@ module.exports = (extensionName, extensionLocation) ->
       appRetriever: internal.retriever
     }
     _.merge context, getSafeCore(extensionName, core, extension.protocol?)
-    _.merge context, getSafeRetriever(extensionName, internal.retriever)
+    _.merge context, _.pick(internal.retriever, ['root', 'rel', 'retrieve'])
 
     Object.freeze context
 

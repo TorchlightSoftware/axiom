@@ -46,7 +46,7 @@ class ErrorCollection extends AxiomError
     {channel, errors} = context
 
     errArray = for responder, error of errors
-      error.message
+      error.stack
     message = "Received errors from channel '#{channel}':\n#{errArray.join '\n'}"
 
     super message, context, start

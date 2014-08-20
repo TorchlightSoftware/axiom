@@ -180,8 +180,8 @@ describe 'core.delegate', ->
 
     core.delegate channel, {}, (err, results) ->
       should.exist err
-      expectedMsg = "Received errors from channel '#{channel}':\n#{testError.message}"
-      err.message.should.eql expectedMsg
+      expectedMsg = "Received errors from channel '#{channel}':\nError: #{testError.message}"
+      err.message.should.startWith expectedMsg
 
       should.exist err.errors, 'expected errors'
       subErrors = _.values err.errors
@@ -217,8 +217,8 @@ describe 'core.delegate', ->
     core.delegate channel, {}, (err, results) ->
       should.exist err
 
-      expectedMsg = "Received errors from channel '#{channel}':\nResponder with id '#{errId}' timed out on channel: '#{channel}'"
-      err.message.should.eql expectedMsg
+      expectedMsg = "Received errors from channel '#{channel}':\nAxiomError/RequestTimeoutError: Responder with id '#{errId}' timed out on channel: '#{channel}'"
+      err.message.should.startWith expectedMsg
 
       should.exist err.errors
 
