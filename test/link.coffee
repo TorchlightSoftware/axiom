@@ -51,3 +51,16 @@ describe 'core.link', ->
       should.exist result
       result.should.eql {greeting: 'hello'}
       done()
+
+  it "should forward to a base namespace", (done) ->
+
+    {responderId} = core.respond 'sample.greet', (args, done) ->
+      done null, {greeting: 'hello'}
+
+    core.link 'salutation.messages', 'sample'
+
+    core.request 'salutation.messages/greet', {}, (err, result) ->
+      should.not.exist err
+      should.exist result
+      result.should.eql {greeting: 'hello'}
+      done()

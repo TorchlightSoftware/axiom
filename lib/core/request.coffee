@@ -23,14 +23,16 @@ module.exports = request = (channel, data, done) ->
 
   switch responders.length
     when 0
-      return done new NoRespondersError {channel}, entryPoint
+      err = new NoRespondersError {channel}, entryPoint
+      return done err, {}
 
     when 1
       # Send the message
       replyTo = send channel, data
 
     else
-      return done new AmbiguousRespondersError {responders, channel}, entryPoint
+      err = new AmbiguousRespondersError {responders, channel}, entryPoint
+      return done err, {}
 
   # Define an 'onTimeout' callback for when we don't get a response
   # (either error or success) in the configured time.
@@ -58,7 +60,7 @@ module.exports = request = (channel, data, done) ->
 
     switch condition
       when 'err'
-        done message
+        done message, {}
       when 'success'
         done null, message
 
@@ -67,7 +69,7 @@ module.exports = request = (channel, data, done) ->
         # be invoked by a subscription to a topic of the form
         # 'err.<uuid>' or 'success.<uuid>'.
         err = new Error "Invalid condition '#{condition}' for response with topicId '#{topicId}'"
-        done err
+        done err, {}
 
   # Subscribe to the 'err' response for topicId
   # We don't pass a callback immediately so that we can

@@ -1,6 +1,8 @@
 _ = require 'lodash'
-internal = require './internal'
 logger = require 'torch'
+
+internal = require './internal'
+ns_replace = require '../helpers/ns-replace'
 
 bus = require '../bus'
 {compare} = bus.configuration.resolver
@@ -12,12 +14,6 @@ module.exports = (from, to) ->
 
   internal.links[from] = _.union internal.links[from], [to]
 
-  # NOTE: former, simpler link method
-  #bus.linkChannels(
-    #{channel: from, topic: 'request.#'}
-    #{channel: to}
-  #)
-
   # link method supporting namespace forwarding
   bus.addWireTap (data, envelope) ->
 
@@ -25,7 +21,7 @@ module.exports = (from, to) ->
     channelMatch = envelope.channel.substring(0, from.length) is from
     if channelMatch
       topicMatch = compare('request.#', envelope.topic)
-      if topicMatch
 
-        target = envelope.channel.replace from, to
+      if topicMatch
+        target = ns_replace(envelope.channel, from, to)
         bus.publish _.merge {}, envelope, {channel: target}

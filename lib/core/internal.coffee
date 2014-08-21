@@ -1,6 +1,8 @@
-bus = require '../bus'
 _ = require 'lodash'
 logger = require 'torch'
+
+bus = require '../bus'
+ns_replace = require '../helpers/ns-replace'
 
 defaultConfig = ->
   return {
@@ -35,10 +37,13 @@ module.exports = internal =
     allResponders = _.keys @responders[channel]
 
     # add any responders on linked channels
-    for l of @links
-      if channel.substring(0, l.length) is l
-        for ns in @links[l]
-          target = channel.replace l, ns
+    for from of @links
+      sub = channel.substring(0, from.length)
+      match = sub is from
+      if match
+        for to in @links[from]
+          target = ns_replace(channel, from, to)
+
           allResponders.push _.keys(@responders[target])...
 
     return allResponders

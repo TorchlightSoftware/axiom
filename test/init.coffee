@@ -28,20 +28,6 @@ describe 'core.init', ->
       result.should.eql data
       done()
 
-  it 'should not init a module that is blacklisted', (done) ->
-    config =
-      blacklist: ['sample']
-      modules: ['sample']
-    core.init config, @retriever
-
-    core.request 'sample.echo', {greeting: 'hello!'}, (err, result) ->
-      should.exist err
-      err.message.should.eql "No responders for request: 'sample.echo'"
-
-      should.not.exist result
-
-      done()
-
   it "should load the project export as a config", (done) ->
     internal = require '../lib/core/internal'
     projectConfig = require proj1Dir

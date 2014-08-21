@@ -42,7 +42,8 @@ describe 'core.request', ->
 
     core.request @channel, @data, (err, message) =>
       should.exist err
-      should.not.exist message
+      should.exist message
+      message.should.eql {}
 
       err.should.eql testError
 
@@ -68,7 +69,8 @@ describe 'core.request', ->
       should.exist err
       err.message.should.eql "Request timed out after 20ms on channel: '#{@channel}'"
       err.should.be.instanceOf RequestTimeoutError
-      should.not.exist result
+      should.exist result
+      result.should.eql {}
       done()
 
   it 'should return immediately if there are no listeners', (done) ->
@@ -77,8 +79,8 @@ describe 'core.request', ->
       expectedMsg = "No responders for request: '#{@channel}'"
       err.message.should.eql expectedMsg
 
-      should.not.exist result
-
+      should.exist result
+      result.should.eql {}
       done()
 
   it 'should return an "ambiguous" error when there are multiple responders', (done) ->
@@ -87,7 +89,8 @@ describe 'core.request', ->
     core.request @channel, @data, (err, result) =>
       should.exist err
       err.message.should.eql "Ambiguous: 2 responders for request: '#{@channel}'"
-      should.not.exist result
+      should.exist result
+      result.should.eql {}
       done()
 
 
