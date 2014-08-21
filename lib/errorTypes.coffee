@@ -24,8 +24,9 @@ class RequestTimeoutError extends AxiomError
   name: 'AxiomError/RequestTimeoutError'
 
   constructor: (context, start) ->
-    {channel} = context
-    message = "Request timed out on channel: '#{channel}'"
+    {channel, ms} = context
+    time = if ms? then "after #{ms}ms " else ''
+    message = "Request timed out #{time}on channel: '#{channel}'"
 
     super message, context, start
 
@@ -33,8 +34,9 @@ class DelegateTimeoutError extends AxiomError
   name: 'AxiomError/RequestTimeoutError'
 
   constructor: (context, start) ->
-    {channel, responderId} = context
-    message = "Responder with id '#{responderId}' timed out on channel: '#{channel}'"
+    {channel, responderId, ms} = context
+    time = if ms? then "after #{ms}ms " else ''
+    message = "Responder with id '#{responderId}' timed out #{time}on channel: '#{channel}'"
 
     super message, context, start
 

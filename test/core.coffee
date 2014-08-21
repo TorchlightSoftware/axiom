@@ -66,7 +66,7 @@ describe 'core.request', ->
     core.respond @channel, -> # I can't hear you
     core.request @channel, @data, (err, result) =>
       should.exist err
-      err.message.should.eql "Request timed out on channel: '#{@channel}'"
+      err.message.should.eql "Request timed out after 20ms on channel: '#{@channel}'"
       err.should.be.instanceOf RequestTimeoutError
       should.not.exist result
       done()
@@ -217,7 +217,7 @@ describe 'core.delegate', ->
     core.delegate channel, {}, (err, results) ->
       should.exist err
 
-      expectedMsg = "Received errors from channel '#{channel}':\nAxiomError/RequestTimeoutError: Responder with id '#{errId}' timed out on channel: '#{channel}'"
+      expectedMsg = "Received errors from channel '#{channel}':\nAxiomError/RequestTimeoutError: Responder with id '#{errId}' timed out after 20ms on channel: '#{channel}'"
       err.message.should.startWith expectedMsg
 
       should.exist err.errors
@@ -225,7 +225,7 @@ describe 'core.delegate', ->
       subErr = err.errors[errId]
       should.exist subErr, 'expected subErr'
 
-      errMsg = "Responder with id '#{errId}' timed out on channel: '#{channel}'"
+      errMsg = "Responder with id '#{errId}' timed out after 20ms on channel: '#{channel}'"
       subErr.message.should.eql errMsg
 
       should.exist results

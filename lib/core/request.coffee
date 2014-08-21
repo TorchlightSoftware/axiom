@@ -34,15 +34,16 @@ module.exports = request = (channel, data, done) ->
 
   # Define an 'onTimeout' callback for when we don't get a response
   # (either error or success) in the configured time.
+  ms = internal.config.timeout
   onTimeout = ->
-    err = new RequestTimeoutError {channel}, entryPoint
+    err = new RequestTimeoutError {channel, ms}, entryPoint
 
     bus.publish
       channel: replyTo.channel
       topic: replyTo.topic.err
       data: err
 
-  timeoutId = timers.setTimeout onTimeout, internal.config.timeout
+  timeoutId = timers.setTimeout onTimeout, ms
 
   # Default callback is of signature (message, envelope).
   # Wrap so we can pass a conventional (err, result)-style callback.

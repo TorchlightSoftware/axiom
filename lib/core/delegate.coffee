@@ -42,10 +42,10 @@ module.exports = delegate = (channel, data, done) ->
 
   # Define an 'onTimeout' callback for when we don't get a response
   # (either error or success) in the configured time.
-  timeout = internal.config.timeout
+  ms = internal.config.timeout
   onTimeout = ->
     waitingOn.map (responderId) ->
-      err = new DelegateTimeoutError {channel, responderId}, entryPoint
+      err = new DelegateTimeoutError {channel, responderId, ms}, entryPoint
 
       bus.publish
         channel: replyTo.channel
@@ -53,7 +53,7 @@ module.exports = delegate = (channel, data, done) ->
         data: err
         responderId: responderId
 
-  timeoutId = timers.setTimeout onTimeout, timeout
+  timeoutId = timers.setTimeout onTimeout, ms
 
   callback = (message, envelope) ->
     {responderId, extension} = envelope
