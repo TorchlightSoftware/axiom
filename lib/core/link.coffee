@@ -24,4 +24,5 @@ module.exports = (from, to) ->
 
       if topicMatch
         target = ns_replace(envelope.channel, from, to)
-        bus.publish _.merge {}, envelope, {channel: target}
+        newEnvelope = _.merge {}, envelope, {channel: target}
+        bus.publish newEnvelope
