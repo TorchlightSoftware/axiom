@@ -1,6 +1,6 @@
 _ = require 'lodash'
 
-module.exports = (extensionName, core, isProtocol) ->
+module.exports = (extensionName, core) ->
 
   # prefix the channel with the extensionName
   limit = (fn) ->
@@ -18,8 +18,5 @@ module.exports = (extensionName, core, isProtocol) ->
   # so apply 'limit' to them to limit the namespace
   for fn in ['request', 'delegate', 'respond', 'respondOnce', 'send', 'listen']
     api[fn] = limit core[fn]
-
-  if isProtocol
-    api.link = core.link
 
   return Object.freeze api

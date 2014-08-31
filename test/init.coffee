@@ -61,11 +61,12 @@ describe 'core.init', ->
 
       done()
 
-  it "should expose 'retriever'", (done) ->
+  it "should expose an injected 'retriever'", (done) ->
+    defaultRetriever = @retriever
 
     # Given a mock test 'retriever'
     mockRetriever =
-      root: 'foo'
+      root: ''
       retrieve: (name...) -> {}
       retrieveExtension: (name...) -> {}
 
@@ -75,7 +76,7 @@ describe 'core.init', ->
         "run/prepare": (args, fin) ->
 
           # Then the mock retriever should be included in the context
-          @root.should.eql 'foo'
+          @root.should.eql 'domain/server'
           (typeof @rel).should.eql 'function'
           (typeof @retrieve).should.eql 'function'
 

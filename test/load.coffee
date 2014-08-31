@@ -113,12 +113,12 @@ describe 'core.load', ->
       done()
     core.request 'robot.crushLikeBug', {}, ->
 
-  it "rel should load paths anywhere within the app", (done) ->
+  it "should limit an extension's retriever to its namespace", (done) ->
     robot =
       services:
         crushLikeBug: (args, fin) ->
           path = @rel('foo/bar')
-          path.should.eql 'foo/bar'
+          path.should.eql 'domain/robot/foo/bar'
           fin()
 
     core.load 'robot', robot
@@ -163,18 +163,6 @@ describe 'core.load', ->
       core.request 'server.run', {}, ->
         if unloaded
           throw new Error 'agent should not unload'
-
-    it 'should include link in context', (done) ->
-      protocol =
-        protocol: {}
-        services:
-          linkStuff: (args, fin) ->
-            should.exist @link
-            fin()
-            done()
-
-      core.load 'protocol', protocol
-      core.request 'protocol.linkStuff', {}, ->
 
     it 'should call unload on a task process', (done) ->
       protocol =
