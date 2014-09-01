@@ -38,7 +38,7 @@ tests = [
   args: []
   expected: [
     source: 'stdout'
-    message: "Missing required positional argument: 'extensionName'\n"
+    message: "Missing required argument: 'extensionName'\n"
    ,
     source: 'stdout'
     message: 'Usage: axiom <extensionName> <serviceName> [<--arg> <value> ...]\n\n\n'
@@ -48,7 +48,7 @@ tests = [
   args: ['hello']
   expected: [
     source: 'stdout'
-    message: "Missing required positional argument: 'serviceName'\n"
+    message: "Missing required argument: 'serviceName'\n"
    ,
     source: 'stdout'
     message: 'Usage: axiom <extensionName> <serviceName> [<--arg> <value> ...]\n\n\n'

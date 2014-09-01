@@ -29,7 +29,9 @@ module.exports = (extensionName, extensionLocation) ->
     projectOverrides = internal.retriever.retrieve('config', extensionName)
 
   if (typeof projectOverrides) is 'function'
-    projectOverrides = projectOverrides(internal.config.config)
+    projectOverrides = projectOverrides.call(
+      internal.retriever, internal.config.config
+    )
 
   _.merge config, projectOverrides, internal.args?[extensionName]
 

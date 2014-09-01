@@ -6,7 +6,7 @@ module.exports =
   extensions:
     protocol: '*'
     connect: '*'
-    fusionPower: require './workInProgress'
+    fusionPower: require './extensions/workInProgress'
 
   # These settings are passed to all extension configurations,
   # and provide a way to distribute common values.
