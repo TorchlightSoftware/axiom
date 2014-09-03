@@ -93,6 +93,32 @@ describe 'core.request', ->
       result.should.eql {}
       done()
 
+  describe 'namespace helper', ->
+    it 'should shortcut to module', (done) ->
+      core.respond 'server.run', (message, done) ->
+        done null, message
+
+      serverReq = core.request.ns 'server'
+      serverReq 'run', @data, (err, message) =>
+        should.not.exist err
+
+        should.exist message
+        message.should.eql @data
+
+        done()
+
+    it 'should shortcut to sub-service', (done) ->
+      core.respond 'server.run/load', (message, done) ->
+        done null, message
+
+      serverReq = core.request.ns 'server.run'
+      serverReq 'load', @data, (err, message) =>
+        should.not.exist err
+
+        should.exist message
+        message.should.eql @data
+
+        done()
 
 describe 'core.response', ->
   beforeEach (done) ->

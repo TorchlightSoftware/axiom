@@ -8,8 +8,9 @@ bus = require '../bus'
 
 internal = require './internal'
 send = require './send'
+ns_replace = require '../helpers/ns-replace'
 
-module.exports = request = (channel, data, done) ->
+request = (channel, data, done) ->
   core = require '../core'
   core.log.coreEntry 'request', {channel, data}
 
@@ -90,3 +91,16 @@ module.exports = request = (channel, data, done) ->
   }
 
   return replyTo
+
+# 'mongoose.resources'
+# 'carts/show'
+# => 'mongoose.resources/carts/show'
+request.ns = (path) ->
+  unless /\/$/.test path
+    path = path + '/'
+
+  (channel, data, done) ->
+    target = ns_replace channel, '', path
+    request(target, data, done)
+
+module.exports = request
