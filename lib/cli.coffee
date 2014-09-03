@@ -26,6 +26,9 @@ unless serviceName
   logger.yellow parsed.help()
   return
 
+if /test/i.test serviceName
+  process.env.NODE_ENV = 'test'
+
 # Anything with the prefix 'axiom' extends the config.  E.G. `axiom server run --axiom.foo=true`
 {axiom} = parsed.argv
 
