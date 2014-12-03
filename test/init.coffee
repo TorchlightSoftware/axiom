@@ -33,7 +33,7 @@ describe 'core.init', ->
     projectConfig = require proj1Dir
     should.exist projectConfig
     core.init {}, @retriever
-    internal.config.should.include projectConfig
+    internal.config.should.containEql projectConfig
     done()
 
   it "should load a config override from the config folder", (done) ->
