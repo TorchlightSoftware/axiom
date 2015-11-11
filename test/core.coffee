@@ -1,6 +1,7 @@
 should = require 'should'
 _ = require 'lodash'
 logger = require 'torch'
+logger.toggleElapsed()
 {focus} = require 'qi'
 {join} = require 'path'
 
@@ -155,7 +156,10 @@ describe 'core.response', ->
 describe 'core.delegate', ->
   beforeEach (done) ->
     core.reset =>
-      core.init {timeout: 20}, mockRetriever()
+      core.init {
+        timeout: 20
+        #loggers: [{writer: 'console', level: 'debug'}]
+      }, mockRetriever()
       done()
 
   it 'should should return if there are no responders', (done) ->
@@ -199,15 +203,20 @@ describe 'core.delegate', ->
   it 'should return an err when a responder returns one', (done) ->
     channel = 'testChannel'
 
+    # Given a success response
     testResponse = {message: 'this works'}
     core.respond channel, (message, next) ->
       next null, testResponse
 
+    # And an error response
     testError = new Error 'Expect this error'
     core.respond channel, (message, next) ->
       next testError, {}
 
+    # When I delegate to the channel
     core.delegate channel, {}, (err, results) ->
+
+      # Then I should receive an error
       should.exist err
       expectedMsg = "Received errors from channel '#{channel}':\nError: #{testError.message}"
       err.message.should.startWith expectedMsg

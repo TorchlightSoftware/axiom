@@ -52,6 +52,7 @@ module.exports = (extensionName, extensionLocation) ->
     for point, target of extension.controls
       core.link "#{extensionName}.#{point}", target
 
+  appUtils = _.merge {}, core, {config: internal.config.config}
   for serviceName, serviceDef of services
     context = {
       extensionName
@@ -59,7 +60,7 @@ module.exports = (extensionName, extensionLocation) ->
       config
       errorTypes
       systemConfig: internal.config.config
-      appUtils: core
+      appUtils: appUtils
       appRetriever: internal.retriever
     }
     _.merge context, getSafeCore(extensionName, core, extension.protocol?)

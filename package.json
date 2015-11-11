@@ -24,8 +24,8 @@
   },
   "devDependencies": {
     "mocha": "*",
-    "should": "*",
-    "qi": "*"
+    "qi": "*",
+    "should": "*"
   },
   "engines": {
     "node": ">= 0.8.4"

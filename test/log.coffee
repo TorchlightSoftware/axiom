@@ -86,7 +86,7 @@ describe "log, 'core' API", ->
           should.exist data
 
           # With the expected details
-          data.should.include expected
+          data.should.containEql expected
 
           done()
 
