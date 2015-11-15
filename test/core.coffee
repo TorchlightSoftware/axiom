@@ -1,7 +1,5 @@
 should = require 'should'
 _ = require 'lodash'
-logger = require 'torch'
-logger.toggleElapsed()
 {focus} = require 'qi'
 {join} = require 'path'
 
@@ -201,6 +199,8 @@ describe 'core.delegate', ->
       done()
 
   it 'should return an err when a responder returns one', (done) ->
+    @timeout 400 # wow, it takes 363ms to format a stack trace
+
     channel = 'testChannel'
 
     # Given a success response

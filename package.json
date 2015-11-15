@@ -10,17 +10,17 @@
     "axiom": "./bin/axiom"
   },
   "dependencies": {
-    "coffee-script": "*",
-    "npm": "*",
     "async": "*",
+    "coffee-script": "*",
+    "law": "^0.2.7",
     "lodash": "*",
-    "postal": "*",
-    "torch": "^0.2.3",
-    "law": "",
-    "uuid": "*",
-    "optimist": "*",
     "moment": "*",
-    "tea-error": "^0.1.0"
+    "npm": "*",
+    "optimist": "*",
+    "postal": "*",
+    "tea-error": "^0.2.0",
+    "torch": "^0.2.3",
+    "uuid": "*"
   },
   "devDependencies": {
     "mocha": "*",

@@ -76,6 +76,7 @@ module.exports = delegate = (channel, data, done) ->
         else
           results[extension] = _.merge {}, data, message
 
+    core.log.debug "Delegate received: #{channel}:#{envelope.topic}, remaining: #{waitingOn.length}"
     if waitingOn.length is 0
       errSub.unsubscribe()
       successSub.unsubscribe()
@@ -86,6 +87,7 @@ module.exports = delegate = (channel, data, done) ->
 
       results.__delegation_result = true
       results.__input = data.__input or data
+      #core.log.debug "Delegate #{channel}.#{replyTo.topicId} calling done."
       done err, results
 
   # Subscribe to the 'err' response for topicId
